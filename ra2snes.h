@@ -17,6 +17,11 @@ public:
     ra2snes(QWidget *parent = nullptr);
     ~ra2snes();
 
+private slots:
+
+    void on_signin_button_clicked();
+    void resizeWindow(int width, int height);
+
 private:
     Ui::ra2snes *ui;
 };
