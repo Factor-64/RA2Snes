@@ -40,7 +40,8 @@ public:
         Connected,
         Ready,
         SendingFile,
-        ReceivingFile
+        ReceivingFile,
+        GettingAddress
     };
     enum sd2snesState {
         sd2menu,

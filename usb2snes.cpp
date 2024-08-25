@@ -71,7 +71,7 @@ void Usb2Snes::connect()
 void Usb2Snes::close()
 {
     if (m_state != None)
-       m_webSocket.close();
+        m_webSocket.close();
 }
 
 void Usb2Snes::setAppName(QString name)
@@ -228,9 +228,9 @@ void Usb2Snes::onWebSocketBinaryReceived(QByteArray message)
 {
     static QByteArray buffer;
     if (message.size() < 100)
-      sDebug() << "<<B" << message.toHex('-') << message;
+        sDebug() << "<<B" << message.toHex('-') << message;
     else
-      sDebug() << "<<B" << "Received " << message.size() << " byte of data";
+        sDebug() << "<<B" << "Received " << message.size() << " byte of data";
     if (m_state == ReceivingFile)
     {
         m_fileGetDataSent += message.size();
@@ -332,7 +332,7 @@ void Usb2Snes::setAddress(unsigned int addr, QByteArray data, Space space)
     //Dumb shit for bad win7 C# websocket api
     sDebug() << "Sending data,  size : " << data.size() << "- MD5 : " << QCryptographicHash::hash(data, QCryptographicHash::Md5).toHex();
     if (data.size() <= 1024)
-      m_webSocket.sendBinaryMessage(data);
+        m_webSocket.sendBinaryMessage(data);
     else
     {
         while (data.size() != 0)
@@ -352,7 +352,7 @@ void Usb2Snes::sendFile(QString path, QByteArray data)
     fileDataToSend = data;
     m_istate = IBusy;
     if (data.size() <= 1024)
-      m_webSocket.sendBinaryMessage(data);
+        m_webSocket.sendBinaryMessage(data);
     else
     {
         int foo = 0;

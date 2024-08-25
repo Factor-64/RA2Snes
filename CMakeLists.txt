@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Websockets)
 
 set(TS_FILES ra2snes_en_US.ts)
 
@@ -26,13 +27,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(ra2snes
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-
-
         ra2snes.cpp
         usb2snes.cpp
         usb2snes.h
-
-
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET ra2snes APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -57,6 +54,7 @@ else()
 endif()
 
 target_link_libraries(ra2snes PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(ra2snes PRIVATE Qt${QT_VERSION_MAJOR}::WebSockets)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
