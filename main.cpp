@@ -1,4 +1,5 @@
 #include "ra2snes.h"
+#include "usb2snes.h"
 
 #include <QApplication>
 #include <QLocale>

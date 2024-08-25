@@ -2,6 +2,7 @@
 #define RA2SNES_H
 
 #include <QMainWindow>
+#include "usb2snes.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -21,6 +22,8 @@ private slots:
 
     void on_signin_button_clicked();
     void resizeWindow(int width, int height);
+    void refreshStatus();
+    void getFileMD5(const QString& path);
 
 private:
     Ui::ra2snes *ui;
