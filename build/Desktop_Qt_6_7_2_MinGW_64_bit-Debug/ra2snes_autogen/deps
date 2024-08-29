@@ -13,6 +13,7 @@ ra2snes_autogen/timestamp: \
 	C:/Qt/6.7.2/mingw_64/include/QtCore/QSharedDataPointer \
 	C:/Qt/6.7.2/mingw_64/include/QtCore/QString \
 	C:/Qt/6.7.2/mingw_64/include/QtCore/QStringList \
+	C:/Qt/6.7.2/mingw_64/include/QtCore/QTimer \
 	C:/Qt/6.7.2/mingw_64/include/QtCore/QUrl \
 	C:/Qt/6.7.2/mingw_64/include/QtCore/QVariant \
 	C:/Qt/6.7.2/mingw_64/include/QtCore/QtCore \
@@ -553,6 +554,14 @@ ra2snes_autogen/timestamp: \
 	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6Network/Qt6QTlsBackendOpenSSLPluginConfig.cmake \
 	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6Network/Qt6QTlsBackendOpenSSLPluginTargets-relwithdebinfo.cmake \
 	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6Network/Qt6QTlsBackendOpenSSLPluginTargets.cmake \
+	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6StateMachine/Qt6StateMachineAdditionalTargetInfo.cmake \
+	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6StateMachine/Qt6StateMachineConfig.cmake \
+	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6StateMachine/Qt6StateMachineConfigVersion.cmake \
+	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6StateMachine/Qt6StateMachineConfigVersionImpl.cmake \
+	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6StateMachine/Qt6StateMachineDependencies.cmake \
+	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6StateMachine/Qt6StateMachineTargets-relwithdebinfo.cmake \
+	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6StateMachine/Qt6StateMachineTargets.cmake \
+	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6StateMachine/Qt6StateMachineVersionlessTargets.cmake \
 	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6WebSockets/Qt6WebSocketsAdditionalTargetInfo.cmake \
 	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6WebSockets/Qt6WebSocketsConfig.cmake \
 	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6WebSockets/Qt6WebSocketsConfigVersion.cmake \
@@ -955,6 +964,126 @@ ra2snes_autogen/timestamp: \
 	E:/Projects/ra2snes/main.cpp \
 	E:/Projects/ra2snes/ra2snes.cpp \
 	E:/Projects/ra2snes/ra2snes.h \
+	E:/Projects/ra2snes/ra_client.cpp \
+	E:/Projects/ra2snes/ra_client.h \
+	E:/Projects/ra2snes/rcheevos/include/rc_api_editor.h \
+	E:/Projects/ra2snes/rcheevos/include/rc_api_info.h \
+	E:/Projects/ra2snes/rcheevos/include/rc_api_request.h \
+	E:/Projects/ra2snes/rcheevos/include/rc_api_runtime.h \
+	E:/Projects/ra2snes/rcheevos/include/rc_api_user.h \
+	E:/Projects/ra2snes/rcheevos/include/rc_client.h \
+	E:/Projects/ra2snes/rcheevos/include/rc_client_raintegration.h \
+	E:/Projects/ra2snes/rcheevos/include/rc_consoles.h \
+	E:/Projects/ra2snes/rcheevos/include/rc_error.h \
+	E:/Projects/ra2snes/rcheevos/include/rc_export.h \
+	E:/Projects/ra2snes/rcheevos/include/rc_hash.h \
+	E:/Projects/ra2snes/rcheevos/include/rc_runtime.h \
+	E:/Projects/ra2snes/rcheevos/include/rc_runtime_types.h \
+	E:/Projects/ra2snes/rcheevos/include/rc_url.h \
+	E:/Projects/ra2snes/rcheevos/include/rc_util.h \
+	E:/Projects/ra2snes/rcheevos/include/rcheevos.h \
+	E:/Projects/ra2snes/rcheevos/src/rapi/rc_api_common.c \
+	E:/Projects/ra2snes/rcheevos/src/rapi/rc_api_common.h \
+	E:/Projects/ra2snes/rcheevos/src/rapi/rc_api_editor.c \
+	E:/Projects/ra2snes/rcheevos/src/rapi/rc_api_info.c \
+	E:/Projects/ra2snes/rcheevos/src/rapi/rc_api_runtime.c \
+	E:/Projects/ra2snes/rcheevos/src/rapi/rc_api_user.c \
+	E:/Projects/ra2snes/rcheevos/src/rc_client.c \
+	E:/Projects/ra2snes/rcheevos/src/rc_client_external.h \
+	E:/Projects/ra2snes/rcheevos/src/rc_client_internal.h \
+	E:/Projects/ra2snes/rcheevos/src/rc_client_raintegration.c \
+	E:/Projects/ra2snes/rcheevos/src/rc_client_raintegration_internal.h \
+	E:/Projects/ra2snes/rcheevos/src/rc_compat.c \
+	E:/Projects/ra2snes/rcheevos/src/rc_compat.h \
+	E:/Projects/ra2snes/rcheevos/src/rc_libretro.c \
+	E:/Projects/ra2snes/rcheevos/src/rc_libretro.h \
+	E:/Projects/ra2snes/rcheevos/src/rc_util.c \
+	E:/Projects/ra2snes/rcheevos/src/rc_version.c \
+	E:/Projects/ra2snes/rcheevos/src/rc_version.h \
+	E:/Projects/ra2snes/rcheevos/src/rcheevos/alloc.c \
+	E:/Projects/ra2snes/rcheevos/src/rcheevos/condition.c \
+	E:/Projects/ra2snes/rcheevos/src/rcheevos/condset.c \
+	E:/Projects/ra2snes/rcheevos/src/rcheevos/consoleinfo.c \
+	E:/Projects/ra2snes/rcheevos/src/rcheevos/format.c \
+	E:/Projects/ra2snes/rcheevos/src/rcheevos/lboard.c \
+	E:/Projects/ra2snes/rcheevos/src/rcheevos/memref.c \
+	E:/Projects/ra2snes/rcheevos/src/rcheevos/operand.c \
+	E:/Projects/ra2snes/rcheevos/src/rcheevos/rc_internal.h \
+	E:/Projects/ra2snes/rcheevos/src/rcheevos/rc_validate.c \
+	E:/Projects/ra2snes/rcheevos/src/rcheevos/rc_validate.h \
+	E:/Projects/ra2snes/rcheevos/src/rcheevos/richpresence.c \
+	E:/Projects/ra2snes/rcheevos/src/rcheevos/runtime.c \
+	E:/Projects/ra2snes/rcheevos/src/rcheevos/runtime_progress.c \
+	E:/Projects/ra2snes/rcheevos/src/rcheevos/trigger.c \
+	E:/Projects/ra2snes/rcheevos/src/rcheevos/value.c \
+	E:/Projects/ra2snes/rcheevos/src/rhash/aes.c \
+	E:/Projects/ra2snes/rcheevos/src/rhash/aes.h \
+	E:/Projects/ra2snes/rcheevos/src/rhash/cdreader.c \
+	E:/Projects/ra2snes/rcheevos/src/rhash/hash.c \
+	E:/Projects/ra2snes/rcheevos/src/rhash/md5.c \
+	E:/Projects/ra2snes/rcheevos/src/rhash/md5.h \
+	E:/Projects/ra2snes/rcheevos/src/rurl/url.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lapi.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lapi.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lauxlib.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lauxlib.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lbaselib.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lbitlib.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lcode.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lcode.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lcorolib.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lctype.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lctype.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/ldblib.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/ldebug.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/ldebug.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/ldo.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/ldo.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/ldump.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lfunc.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lfunc.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lgc.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lgc.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/linit.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/liolib.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/llex.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/llex.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/llimits.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lmathlib.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lmem.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lmem.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/loadlib.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lobject.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lobject.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lopcodes.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lopcodes.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/loslib.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lparser.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lparser.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lprefix.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lstate.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lstate.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lstring.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lstring.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lstrlib.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/ltable.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/ltable.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/ltablib.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/ltm.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/ltm.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lua.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lua.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lua.hpp \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/luac.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/luaconf.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lualib.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lundump.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lundump.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lutf8lib.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lvm.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lvm.h \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lzio.c \
+	E:/Projects/ra2snes/rcheevos/test/lua/src/lzio.h \
 	E:/Projects/ra2snes/usb2snes.cpp \
 	E:/Projects/ra2snes/usb2snes.h \
 	E:/Projects/ra2snes/ra2snes.ui \

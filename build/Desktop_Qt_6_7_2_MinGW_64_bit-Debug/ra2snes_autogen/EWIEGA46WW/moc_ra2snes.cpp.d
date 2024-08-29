@@ -14,6 +14,7 @@ E:/Projects/ra2snes/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/ra2snes_autogen/EW
   C:/Qt/6.7.2/mingw_64/include/QtCore/QSharedDataPointer \
   C:/Qt/6.7.2/mingw_64/include/QtCore/QString \
   C:/Qt/6.7.2/mingw_64/include/QtCore/QStringList \
+  C:/Qt/6.7.2/mingw_64/include/QtCore/QTimer \
   C:/Qt/6.7.2/mingw_64/include/QtCore/QUrl \
   C:/Qt/6.7.2/mingw_64/include/QtCore/QVariant \
   C:/Qt/6.7.2/mingw_64/include/QtCore/QtCore \

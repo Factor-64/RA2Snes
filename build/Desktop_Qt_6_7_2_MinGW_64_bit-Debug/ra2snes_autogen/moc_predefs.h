@@ -9,6 +9,7 @@
 #define __cpp_aggregate_nsdmi 201304L
 #define __UINT_LEAST8_TYPE__ unsigned char
 #define __SIZEOF_FLOAT80__ 16
+#define QT_STATEMACHINE_LIB 1
 #define __INTMAX_C(c) c ## LL
 #define __CHAR_BIT__ 8
 #define __MINGW32__ 1

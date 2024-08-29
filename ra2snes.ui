@@ -2857,12 +2857,18 @@ color: rgb(44, 151, 250);</string>
       <string>Remember Me</string>
      </property>
     </widget>
+    <zorder>signin_button</zorder>
+    <zorder>password_input</zorder>
+    <zorder>username_label</zorder>
+    <zorder>password_label</zorder>
+    <zorder>remember</zorder>
+    <zorder>username_input</zorder>
    </widget>
    <widget class="QLabel" name="currentRom">
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>310</y>
+      <y>580</y>
       <width>551</width>
       <height>151</height>
      </rect>
