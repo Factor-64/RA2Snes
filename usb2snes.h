@@ -14,8 +14,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
 #ifndef USB2SNES_H
 #define USB2SNES_H
 

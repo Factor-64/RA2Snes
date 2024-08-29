@@ -2,6 +2,7 @@
 #define RA2SNES_H
 
 #include <QMainWindow>
+#include <QTimer>
 #include "usb2snes.h"
 
 QT_BEGIN_NAMESPACE
@@ -19,13 +20,23 @@ public:
     ~ra2snes();
 
 private slots:
-
     void on_signin_button_clicked();
-    void resizeWindow(int width, int height);
-    void refreshStatus();
-    void getFileMD5(const QString& path);
+    void processFrame();
+
+signals:
+    void operationComplete();
 
 private:
     Ui::ra2snes *ui;
+    Usb2Snes* usb2snes;
+    QString currentGame;
+    bool loggedin;
+    bool gameLoaded;
+    bool isGB;
+    QTimer *frameTimer;
+
+    void resizeWindow(int width, int height);
+    void refreshStatus();
+    void onUsb2SnesStateChange();
 };
 #endif // RA2SNES_H

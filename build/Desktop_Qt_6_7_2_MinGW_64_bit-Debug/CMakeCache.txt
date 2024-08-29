@@ -331,6 +331,9 @@ Qt6LinguistTools_DIR:PATH=C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6LinguistTools
 //The directory containing a CMake configuration file for Qt6Network.
 Qt6Network_DIR:PATH=C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6Network
 
+//The directory containing a CMake configuration file for Qt6StateMachine.
+Qt6StateMachine_DIR:PATH=C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6StateMachine
+
 //The directory containing a CMake configuration file for Qt6Websockets.
 Qt6Websockets_DIR:PATH=C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6WebSockets
 
@@ -1035,6 +1038,8 @@ QT_FEATURE_publicsuffix_qt:INTERNAL=ON
 QT_FEATURE_publicsuffix_system:INTERNAL=OFF
 //Qt feature: pushbutton (from target Qt6::Widgets)
 QT_FEATURE_pushbutton:INTERNAL=ON
+//Qt feature: qeventtransition (from target Qt6::StateMachine)
+QT_FEATURE_qeventtransition:INTERNAL=ON
 //Qt feature: qqnx_imf (from target Qt6::Gui)
 QT_FEATURE_qqnx_imf:INTERNAL=OFF
 //Qt feature: qqnx_pps (from target Qt6::Core)
@@ -1137,6 +1142,8 @@ QT_FEATURE_stack_protector_strong:INTERNAL=OFF
 QT_FEATURE_stackedwidget:INTERNAL=ON
 //Qt feature: standarditemmodel (from target Qt6::Gui)
 QT_FEATURE_standarditemmodel:INTERNAL=ON
+//Qt feature: statemachine (from target Qt6::StateMachine)
+QT_FEATURE_statemachine:INTERNAL=ON
 //Qt feature: static (from target Qt6::Core)
 QT_FEATURE_static:INTERNAL=OFF
 //Qt feature: statusbar (from target Qt6::Widgets)

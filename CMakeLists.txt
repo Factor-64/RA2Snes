@@ -12,8 +12,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Websockets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS StateMachine)
+
+include_directories(${CMAKE_SOURCE_DIR}/rcheevos/include)
+include_directories(${CMAKE_SOURCE_DIR}/rcheevos/src)
 
 set(TS_FILES ra2snes_en_US.ts)
+
+file(GLOB RCHEEVOS_SOURCES ${CMAKE_SOURCE_DIR}/rcheevos/src/*)
+file(GLOB RCHEEVOS_INCLUDE ${CMAKE_SOURCE_DIR}/rcheevos/include/*)
+file(GLOB RCHEEVOS_SOURCES_RAPI ${CMAKE_SOURCE_DIR}/rcheevos/src/rapi/*)
+file(GLOB RCHEEVOS_SOURCES_RCHEEVOS ${CMAKE_SOURCE_DIR}/rcheevos/src/rcheevos/*)
+file(GLOB RCHEEVOS_SOURCES_RHASH ${CMAKE_SOURCE_DIR}/rcheevos/src/rhash/*)
+file(GLOB RCHEEVOS_SOURCES_RURL ${CMAKE_SOURCE_DIR}/rcheevos/src/rurl/*)
+file(GLOB LUA_SOURCES ${CMAKE_SOURCE_DIR}/rcheevos/test/lua/src/*)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -21,6 +33,15 @@ set(PROJECT_SOURCES
         ra2snes.h
         ra2snes.ui
         ${TS_FILES}
+        usb2snes.cpp
+        usb2snes.h
+        ${RCHEEVOS_SOURCES}
+        ${RCHEEVOS_INCLUDE}
+        ${RCHEEVOS_SOURCES_RCHEEVOS}
+        ${RCHEEVOS_SOURCES_RAPI}
+        ${RCHEEVOS_SOURCES_RHASH}
+        ${RCHEEVOS_SOURCES_RURL}
+        ${LUA_SOURCES}
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -30,6 +51,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ra2snes.cpp
         usb2snes.cpp
         usb2snes.h
+        ra_client.h ra_client.cpp
+
+
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET ra2snes APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -55,6 +79,7 @@ endif()
 
 target_link_libraries(ra2snes PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(ra2snes PRIVATE Qt${QT_VERSION_MAJOR}::WebSockets)
+target_link_libraries(ra2snes PRIVATE Qt${QT_VERSION_MAJOR}::StateMachine)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
