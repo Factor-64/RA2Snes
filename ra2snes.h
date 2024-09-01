@@ -1,6 +1,7 @@
 #ifndef RA2SNES_H
 #define RA2SNES_H
 
+#include <QApplication>
 #include <QMainWindow>
 #include <QTimer>
 #include "usb2snes.h"
@@ -24,14 +25,11 @@ private slots:
     void processFrame();
 
 signals:
-    void operationComplete();
+    void doFrame();
 
 private:
     Ui::ra2snes *ui;
-    Usb2Snes* usb2snes;
     QString currentGame;
-    bool loggedin;
-    bool gameLoaded;
     bool isGB;
     QTimer *frameTimer;
 

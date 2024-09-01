@@ -286,8 +286,11 @@ E:/Projects/ra2snes/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/ra2snes_autogen/EW
   C:/Qt/6.7.2/mingw_64/include/QtGui/qfont.h \
   C:/Qt/6.7.2/mingw_64/include/QtGui/qfontinfo.h \
   C:/Qt/6.7.2/mingw_64/include/QtGui/qfontmetrics.h \
+  C:/Qt/6.7.2/mingw_64/include/QtGui/qguiapplication.h \
+  C:/Qt/6.7.2/mingw_64/include/QtGui/qguiapplication_platform.h \
   C:/Qt/6.7.2/mingw_64/include/QtGui/qicon.h \
   C:/Qt/6.7.2/mingw_64/include/QtGui/qimage.h \
+  C:/Qt/6.7.2/mingw_64/include/QtGui/qinputmethod.h \
   C:/Qt/6.7.2/mingw_64/include/QtGui/qkeysequence.h \
   C:/Qt/6.7.2/mingw_64/include/QtGui/qpaintdevice.h \
   C:/Qt/6.7.2/mingw_64/include/QtGui/qpalette.h \
@@ -374,7 +377,9 @@ E:/Projects/ra2snes/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/ra2snes_autogen/EW
   C:/Qt/6.7.2/mingw_64/include/QtWebSockets/qwebsocketprotocol.h \
   C:/Qt/6.7.2/mingw_64/include/QtWebSockets/qwebsockets_global.h \
   C:/Qt/6.7.2/mingw_64/include/QtWebSockets/qwebsocketserver.h \
+  C:/Qt/6.7.2/mingw_64/include/QtWidgets/QApplication \
   C:/Qt/6.7.2/mingw_64/include/QtWidgets/QMainWindow \
+  C:/Qt/6.7.2/mingw_64/include/QtWidgets/qapplication.h \
   C:/Qt/6.7.2/mingw_64/include/QtWidgets/qmainwindow.h \
   C:/Qt/6.7.2/mingw_64/include/QtWidgets/qsizepolicy.h \
   C:/Qt/6.7.2/mingw_64/include/QtWidgets/qtabwidget.h \

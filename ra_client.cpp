@@ -1,18 +1,113 @@
 #include "ra_client.h"
 
 rc_client_t* g_client = NULL;
+bool loggedin = false;
+Usb2Snes* usb2snes = nullptr;
+uint32_t validAddressCount = -1;
+uint32_t readMemoryCount = 0;
+//bool readingMemory = false;
+/*MemoryRegion addresses[] = {
+    {0x000000, 2 * 1024 * 1024},  // 2MB ROM space (banked)
+    {0x7E0000, 256 * 1024},       // 256KB Work RAM (WRAM)
+    {0x7F0000, 256 * 1024},       // 256KB Video RAM (VRAM)
+    {0xF50000, 128 * 1024},       // 128KB Sound RAM (SRAM)
+    {0xF80000, 128 * 1024},       // 128KB Input/Output (I/O) RAM
+    {0x2100, 0x21FF - 0x2100 + 1},// PPU (Picture Processing Unit) registers
+    {0x4200, 0x43FF - 0x4200 + 1},// APU (Audio Processing Unit) registers
+    {0x4500, 0x45FF - 0x4500 + 1},// DSP (Digital Signal Processor) registers
+    {0x5000, 0x5FFF - 0x5000 + 1},// Expansion ROM (e.g., for games like Star Fox)
+    {0x2000, 0x20FF - 0x2000 + 1} // Joypad registers
+};*/
 
-// This is the function the rc_client will use to read memory for the emulator. we don't need it yet,
-// so just provide a dummy function that returns "no memory read".
-uint32_t read_memory(uint32_t address, uint8_t* buffer, uint32_t num_bytes, rc_client_t* client)
+/*
+SD2SNES Regions:
+WRAM = 0xF50000; Size = 0x0020000;
+VRAM = 0xF70000; Size = 0x0010000;
+APU = 0xF80000; Size = 0x0010000;
+CGRAM = 0xF90000; Size = 0x0000200;
+OAM = 0xF90200; Size = 0x0000220;
+PPUREG = 0xF90500; Size = 0x0000200;
+CPUREG = 0xF90700; Size = 0x0000200;
+MISC = 0xF90420; 0x00000E0;
+
+MSU = 0x000000; Size = 0x0007800; Use MSU as space;
+
+CMD = 0x002A00; Size = 0x0000400; Use CMD as space;
+*/
+
+// This is the function the rc_client will use to read memory for the emulator
+static uint32_t read_memory(uint32_t address, uint8_t* buffer, uint32_t num_bytes, rc_client_t* client)
 {
-    //return getMemoryAddress(address, buffer, num_bytes);
-    //return getAddress(unsigned int addr, unsigned int size, Space space = SNES);
-    qDebug() << "Address: " << address << " Num of Bytes: " << num_bytes;
-    return 0;
+    qDebug() << "Address: " << QString::number(address + 0xF50000, 16) << "Address: " << address << " Num of Bytes: " << num_bytes;
+
+    QPointer<QEventLoop> loop = new QEventLoop; //Prevents Segmentation Fault
+
+    if (usb2snes->state() != Usb2Snes::Ready) {
+        QTimer* timer = new QTimer(loop);
+        auto stateChecker = QObject::connect(usb2snes, &Usb2Snes::stateChanged, usb2snes, [loop] {
+            if (usb2snes->state() == Usb2Snes::Ready && loop) {
+                loop->quit();
+            }
+        });
+        auto stateCheckerTimer = QObject::connect(timer, &QTimer::timeout, loop, [loop]() {
+            if (loop) {
+                loop->quit();
+            }
+        });
+        timer->start(1000);
+        loop->exec();
+
+        QObject::disconnect(stateChecker);
+        QObject::disconnect(stateCheckerTimer);
+        if (usb2snes->state() != Usb2Snes::Ready) {
+            qDebug() << "Error: usb2snes not ready";
+            qDebug() << usb2snes->state();
+            return 0;
+        }
+    }
+
+    auto getAchievementAddr = QObject::connect(usb2snes, &Usb2Snes::getAddressGet, usb2snes, [loop, buffer, num_bytes] (QByteArray data) mutable {
+        if (loop) {
+            memcpy(buffer, data.data(), num_bytes);
+            loop->quit();
+        }
+    });
+
+    usb2snes->getAddress(address + 0xF50000, num_bytes);
+    loop->exec();
+
+    QObject::disconnect(getAchievementAddr);
+    readMemoryCount++;
+
+    auto result = std::make_shared<bool>();
+
+    auto resetChecker = QObject::connect(usb2snes, &Usb2Snes::getAddressGet, usb2snes, [loop, result] (QByteArray data) mutable {
+        if (loop) {
+            if(data[0] != '\x00')
+                *result = true;
+            else
+                *result = false;
+            loop->quit();
+        }
+    });
+
+    usb2snes->getAddress(0x2A00, 1, Usb2Snes::CMD);
+    loop->exec();
+
+    QObject::disconnect(resetChecker);
+
+    qDebug() << "Result: " << *result;
+    if(*result)
+        rc_client_reset(g_client);
+
+    qDebug() << "Read Mem Count: " << readMemoryCount;
+    qDebug() << "Address Count: " << validAddressCount;
+    if(readMemoryCount == validAddressCount)
+        usb2snes->infos();
+    return num_bytes;
 }
 
-// This is the callback function for the asynchronous HTTP call (which is not provided in this example)
+// This is the callback function for the asynchronous HTTP call
 void http_callback(int status_code, const char* content, size_t content_size, void* userdata, const char* error_message)
 {
     // Prepare a data object to pass the HTTP response to the callback
@@ -45,7 +140,7 @@ void server_call(const rc_api_request_t* request,
                  rc_client_server_callback_t callback, void* callback_data, rc_client_t* client)
 {
     // RetroAchievements may not allow hardcore unlocks if we don't properly identify ourselves.
-    const char* user_agent = "ra2snes/1.0";
+    const char* user_agent = "RA2Snes/1.0";
 
     // callback must be called with callback_data, regardless of the outcome of the HTTP call.
     // Since we're making the HTTP call asynchronously, we need to capture them and pass it
@@ -104,9 +199,239 @@ void log_message(const char* message, const rc_client_t* client)
     qDebug() << message;
 }
 
+static void achievement_triggered(const rc_client_achievement_t* achievement)
+{
+    char url[128];
+    const char* message = "Achievement Unlocked";
+    //async_image_data* image_data = NULL;
+
+    // the runtime already took care of dispatching the server request to notify the
+    // server, we just have to tell the player.
+
+    if (rc_client_achievement_get_image_url(achievement, RC_CLIENT_ACHIEVEMENT_STATE_UNLOCKED, url, sizeof(url)) == RC_OK)
+    {
+        // Generate a local filename to store the downloaded image.
+        char achievement_badge[64];
+        qDebug() << "ach_%s.png" << achievement->badge_name;
+        //image_data = download_and_cache_image(achievement_badge, url);
+    }
+
+    if (achievement->category == RC_CLIENT_ACHIEVEMENT_CATEGORY_UNOFFICIAL)
+        message = "Unofficial Achievement Unlocked";
+
+    //show_popup_message(image_data, message, achievement->title);
+    qDebug() << message;
+    // it's nice to also give an audio cue when an achievement is unlocked
+    //play_sound("unlock.wav");
+}
+
+static void leaderboard_started(const rc_client_leaderboard_t* leaderboard)
+{
+    qDebug() << "Leaderboard attempt started: " << leaderboard->title << leaderboard->description;
+}
+
+static void leaderboard_failed(const rc_client_leaderboard_t* leaderboard)
+{
+    qDebug() << "Leaderboard attempt failed: " << leaderboard->title;
+}
+
+static void leaderboard_submitted(const rc_client_leaderboard_t* leaderboard)
+{
+    qDebug() << "Submitted " << leaderboard->tracker_value << leaderboard->title;
+}
+
+static void leaderboard_tracker_update(const rc_client_leaderboard_tracker_t* tracker)
+{
+    // Find the currently visible tracker by ID and update what's being displayed.
+    /*tracker_data* data = find_tracker(tracker->id);
+    if (data)
+    {
+        // The display text buffer is guaranteed to live for as long as the game is loaded,
+        // but it may be updated in a non-thread safe manner within rc_client_do_frame, so
+        // we create a copy for the rendering code to read.
+        strcpy(data->value, tracker->display);
+    }*/
+}
+
+static void leaderboard_tracker_show(const rc_client_leaderboard_tracker_t* tracker)
+{
+    // The actual implementation of converting an rc_client_leaderboard_tracker_t to
+    // an on-screen widget is going to be client-specific. The provided tracker object
+    // has a unique identifier for the tracker and a string to be displayed on-screen.
+    // The string should be displayed using a fixed-width font to eliminate jittering
+    // when timers are updated several times a second.
+    //create_tracker(tracker->id, tracker->display);
+}
+
+static void leaderboard_tracker_hide(const rc_client_leaderboard_tracker_t* tracker)
+{
+    // This tracker is no longer needed
+    //destroy_tracker(tracker->id);
+}
+
+static void challenge_indicator_show(const rc_client_achievement_t* achievement)
+{
+    char url[128];
+    //async_image_data* image_data = NULL;
+
+    if (rc_client_achievement_get_image_url(achievement, RC_CLIENT_ACHIEVEMENT_STATE_UNLOCKED, url, sizeof(url)) == RC_OK)
+    {
+        // Generate a local filename to store the downloaded image.
+        char achievement_badge[64];
+        //snprintf("ach_%s.png", achievement->badge_name);
+        //image_data = download_and_cache_image(achievement_badge, url);
+    }
+
+    // Multiple challenge indicators may be shown, but only one per achievement, so key the list on the achievement ID
+    //create_challenge_indicator(achievement->id, image_data);
+}
+
+static void challenge_indicator_hide(const rc_client_achievement_t* achievement)
+{
+    // This indicator is no longer needed
+    //destroy_challenge_indicator(achievement->id);
+}
+
+static void progress_indicator_update(const rc_client_achievement_t* achievement)
+{
+    char url[128];
+    //async_image_data* image_data = NULL;
+
+    if (rc_client_achievement_get_image_url(achievement, RC_CLIENT_ACHIEVEMENT_STATE_ACTIVE, url, sizeof(url)) == RC_OK)
+    {
+        // Generate a local filename to store the downloaded image.
+        char achievement_badge[64];
+        //snprintf("ach_%s_lock.png", achievement->badge_name);
+        //image_data = download_and_cache_image(achievement_badge, url);
+    }
+
+    // The UPDATE event assumes the indicator is already visible, and just asks us to update the image/text.
+    //update_progress_indicator(image_data, achievement->measured_progress);
+}
+
+static void progress_indicator_show(const rc_client_achievement_t* achievement)
+{
+    // The SHOW event tells us the indicator was not visible, but should be now.
+    // To reduce duplicate code, we just update the non-visible indicator, then show it.
+    progress_indicator_update(achievement);
+    //show_progress_indicator();
+}
+
+static void progress_indicator_hide(void)
+{
+    // The HIDE event indicates the indicator should no longer be visible.
+    //hide_progress_indicator();
+}
+
+static void game_mastered(void)
+{
+    char message[128], submessage[128];
+    char url[128];
+    //async_image_data* image_data = NULL;
+    const rc_client_game_t* game = rc_client_get_game_info(g_client);
+
+    if (rc_client_game_get_image_url(game, url, sizeof(url)) == RC_OK)
+    {
+        // Generate a local filename to store the downloaded image.
+        char game_badge[64];
+        //snprintf("game_%s.png", game->badge_name);
+        //image_data = download_and_cache_image(game_badge, url);
+    }
+
+    // The popup should say "Completed GameTitle" or "Mastered GameTitle",
+    // depending on whether or not hardcore is enabled.
+    snprintf(message, sizeof(message), "%s %s",
+             rc_client_get_hardcore_enabled(g_client) ? "Mastered" : "Completed",
+             game->title);
+
+    // You should also display the name of the user (for personalized screenshots).
+    // If the emulator keeps track of the user's per-game playtime, it's nice to
+    // display that too.
+    /*snprintf(submessage, sizeof(submessage), "%s (%s)",
+             rc_client_get_user_info(g_client)->display_name,
+             format_total_playtime());*/
+
+    //show_popup_message(image_data, message, submessage);
+
+    //play_sound("mastery.wav");
+}
+
+static void server_error(const rc_client_server_error_t* error)
+{
+    char buffer[256];
+    //snprintf(buffer, "%s: %s", error->api, error->error_message);
+    //show_message(buffer);
+}
+
 static void event_handler(const rc_client_event_t* event, rc_client_t* client)
 {
-    qDebug() << "Event! " << event->type;
+    switch (event->type)
+    {
+    case RC_CLIENT_EVENT_ACHIEVEMENT_TRIGGERED:
+        qDebug() << "ACHIEVEMENT_TRIGGERED";
+        achievement_triggered(event->achievement);
+        break;
+    case RC_CLIENT_EVENT_LEADERBOARD_STARTED:
+        qDebug() << "LEADERBOARD_STARTED";
+        leaderboard_started(event->leaderboard);
+        break;
+    case RC_CLIENT_EVENT_LEADERBOARD_FAILED:
+        qDebug() << "LEADERBOARD_FAILED";
+        leaderboard_failed(event->leaderboard);
+        break;
+    case RC_CLIENT_EVENT_LEADERBOARD_SUBMITTED:
+        qDebug() << "LEADERBOARD_SUBMITTED";
+        leaderboard_submitted(event->leaderboard);
+        break;
+    case RC_CLIENT_EVENT_LEADERBOARD_TRACKER_UPDATE:
+        qDebug() << "LEADERBOARD_TRACKER_UPDATE";
+        leaderboard_tracker_update(event->leaderboard_tracker);
+        break;
+    case RC_CLIENT_EVENT_LEADERBOARD_TRACKER_SHOW:
+        qDebug() << "LEADERBOARD_TRACKER_SHOW";
+        leaderboard_tracker_show(event->leaderboard_tracker);
+        break;
+    case RC_CLIENT_EVENT_LEADERBOARD_TRACKER_HIDE:
+        qDebug() << "LEADERBOARD_TRACKER_HIDE";
+        leaderboard_tracker_hide(event->leaderboard_tracker);
+        break;
+    case RC_CLIENT_EVENT_ACHIEVEMENT_CHALLENGE_INDICATOR_SHOW:
+        qDebug() << "CHALLENGE_INDICATOR_SHOW";
+        challenge_indicator_show(event->achievement);
+        break;
+    case RC_CLIENT_EVENT_ACHIEVEMENT_CHALLENGE_INDICATOR_HIDE:
+        qDebug() << "CHALLENGE_INDICATOR_HIDE";
+        challenge_indicator_hide(event->achievement);
+        break;
+    case RC_CLIENT_EVENT_ACHIEVEMENT_PROGRESS_INDICATOR_SHOW:
+        qDebug() << "PROGRESS_INDICATOR_SHOW";
+        progress_indicator_show(event->achievement);
+        break;
+    case RC_CLIENT_EVENT_ACHIEVEMENT_PROGRESS_INDICATOR_UPDATE:
+        qDebug() << "PROGRESS_INDICATOR_UPDATE";
+        progress_indicator_update(event->achievement);
+        break;
+    case RC_CLIENT_EVENT_ACHIEVEMENT_PROGRESS_INDICATOR_HIDE:
+        qDebug() << "PROGRESS_INDICATOR_HIDE";
+        progress_indicator_hide();
+        break;
+    case RC_CLIENT_EVENT_GAME_COMPLETED:
+        qDebug() << "GAME_COMPLETED";
+        game_mastered();
+        break;
+    case RC_CLIENT_EVENT_RESET:
+        qDebug() << "EVENT_RESET";
+        usb2snes->reset();
+        break;
+    case RC_CLIENT_EVENT_SERVER_ERROR:
+        qDebug() << "SERVER_ERROR";
+        server_error(event->server_error);
+        break;
+    default:
+        qDebug() << "Unhandled event %d\n" << event->type;
+        break;
+    }
+    usb2snes->infos();
 }
 
 void initialize_retroachievements_client(void)
@@ -143,6 +468,8 @@ static void login_callback(int result, const char* error_message, rc_client_t* c
         return;
     }
 
+    loggedin = true;
+    usb2snes->infos();
     // Login was successful. Capture the token for future logins so we don't have to store the password anywhere.
     const rc_client_user_t* user = rc_client_get_user_info(client);
     //store_retroachievements_credentials(user->username, user->token);
@@ -177,11 +504,13 @@ static void load_game_callback(int result, const char* error_message, rc_client_
     // announce that the game is ready. we'll cover this in the next section.
     qDebug() << result << "Success!";
     show_game_placard();
+    validAddressCount = readMemoryCount;
+    usb2snes->infos();
 }
 
 void load_snes_game(const uint8_t* rom, size_t rom_size)
 {
-    // this example is hard-coded to identify a Super Nintendo game already loaded in memory.
+    // this is hard-coded to identify a Super Nintendo game already loaded in memory.
     // it will use the rhash library to generate a hash, then make a server call to resolve
     // the hash to a game_id. If found, it will then fetch the game data and start a session
     // for the user. By the time load_game_callback is called, the achievements for the game are
@@ -192,9 +521,11 @@ void load_snes_game(const uint8_t* rom, size_t rom_size)
 
 void load_gameboy_game(const uint8_t* rom, size_t rom_size)
 {
-    // this example uses RC_CONSOLE_UNKNOWN, which tells the rc_client to attempt to determine
-    // the system associated to the game from the filename and contents of the file. If the
-    // console is known, it's always preferred to pass it in.
+    // this is hard-coded to identify a Super Gameboy/Gameboy game already loaded in memory.
+    // it will use the rhash library to generate a hash, then make a server call to resolve
+    // the hash to a game_id. If found, it will then fetch the game data and start a session
+    // for the user. By the time load_game_callback is called, the achievements for the game are
+    // ready to be processed (unless an error occurs, like not being able to identify the game).
     rc_client_begin_identify_and_load_game(g_client, RC_CONSOLE_GAMEBOY,
                                            NULL, rom, rom_size, load_game_callback, NULL);
 }

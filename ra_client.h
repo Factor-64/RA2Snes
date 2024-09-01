@@ -11,6 +11,7 @@
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QEventLoop>
+#include "ra2snes.h"
 
 #define RC_CLIENT_SUPPORTS_HASH 1
 
@@ -34,7 +35,21 @@ typedef struct {
     void* callback_data;
 } async_callback_data;
 
+/*typedef struct {
+    unsigned int address;
+    unsigned int size;
+} MemoryRegion;*/
+
+//extern MemoryRegion addresses[];
+//extern uint8_t* snesMemory;
+//extern size_t snesMemorySize;
+
 extern rc_client_t* g_client;
+extern bool loggedin;
+extern Usb2Snes* usb2snes;
+extern uint32_t validAddressCount;
+extern uint32_t readMemoryCount;
+//extern bool readingMemory;
 
 typedef void (*http_callback_t)(int status_code, const char* response_data, size_t response_size, void* userdata, const char* error_message);
 
@@ -44,6 +59,21 @@ static void server_call(const rc_api_request_t* request, rc_client_server_callba
 void async_http_post(const char* url, const char* post_data, const char* content_type, const char* user_agent, http_callback_t callback, void* userdata);
 void async_http_get(const char* url, const char* user_agent, http_callback_t callback, void* userdata);
 static void log_message(const char* message, const rc_client_t* client);
+static void achievement_triggered(const rc_client_achievement_t* achievement);
+static void leaderboard_started(const rc_client_leaderboard_t* leaderboard);
+static void leaderboard_failed(const rc_client_leaderboard_t* leaderboard);
+static void leaderboard_submitted(const rc_client_leaderboard_t* leaderboard);
+static void leaderboard_tracker_update(const rc_client_leaderboard_tracker_t* tracker);
+static void leaderboard_tracker_show(const rc_client_leaderboard_tracker_t* tracker);
+static void leaderboard_tracker_hide(const rc_client_leaderboard_tracker_t* tracker);
+static void challenge_indicator_show(const rc_client_achievement_t* achievement);
+static void challenge_indicator_hide(const rc_client_achievement_t* achievement);
+static void progress_indicator_update(const rc_client_achievement_t* achievement);
+static void progress_indicator_show(const rc_client_achievement_t* achievement);
+static void progress_indicator_hide(void);
+static void game_mastered(void);
+static void server_error(const rc_client_server_error_t* error);
+static void event_handler(const rc_client_event_t* event, rc_client_t* client);
 void initialize_retroachievements_client(void);
 void shutdown_retroachievements_client(void);
 static void login_callback(int result, const char* error_message, rc_client_t* client, void* userdata);

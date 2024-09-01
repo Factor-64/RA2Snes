@@ -23,7 +23,6 @@
 
 #define USB2SNESURL "ws://localhost:8080/"
 
-
 class Usb2Snes : public QObject
 {
     Q_OBJECT
@@ -39,7 +38,10 @@ public:
         Ready,
         SendingFile,
         ReceivingFile,
-        GettingAddress
+        GettingAddress,
+        CheckingReset,
+        GettingInfo,
+        //GettingSnesMemory
     };
     enum sd2snesState {
         sd2menu,
@@ -102,8 +104,10 @@ public:
     void                    close();
     void                    setAppName(QString name);
     void                    attach(QString deviceName);
-    QByteArray              getAddress(unsigned int addr, unsigned int size, Space space = SNES);
+    void                    getAddress(unsigned int addr, unsigned int size, Space space = SNES);
     void                    setAddress(unsigned int addr, QByteArray data, Space space = SNES);
+    void                    checkReset();
+    //void                    getSnesMemory();
     void                    sendFile(QString path, QByteArray data);
     void                    getFile(QString path);
     void                    renameFile(QString oldPath, QString newPath);
@@ -113,6 +117,7 @@ public:
     void                    reset();
     void                    menu();
     State                   state();
+    void                    resetState();
     void                    queueInfos();
     void                    infos();
     int                     fileDataSize() const;
@@ -135,9 +140,13 @@ signals:
     void    fileSent();
     void    getFileSizeGet(unsigned int);
     void    getFileDataGet(QByteArray data);
+    void    getAddressGet(QByteArray data);
+    void    resetOccurred(QByteArray data);
+    //void    getSnesMemoryComplete();
     void    deviceListDone(QStringList listDevice);
     void    infoDone(Usb2Snes::DeviceInfo info);
     void    lsDone(QList<Usb2Snes::FileInfo> filesInfo);
+    void    doFrame();
 
 
 private slots:

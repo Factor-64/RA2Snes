@@ -2864,13 +2864,26 @@ color: rgb(44, 151, 250);</string>
     <zorder>remember</zorder>
     <zorder>username_input</zorder>
    </widget>
-   <widget class="QLabel" name="currentRom">
+   <widget class="QLabel" name="currentGame">
     <property name="geometry">
      <rect>
       <x>30</x>
       <y>580</y>
       <width>551</width>
       <height>151</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="romName">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>680</y>
+      <width>49</width>
+      <height>16</height>
      </rect>
     </property>
     <property name="text">
