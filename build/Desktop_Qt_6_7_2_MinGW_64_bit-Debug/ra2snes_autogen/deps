@@ -285,8 +285,11 @@ ra2snes_autogen/timestamp: \
 	C:/Qt/6.7.2/mingw_64/include/QtGui/qfont.h \
 	C:/Qt/6.7.2/mingw_64/include/QtGui/qfontinfo.h \
 	C:/Qt/6.7.2/mingw_64/include/QtGui/qfontmetrics.h \
+	C:/Qt/6.7.2/mingw_64/include/QtGui/qguiapplication.h \
+	C:/Qt/6.7.2/mingw_64/include/QtGui/qguiapplication_platform.h \
 	C:/Qt/6.7.2/mingw_64/include/QtGui/qicon.h \
 	C:/Qt/6.7.2/mingw_64/include/QtGui/qimage.h \
+	C:/Qt/6.7.2/mingw_64/include/QtGui/qinputmethod.h \
 	C:/Qt/6.7.2/mingw_64/include/QtGui/qkeysequence.h \
 	C:/Qt/6.7.2/mingw_64/include/QtGui/qpaintdevice.h \
 	C:/Qt/6.7.2/mingw_64/include/QtGui/qpalette.h \
@@ -373,7 +376,9 @@ ra2snes_autogen/timestamp: \
 	C:/Qt/6.7.2/mingw_64/include/QtWebSockets/qwebsocketprotocol.h \
 	C:/Qt/6.7.2/mingw_64/include/QtWebSockets/qwebsockets_global.h \
 	C:/Qt/6.7.2/mingw_64/include/QtWebSockets/qwebsocketserver.h \
+	C:/Qt/6.7.2/mingw_64/include/QtWidgets/QApplication \
 	C:/Qt/6.7.2/mingw_64/include/QtWidgets/QMainWindow \
+	C:/Qt/6.7.2/mingw_64/include/QtWidgets/qapplication.h \
 	C:/Qt/6.7.2/mingw_64/include/QtWidgets/qmainwindow.h \
 	C:/Qt/6.7.2/mingw_64/include/QtWidgets/qsizepolicy.h \
 	C:/Qt/6.7.2/mingw_64/include/QtWidgets/qtabwidget.h \
@@ -554,14 +559,6 @@ ra2snes_autogen/timestamp: \
 	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6Network/Qt6QTlsBackendOpenSSLPluginConfig.cmake \
 	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6Network/Qt6QTlsBackendOpenSSLPluginTargets-relwithdebinfo.cmake \
 	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6Network/Qt6QTlsBackendOpenSSLPluginTargets.cmake \
-	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6StateMachine/Qt6StateMachineAdditionalTargetInfo.cmake \
-	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6StateMachine/Qt6StateMachineConfig.cmake \
-	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6StateMachine/Qt6StateMachineConfigVersion.cmake \
-	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6StateMachine/Qt6StateMachineConfigVersionImpl.cmake \
-	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6StateMachine/Qt6StateMachineDependencies.cmake \
-	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6StateMachine/Qt6StateMachineTargets-relwithdebinfo.cmake \
-	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6StateMachine/Qt6StateMachineTargets.cmake \
-	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6StateMachine/Qt6StateMachineVersionlessTargets.cmake \
 	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6WebSockets/Qt6WebSocketsAdditionalTargetInfo.cmake \
 	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6WebSockets/Qt6WebSocketsConfig.cmake \
 	C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6WebSockets/Qt6WebSocketsConfigVersion.cmake \

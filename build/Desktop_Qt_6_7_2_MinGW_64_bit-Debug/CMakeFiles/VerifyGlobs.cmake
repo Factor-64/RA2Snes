@@ -136,12 +136,13 @@ endif()
 # _directory_contents at C:/Qt/6.7.2/mingw_64/lib/cmake/Qt6LinguistTools/Qt6LinguistToolsMacros.cmake:55 (file)
 file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "E:/Projects/ra2snes/*.cpp")
 set(OLD_GLOB
+  "E:/Projects/ra2snes/build/CMakeFiles/3.30.2/CompilerIdCXX/CMakeCXXCompilerId.cpp"
   "E:/Projects/ra2snes/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/CMakeFiles/3.29.3/CompilerIdCXX/CMakeCXXCompilerId.cpp"
   "E:/Projects/ra2snes/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/qtc_Ninja_Multi_Config/CMakeFiles/3.29.3/CompilerIdCXX/CMakeCXXCompilerId.cpp"
-  "E:/Projects/ra2snes/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/ra2snes_autogen/EWIEGA46WW/moc_Usb2SnesManager.cpp"
   "E:/Projects/ra2snes/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/ra2snes_autogen/EWIEGA46WW/moc_ra2snes.cpp"
   "E:/Projects/ra2snes/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/ra2snes_autogen/EWIEGA46WW/moc_usb2snes.cpp"
   "E:/Projects/ra2snes/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/ra2snes_autogen/mocs_compilation.cpp"
+  "E:/Projects/ra2snes/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/validator_autogen/mocs_compilation.cpp"
   "E:/Projects/ra2snes/main.cpp"
   "E:/Projects/ra2snes/ra2snes.cpp"
   "E:/Projects/ra2snes/ra_client.cpp"
@@ -166,6 +167,7 @@ file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "E:/Projects/ra2snes/*.h")
 set(OLD_GLOB
   "E:/Projects/ra2snes/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/ra2snes_autogen/include/ui_ra2snes.h"
   "E:/Projects/ra2snes/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/ra2snes_autogen/moc_predefs.h"
+  "E:/Projects/ra2snes/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/validator_autogen/moc_predefs.h"
   "E:/Projects/ra2snes/ra2snes.h"
   "E:/Projects/ra2snes/ra_client.h"
   "E:/Projects/ra2snes/rcheevos/include/rc_api_editor.h"
