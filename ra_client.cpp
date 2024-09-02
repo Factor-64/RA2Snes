@@ -140,7 +140,7 @@ void server_call(const rc_api_request_t* request,
                  rc_client_server_callback_t callback, void* callback_data, rc_client_t* client)
 {
     // RetroAchievements may not allow hardcore unlocks if we don't properly identify ourselves.
-    const char* user_agent = "RA2Snes/1.0";
+    const char* user_agent = "ra2snes/1.0";
 
     // callback must be called with callback_data, regardless of the outcome of the HTTP call.
     // Since we're making the HTTP call asynchronously, we need to capture them and pass it
