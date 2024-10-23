@@ -32,7 +32,9 @@ SD2Snes cannot currently read the memory of the Super Game Boy.
 
 ### Preemptive Unlocks
 
-Some achievements may activate without the requirement being met. This happens because a memory address is not overwritten before it is checked (SD2Snes only updates RAM addresses if they are written to so some values bleed over since they aren't updated). This case is extremely rare (I know of only 1 achievement that had this happen).
+Some achievements may activate without the requirement being met. This happens because a memory address is not overwritten before it is checked (SD2Snes only updates RAM addresses if they are written to so some values bleed over since they aren't updated). This case is extremely rare (I know of only 1 achievement that had this happen). 
+
+**When this happens click on the achievement title to go to its page on the RetroAchievements Website and reset that achievement!**
 
 ### Achievement Won't Trigger
 
