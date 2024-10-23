@@ -34,10 +34,13 @@
     cmake -S . -B build -DCMake_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt6
     ```
 
-6) Build and Run
+6) Build
     ```
     cmake --build build --config Release
-    cd build
-    chmod +x ra2snes
-    ./ra2snes
     ```
+7) Run
+   ```
+   cd build
+   chmod +x ra2snes
+   ./ra2snes
+   ```
