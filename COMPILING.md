@@ -44,3 +44,9 @@
    chmod +x ra2snes
    ./ra2snes
    ```
+Rebuilding
+   ```
+   cmake --build build --target clean
+   cmake -S . -B build -DCMake_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt6
+   cmake --build build --config Release
+   ```
