@@ -1506,7 +1506,7 @@ ApplicationWindow {
                                     }
                                     Text{
                                         id: time
-                                        text: qsTr("Lastest")
+                                        text: qsTr("Latest")
                                         font.family: "Verdana"
                                         font.pixelSize: 13
                                         color: "#cc9900"
