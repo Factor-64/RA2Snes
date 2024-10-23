@@ -33,7 +33,7 @@ ApplicationWindow {
     }
     minimumWidth: 600
     minimumHeight: 600
-    title: "ra2snes"
+    title: "ra2snes - v1.0.0"
 
     Material.theme: Material.Dark
     Material.accent: "#eab308"
