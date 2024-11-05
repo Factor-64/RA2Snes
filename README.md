@@ -8,7 +8,7 @@ Download the latest firmware for your [SD2Snes](https://sd2snes.de/blog/download
 
 Download the latest version of [QUsb2Snes](https://github.com/Skarsnik/QUsb2snes/releases).
 
-Plug the SD2Snes into your computer (Linux users may need to allow Serial Port communications to allow communication between QUsb2Snes and SD2Snes).
+Plug the SD2Snes into your computer (Linux users may need to allow Serial Port communications to enable communication between QUsb2Snes and SD2Snes).
 
 Run both QUsb2Snes and RA2Snes.
 
@@ -18,7 +18,7 @@ Run both QUsb2Snes and RA2Snes.
 
 ### Configuration Files
 
-The settings.ini is created in the same directory as RA2Snes once RA2Snes has been run for the first time. This file holds all settings for the program including your saved login information.
+Once RA2Snes has been run for the first time, the settings.ini file is created in the same directory as RA2Snes. This file holds all program settings, including your saved login information.
 
 ### Currently Unsupported Games
 
@@ -29,6 +29,10 @@ SD2Snes cannot currently read the memory of the Super Game Boy.
 ---
 
 ## Limitations and Issues
+
+### RA2Snes won't load game or update SNES status
+
+The SD2nes firmware may have crashed power cycling the SNES should fix the issue. Ensuring a good usb connection and booting QUsb2Snes and RA2Snes before powering on the SNES will mitigate any crashes.
 
 ### Preemptive Unlocks
 
