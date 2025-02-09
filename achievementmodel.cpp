@@ -95,7 +95,6 @@ void AchievementModel::setUnlockedState(unsigned int id, bool unlocked, QDateTim
             m_achievements[i].time_unlocked = time;
             m_achievements[i].time_unlocked_string = time.toString("MMMM d yyyy, h:mmap");
             QModelIndex index = createIndex(i, 0);
-            //qDebug() << "Data changed for index:" << index << "Unlocked state:" << unlocked;
             emit dataChanged(index, index, {UnlockedRole, TimeUnlockedRole, TimeUnlockedStringRole});
             emit unlockedChanged();
             break;
@@ -103,8 +102,7 @@ void AchievementModel::setUnlockedState(unsigned int id, bool unlocked, QDateTim
     }
 }
 
-void AchievementModel::primeAchievement(unsigned int id, bool p)
-{
+void AchievementModel::primeAchievement(unsigned int id, bool p) {
     for (int i = 0; i < m_achievements.size(); ++i) {
         if (m_achievements[i].id == id) {
             m_achievements[i].primed = p;
@@ -115,8 +113,7 @@ void AchievementModel::primeAchievement(unsigned int id, bool p)
     }
 }
 
-void AchievementModel::updateAchievementValue(unsigned int id, int value)
-{
+void AchievementModel::updateAchievementValue(unsigned int id, int value) {
     for (int i = 0; i < m_achievements.size(); ++i) {
         if (m_achievements[i].id == id) {
             m_achievements[i].value = value;
@@ -127,8 +124,7 @@ void AchievementModel::updateAchievementValue(unsigned int id, int value)
     }
 }
 
-void AchievementModel::updateAchievementPercent(unsigned int id, int percent)
-{
+void AchievementModel::updateAchievementPercent(unsigned int id, int percent) {
     for (int i = 0; i < m_achievements.size(); ++i) {
         if (m_achievements[i].id == id) {
             m_achievements[i].percent = percent;
@@ -139,8 +135,7 @@ void AchievementModel::updateAchievementPercent(unsigned int id, int percent)
     }
 }
 
-void AchievementModel::updateAchievementTarget(unsigned int id, int target)
-{
+void AchievementModel::updateAchievementTarget(unsigned int id, int target) {
     for (int i = 0; i < m_achievements.size(); ++i) {
         if (m_achievements[i].id == id) {
             m_achievements[i].target = target;
@@ -157,8 +152,7 @@ void AchievementModel::clearAchievements() {
     endResetModel();
 }
 
-QList<AchievementInfo> AchievementModel::getAchievements()
-{
+QList<AchievementInfo> AchievementModel::getAchievements() {
     return m_achievements;
 }
 

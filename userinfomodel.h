@@ -20,7 +20,10 @@ class UserInfoModel : public QObject {
     Q_PROPERTY(bool autohardcore READ autohardcore NOTIFY dataChanged)
 
 public:
-    explicit UserInfoModel(QObject *parent = nullptr);
+    static UserInfoModel* instance() {
+        static UserInfoModel instance;
+        return &instance;
+    }
 
     void updateHardcoreScore(int score);
     void updateSoftcoreScore(int score);
@@ -58,6 +61,10 @@ signals:
     void dataChanged();
 
 private:
+    explicit UserInfoModel(QObject *parent = nullptr);  // Private constructor
+    UserInfoModel(const UserInfoModel&) = delete;
+    UserInfoModel& operator=(const UserInfoModel&) = delete;
+
     UserInfo m_userInfo;
 };
 

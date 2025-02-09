@@ -32,34 +32,32 @@ public:
         TargetRole
     };
 
-    AchievementModel(QObject *parent = nullptr);
+    static AchievementModel* instance() {
+        static AchievementModel instance;
+        return &instance;
+    }
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-
+    QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
     void setUnlockedState(unsigned int id, bool unlocked, QDateTime time);
-
     void primeAchievement(unsigned int id, bool p);
-
     void updateAchievementValue(unsigned int id, int value);
-
     void updateAchievementPercent(unsigned int id, int percent);
-
     void updateAchievementTarget(unsigned int id, int target);
-
     void clearAchievements();
-
     QList<AchievementInfo> getAchievements();
-
     void appendAchievement(AchievementInfo a);
 
 signals:
     void unlockedChanged();
 
 private:
+    AchievementModel(QObject *parent = nullptr);  // Private constructor
+    AchievementModel(const AchievementModel&) = delete;
+    AchievementModel& operator=(const AchievementModel&) = delete;
+
     QList<AchievementInfo> m_achievements;
 };
 

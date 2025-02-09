@@ -7,6 +7,7 @@
 #include "userinfomodel.h"
 #include "gameinfomodel.h"
 #include "achievementmodel.h"
+
 class RAClient : public QObject {
     Q_OBJECT
 
@@ -25,7 +26,10 @@ public:
         unsigned int score;
     };
 
-    explicit RAClient(QObject *parent = nullptr);
+    static RAClient* instance() {
+        static RAClient instance;
+        return &instance;
+    }
 
     void loginPassword(const QString& username, const QString& password);
     void loginToken(const QString& username, const QString& token);
@@ -67,6 +71,7 @@ public:
     void setAutoHardcore(bool ac);
     bool getAutoHardcore();
     void setAchievementInfo(unsigned int id, AchievementInfoType infotype, int value);
+    void setTitleToHash();
 
 signals:
     void loginSuccess();
@@ -81,6 +86,10 @@ signals:
     void continueQueue();
 
 private:
+    RAClient(QObject *parent = nullptr);  // Private constructor
+    RAClient(const RAClient&) = delete;
+    RAClient& operator=(const RAClient&) = delete;
+
     static const QString baseUrl;
     static const QString userAgent;
     static const QString mediaUrl;

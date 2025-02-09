@@ -25,11 +25,14 @@ public:
         Reset,
         NoChecksNeeded,
         GetRamSize,
-        GetRomType
+        GetRomType,
+        GetFirmware
     };
 
-    explicit ra2snes(QObject *parent = nullptr);
-    ~ra2snes();
+    static ra2snes* instance() {
+        static ra2snes instance;
+        return &instance;
+    }
 
     AchievementModel* achievementModel();
     GameInfoModel* gameInfoModel();
@@ -59,6 +62,11 @@ signals:
     void consoleChanged();
 
 private:
+    explicit ra2snes(QObject *parent = nullptr);  // Private constructor
+    ~ra2snes();  // Private destructor
+    ra2snes(const ra2snes&) = delete;
+    ra2snes& operator=(const ra2snes&) = delete;
+
     Usb2Snes *usb2snes;
     RAClient *raclient;
     MemoryReader *reader;

@@ -9,16 +9,18 @@ const QString RAClient::baseUrl = "https://retroachievements.org/";
 const QString RAClient::mediaUrl = "https://media.retroachievements.org/";
 const QString RAClient::userAgent = "ra2snes/1.0";
 
-RAClient::RAClient(QObject *parent) : QObject(parent)
+RAClient::RAClient(QObject *parent)
+    : QObject(parent)
 {
-    networkManager = new QNetworkAccessManager();
-    userinfo_model = new UserInfoModel(this);
-    gameinfo_model = new GameInfoModel(this);
-    achievement_model = new AchievementModel(this);
+    networkManager = new QNetworkAccessManager(this);
+    userinfo_model = UserInfoModel::instance();
+    gameinfo_model = GameInfoModel::instance();
+    achievement_model = AchievementModel::instance();
     connect(networkManager, &QNetworkAccessManager::finished, this, &RAClient::handleNetworkReply);
     queue.clear();
     running = false;
 }
+
 
 void RAClient::loginPassword(const QString& username, const QString& password)
 {
@@ -40,7 +42,7 @@ void RAClient::loginToken(const QString& username, const QString& token)
 
 void RAClient::loadGame(const QString& md5hash)
 {
-    gameinfo_model->md5hash() = md5hash;
+    gameinfo_model->md5hash(md5hash);
     QJsonObject post_content;
     post_content["m"] = md5hash;
 
@@ -220,6 +222,11 @@ void RAClient::setAutoHardcore(bool ac)
 bool RAClient::getAutoHardcore()
 {
     return userinfo_model->autohardcore();
+}
+
+void RAClient::setTitleToHash()
+{
+    gameinfo_model->title(gameinfo_model->md5hash());
 }
 
 void RAClient::setTitle(QString t, QString i, QString l)
