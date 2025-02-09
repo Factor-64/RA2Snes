@@ -22,7 +22,10 @@ class GameInfoModel : public QObject {
     Q_PROPERTY(int achievement_count READ achievement_count NOTIFY dataChanged)
 
 public:
-    explicit GameInfoModel(QObject *parent = nullptr);
+    static GameInfoModel* instance() {
+        static GameInfoModel instance;
+        return &instance;
+    }
 
     void setGameInfo(const GameInfo &gameInfo);
     void updateCompletionCount();
@@ -68,6 +71,10 @@ signals:
     void beatenGame();
 
 private:
+    explicit GameInfoModel(QObject *parent = nullptr);  // Private constructor
+    GameInfoModel(const GameInfoModel&) = delete;
+    GameInfoModel& operator=(const GameInfoModel&) = delete;
+
     GameInfo m_gameInfo;
 };
 
