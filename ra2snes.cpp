@@ -5,7 +5,7 @@ ra2snes::ra2snes(QObject *parent)
     : QObject(parent)
 {
     usb2snes = new Usb2Snes(false);
-    raclient = new RAClient(this);
+    raclient = RAClient::instance();
     reader = new MemoryReader(this);
     m_currentGame = "";
     loggedin = false;
@@ -173,8 +173,6 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
         }
         else if (!gameLoaded && loggedin)
         {
-
-            emit switchingMode();
             if(raclient->getAutoHardcore() && !raclient->getHardcore())
                 changeMode();
             setCurrentConsole();
@@ -212,8 +210,6 @@ void ra2snes::onUsb2SnesGetConfigDataReceived()
         if(raclient->getHardcore())
             changeMode();
     }
-    if(raclient->getAutoHardcore())
-        changeMode();
     if(doThisTaskNext != GetCurrentGameFile)
         usb2snes->infos();
 }
@@ -290,7 +286,9 @@ void ra2snes::onRequestError(bool net)
     else
     {
         emit displayMessage("Game Hash does not exist!", true);
+        raclient->setTitleToHash();
         doThisTaskNext = NoChecksNeeded;
+
         onUsb2SnesStateChanged();
     }
     //qDebug() << "request error";
@@ -454,7 +452,7 @@ void ra2snes::createSettingsFile()
 
     if(remember_me)
     {
-        QString time = QString::number(QDateTime::currentDateTime().toSecsSinceEpoch());
+        QString time = QString::number(QDateTime::currentSecsSinceEpoch());
         UserInfoModel* user = raclient->getUserInfoModel();
         settings.setValue("Username", user->username());
         settings.setValue("Token", xorEncryptDecrypt(user->token(), time));
@@ -523,9 +521,11 @@ void ra2snes::signOut()
 
 void ra2snes::changeMode()
 {
+    qDebug() << "Changing Mode";
     UserInfoModel* user = raclient->getUserInfoModel();
     QString reason = "Hardcore Disabled: ";
     bool needsChange = false;
+    emit switchingMode();
 
     if(user->cheats()) {
         reason += QString("Cheats Enabled");
@@ -548,20 +548,19 @@ void ra2snes::changeMode()
             user->hardcore(true);
         else
             user->hardcore(!user->hardcore());
-        emit changeModeFailed("");
+        reason = "";
     }
     else
     {
         user->hardcore(false);
-        emit changeModeFailed(reason);
     }
+    emit changeModeFailed(reason);
     if(gameLoaded && loggedin)
     {
         reset = true;
         raclient->clearAchievements();
         raclient->stopQueue();
         onUsb2SnesStateChanged();
-        emit switchingMode();
     }
 }
 

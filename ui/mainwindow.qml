@@ -11,29 +11,19 @@ ApplicationWindow {
     id: mainWindow
     visible: true
     width: {
-        if(userInfoModel)
-        {
-            if(userInfoModel.width >= 600)
-                userInfoModel.width
-            else 600
-        }
-        else
-            600
+        if(UserInfoModel.width >= 600)
+            UserInfoModel.width;
+        else 600
     }
 
     height: {
-        if(userInfoModel)
-        {
-            if(userInfoModel.height >= 600)
-                userInfoModel.height
-            else 600
-        }
-        else
-            600
+        if(UserInfoModel.height >= 600)
+            UserInfoModel.height;
+        else 600
     }
     minimumWidth: 600
     minimumHeight: 600
-    title: "ra2snes - v1.0.0"
+    title: "ra2snes - v1.0.1"
 
     Material.theme: Material.Dark
     Material.accent: "#eab308"
@@ -44,13 +34,14 @@ ApplicationWindow {
     property string modeFailed: ""
     property bool disableChange: false
     property bool setupFinished: false
+    property string appDir: Qt.application.arguments[0].substring(0, Qt.application.arguments[0].lastIndexOf("/"))
 
     onWidthChanged: windowWidth = width
     onHeightChanged: windowHeight = height
 
     AchievementSortFilterProxyModel {
         id: sortedAchievementModel
-        sourceModel: achievementModel
+        sourceModel: AchievementModel
     }
 
     Item {
@@ -87,7 +78,7 @@ ApplicationWindow {
         }
 
         Connections {
-            target: gameInfoModel
+            target: GameInfoModel
             function onMasteredGame() {
                 if(setupFinished)
                     masteredFanfare.playMasteredSound();
@@ -129,7 +120,7 @@ ApplicationWindow {
         }
 
         Connections {
-            target: gameInfoModel
+            target: GameInfoModel
             function onBeatenGame() {
                 if(setupFinished)
                     beatenFanfare.playBeatenSound();
@@ -192,7 +183,7 @@ ApplicationWindow {
         }
 
         Connections {
-            target: achievementModel
+            target: AchievementModel
             function onUnlockedChanged() {
                 if(setupFinished)
                     unlockSounds.playRandomSound();
@@ -271,8 +262,8 @@ ApplicationWindow {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     onClicked: {
-                                        ra2snes.saveWindowSize(windowWidth, windowHeight);
-                                        ra2snes.signOut();
+                                        Ra2snes.saveWindowSize(windowWidth, windowHeight);
+                                        Ra2snes.signOut();
                                     }
                                     onEntered: logout_button.state = "hovered"
                                     onExited: logout_button.state = ""
@@ -374,10 +365,10 @@ ApplicationWindow {
                                                 mouseAreaMode.enableModeChangeButton();
                                             }
                                             setupFinished = false;
-                                            ra2snes.autoChange(changeCheckBox.checked);
+                                            Ra2snes.autoChange(changeCheckBox.checked);
                                         }
                                         Component.onCompleted: {
-                                            changeCheckBox.checked = userInfoModel.autohardcore;
+                                            changeCheckBox.checked = UserInfoModel.autohardcore;
                                         }
                                     }
                                     Text {
@@ -418,26 +409,20 @@ ApplicationWindow {
                                         id: button_Text
                                         color: {
                                             if(mouseAreaMode.enabled)
-                                                if(userInfoModel)
-                                                {
-                                                   if(userInfoModel.hardcore)
-                                                       "#00ff00"
-                                                   else
-                                                       "#ff0000"
-                                                }
-                                                else "#000000"
-                                            else "#bbbbbb"
+                                            {
+                                                if(UserInfoModel.hardcore)
+                                                    "#00ff00";
+                                                else
+                                                    "#ff0000";
+                                            }
+                                            else "#bbbbbb";
 
                                         }
                                         text: {
-                                            if(userInfoModel)
-                                            {
-                                                if(userInfoModel.hardcore)
-                                                    qsTr("Softcore Mode")
-                                                else
-                                                    qsTr("Hardcore Mode")
-                                            }
-                                            else ""
+                                            if(UserInfoModel.hardcore)
+                                                qsTr("Softcore Mode");
+                                            else
+                                                qsTr("Hardcore Mode");
                                         }
                                         font.family: "Verdana"
                                         font.pixelSize: 13
@@ -451,7 +436,7 @@ ApplicationWindow {
                                         onClicked: {
                                             disableModeChangeButton();
                                             mainWindow.setupFinished = false;
-                                            ra2snes.changeMode();
+                                            Ra2snes.changeMode();
                                         }
                                         Component.onCompleted: {
                                             enableModeChangeButton();
@@ -466,6 +451,8 @@ ApplicationWindow {
 
                                         function enableModeChangeButton()
                                         {
+                                            changeCheckBox.enabled = true;
+                                            autoHardcore.color = "#2c97fa";
                                             if(!disableChange)
                                                 mouseAreaMode.enabled = true;
                                         }
@@ -575,14 +562,14 @@ ApplicationWindow {
                                     }
 
                                     Connections {
-                                        target: ra2snes
+                                        target: Ra2snes
                                         function onChangeModeFailed(error) {
                                             errorMessage.showErrorMessage(error, true);
                                         }
                                     }
 
                                     Connections {
-                                        target: ra2snes
+                                        target: Ra2snes
                                         function onDisplayMessage(error, iserror) {
                                             errorMessage.showErrorMessage(error, iserror);
                                         }
@@ -600,11 +587,7 @@ ApplicationWindow {
                                 anchors.fill: parent
                                 Image {
                                     id: userpfp
-                                    source: {
-                                        if(userInfoModel)
-                                            userInfoModel.pfp
-                                        else ""
-                                    }
+                                    source: UserInfoModel.pfp
                                     width: 128
                                     height: 128
                                 }
@@ -612,11 +595,7 @@ ApplicationWindow {
                                     spacing: 6
                                     Text {
                                         id: user
-                                        text: {
-                                            if(userInfoModel)
-                                                userInfoModel.username
-                                            else ""
-                                        }
+                                        text: UserInfoModel.username
                                         color: "#cc9900"
                                         font.bold: true
                                         font.family: "Verdana"
@@ -626,7 +605,7 @@ ApplicationWindow {
                                             anchors.fill: parent
                                             hoverEnabled: true
                                             onClicked: {
-                                                Qt.openUrlExternally(userInfoModel.link)
+                                                Qt.openUrlExternally(UserInfoModel.link)
                                             }
                                             onEntered: user.state = "hovered"
                                             onExited: user.state = ""
@@ -673,14 +652,10 @@ ApplicationWindow {
                                         }
                                         Text {
                                             text: {
-                                                if(userInfoModel)
-                                                {
-                                                    if(userInfoModel.hardcore)
-                                                        "" + userInfoModel.hardcore_score
-                                                    else
-                                                        "" + userInfoModel.softcore_score
-                                                }
-                                                else ""
+                                                if(UserInfoModel.hardcore)
+                                                    "" + UserInfoModel.hardcore_score;
+                                                else
+                                                    "" + UserInfoModel.softcore_score;
                                             }
                                             font.family: "Verdana"
                                             font.pixelSize: 13
@@ -697,43 +672,37 @@ ApplicationWindow {
                                         }
                                         Text {
                                             text: {
-                                                if(userInfoModel)
-                                                {
-                                                    if(userInfoModel.hardcore)
-                                                        qsTr("Hardcore")
-                                                    else
-                                                        qsTr("Softcore")
-                                                }
-                                                else ""
+                                                if(UserInfoModel.hardcore)
+                                                    qsTr("Hardcore");
+                                                else
+                                                    qsTr("Softcore");
                                             }
                                             font.family: "Verdana"
                                             font.pixelSize: 13
                                             color: {
-                                                if(userInfoModel)
-                                                {
-                                                    if(userInfoModel.hardcore)
-                                                        "#ff0000"
-                                                    else
-                                                        "#00ff00"
-                                                }
-                                                else "#000000"
+                                                if(UserInfoModel.hardcore)
+                                                    "#ff0000";
+                                                else
+                                                    "#00ff00";
                                             }
                                         }
                                     }
                                 }
                             }
                         }
-                        Text {
+                        RowLayout {
                             Layout.topMargin: 8
                             Layout.leftMargin: 20
                             Layout.rightMargin: 20
                             Layout.bottomMargin: 0
                             Layout.fillWidth: true
-                            color: "#2c97fa"
-                            font.bold: true
-                            font.family: "Verdana"
-                            font.pixelSize: 13
-                            text: qsTr("Currently Playing")
+                            Text {
+                                color: "#2c97fa"
+                                font.bold: true
+                                font.family: "Verdana"
+                                font.pixelSize: 13
+                                text: qsTr("Currently Playing")
+                            }
                         }
                         Rectangle {
                             color: "#161616"
@@ -751,31 +720,31 @@ ApplicationWindow {
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.rightMargin: 16
                                 color: {
-                                    if(gameInfoModel)
-                                    {
-                                        if(gameInfoModel.mastered)
-                                            "#eab308"
-                                        else if(gameInfoModel.beaten)
-                                            "#d4d4d4"
-                                        else "#161616"
-                                    }
-                                    else "#161616"
+                                    if(GameInfoModel.mastered)
+                                        "#eab308";
+                                    else if(GameInfoModel.beaten)
+                                        "#d4d4d4";
+                                    else "#161616";
                                 }
                                 radius: 50
                                 width: 36
                                 height: 36
                                 border.width: 2
                                 border.color: {
-                                    if(gameInfoModel)
-                                    {
-                                        if(gameInfoModel.mastered)
-                                            "#ffd700"
-                                        else
-                                            "#52525b"
-                                    }
-                                    else "#000000"
+                                    if(GameInfoModel.mastered)
+                                        "#ffd700";
+                                    else
+                                        "#52525b";
                                 }
                                 visible: false
+                            }
+
+                            Rectangle {
+                                id: gameHashRect
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.rightMargin: 32
+
                             }
 
                             Row {
@@ -786,11 +755,7 @@ ApplicationWindow {
                                 anchors.bottomMargin: 8
                                 anchors.fill: parent
                                 Image {
-                                    source: {
-                                        if(gameInfoModel)
-                                            gameInfoModel.image_icon_url
-                                        else ""
-                                    }
+                                    source: GameInfoModel.image_icon_url
                                     width: 36
                                     height: 36
                                 }
@@ -799,11 +764,7 @@ ApplicationWindow {
                                     spacing: 4
                                     Text {
                                         id: game
-                                        text: {
-                                            if(userInfoModel)
-                                                gameInfoModel.title
-                                            else ""
-                                        }
+                                        text: GameInfoModel.title
                                         color: "#cc9900"
                                         font.family: "Verdana"
                                         font.pixelSize: 13
@@ -816,6 +777,11 @@ ApplicationWindow {
                                             }
                                             onEntered: game.state = "hovered"
                                             onExited: game.state = ""
+
+                                            ToolTip {
+                                                visible: mouseAreaGame.containsMouse
+                                                text: GameInfoModel.md5hash
+                                            }
                                         }
 
                                         states: [
@@ -853,11 +819,7 @@ ApplicationWindow {
                                         Layout.fillWidth: true
                                         spacing: 4
                                         Image {
-                                            source: {
-                                                if(gameInfoModel)
-                                                    gameInfoModel.console_icon
-                                                else ""
-                                            }
+                                            source: GameInfoModel.console_icon
                                             width: 18
                                             height: 18
                                             MouseArea {
@@ -865,7 +827,7 @@ ApplicationWindow {
                                                 anchors.fill: parent
                                                 hoverEnabled: true
                                                 onClicked: {
-                                                    Qt.openUrlExternally(gameInfoModel.game_link)
+                                                    Qt.openUrlExternally(GameInfoModel.game_link)
                                                 }
                                                 onEntered: game.state = "hovered"
                                                 onExited: game.state = ""
@@ -903,11 +865,7 @@ ApplicationWindow {
                                             ]
                                         }
                                         Text {
-                                            text: {
-                                                if(gameInfoModel)
-                                                    gameInfoModel.console
-                                                else ""
-                                            }
+                                            text: GameInfoModel.console
                                             font.family: "Verdana"
                                             font.pixelSize: 13
                                             color: "#2c97fa"
@@ -945,39 +903,27 @@ ApplicationWindow {
                                 anchors.fill: parent
                                 Text {
                                     text: {
-                                        if(gameInfoModel)
-                                        {
-                                            if(gameInfoModel.mastered)
-                                                qsTr("Mastered")
-                                            else if(gameInfoModel.beaten)
-                                                qsTr("Beaten")
-                                            else qsTr("Unfinished")
-                                        }
-                                        else ""
+                                        if(GameInfoModel.mastered)
+                                            qsTr("Mastered");
+                                        else if(GameInfoModel.beaten)
+                                            qsTr("Beaten");
+                                        else qsTr("Unfinished");
                                     }
                                     font.family: "Verdana"
                                     font.pixelSize: 18
                                     color: {
-                                        if(gameInfoModel)
-                                        {
-                                           if(gameInfoModel.mastered)
-                                               "#ffd700"
-                                           else if(gameInfoModel.beaten)
-                                               "#d4d4d4"
-                                           else "#4b4b4b"
-                                        }
-                                        else "black"
+                                       if(GameInfoModel.mastered)
+                                           "#ffd700";
+                                       else if(GameInfoModel.beaten)
+                                           "#d4d4d4";
+                                       else "#4b4b4b";
                                     }
                                 }
                                 Column {
                                     spacing: 6
                                     Row {
                                         Text {
-                                            text: {
-                                                if(gameInfoModel)
-                                                    gameInfoModel.completion_count
-                                                else ""
-                                            }
+                                            text: GameInfoModel.completion_count
                                             font.bold: true
                                             font.family: "Verdana"
                                             font.pixelSize: 13
@@ -990,11 +936,7 @@ ApplicationWindow {
                                             color: "#2c97fa"
                                         }
                                         Text {
-                                            text: {
-                                                if(gameInfoModel)
-                                                    gameInfoModel.achievement_count;
-                                                else ""
-                                            }
+                                            text: GameInfoModel.achievement_count;
                                             font.family: "Verdana"
                                             font.pixelSize: 13
                                             color: "#2c97fa"
@@ -1008,13 +950,7 @@ ApplicationWindow {
                                     }
                                     Row {
                                         Text {
-                                            text: {
-                                                if(gameInfoModel)
-                                                {
-                                                    gameInfoModel.point_count
-                                                }
-                                                else ""
-                                            }
+                                            text: GameInfoModel.point_count
                                             font.bold: true
                                             font.family: "Verdana"
                                             font.pixelSize: 13
@@ -1027,13 +963,7 @@ ApplicationWindow {
                                             color: "#2c97fa"
                                         }
                                         Text {
-                                            text: {
-                                                if(gameInfoModel)
-                                                {
-                                                    gameInfoModel.point_total
-                                                }
-                                                else ""
-                                            }
+                                            text: GameInfoModel.point_total
                                             font.family: "Verdana"
                                             font.pixelSize: 13
                                             color: "#2c97fa"
@@ -1054,14 +984,10 @@ ApplicationWindow {
                                 width: parent.width
                                 height: 8
                                 value: {
-                                    if (gameInfoModel) {
-                                        let val = (gameInfoModel.completion_count / gameInfoModel.achievement_count);
-                                        if(val >= 0)
-                                            return Math.min(Math.max(val, 0), 1);
-                                        else return 0;
-                                    } else {
-                                        return 0;
-                                    }
+                                    let val = (GameInfoModel.completion_count / GameInfoModel.achievement_count);
+                                    if(val >= 0)
+                                        return Math.min(Math.max(val, 0), 1);
+                                    else return 0;
                                 }
                                 Item {
                                     width: progressBar.width
@@ -1110,7 +1036,7 @@ ApplicationWindow {
                         }
 
                         Connections {
-                            target: ra2snes
+                            target: Ra2snes
                             function onSwitchingMode() {
                                 achievementHeaderLoader.active = false;
                                 listViewLoader.active = false;
@@ -1124,7 +1050,7 @@ ApplicationWindow {
                         }
 
                         Connections {
-                            target: ra2snes
+                            target: Ra2snes
                             function onAchievementModelReady() {
                                 sortedAchievementModel.clearMissableFilter();
                                 sortedAchievementModel.clearUnlockedFilter();
@@ -1132,7 +1058,7 @@ ApplicationWindow {
                                 achievementHeaderLoader.active = true;
                                 listViewLoader.active = true;
                                 completionHeader.visible = true;
-                                let val =(gameInfoModel.completion_count / gameInfoModel.achievement_count);
+                                let val =(GameInfoModel.completion_count / GameInfoModel.achievement_count);
                                 if(val >= 0)
                                     progressBar.value = Math.min(Math.max(val, 0), 1);
                                 else progressBar.value = 0;
@@ -1145,7 +1071,7 @@ ApplicationWindow {
                         }
 
                         Connections {
-                            target: ra2snes
+                            target: Ra2snes
                             function onClearedAchievements() {
                                 achievementHeaderLoader.active = false;
                                 listViewLoader.active = false;
@@ -1172,11 +1098,7 @@ ApplicationWindow {
                                         Layout.fillWidth: true
                                     }
                                     Text {
-                                        text: {
-                                            if(gameInfoModel)
-                                                gameInfoModel.achievement_count;
-                                            else ""
-                                        }
+                                        text: GameInfoModel.achievement_count;
                                         font.family: "Verdana"
                                         font.pixelSize: 13
                                         color: "#2c97fa"
@@ -1191,11 +1113,7 @@ ApplicationWindow {
                                         Layout.fillWidth: true
                                     }
                                     Text {
-                                        text: {
-                                            if(gameInfoModel)
-                                                gameInfoModel.point_total
-                                            else ""
-                                        }
+                                        text: GameInfoModel.point_total
                                         font.family: "Verdana"
                                         font.pixelSize: 13
                                         color: "#2c97fa"
@@ -1235,11 +1153,7 @@ ApplicationWindow {
                                             Layout.fillWidth: true
                                         }
                                         Text {
-                                            text: {
-                                                if(gameInfoModel)
-                                                    gameInfoModel.missable_count
-                                                else "0"
-                                            }
+                                            text: GameInfoModel.missable_count
                                             font.family: "Verdana"
                                             font.pixelSize: 13
                                             color: "#2c97fa"
@@ -2182,7 +2096,7 @@ ApplicationWindow {
                             }
                         }
                         Item {
-                            height: 10
+                            implicitHeight: 10
                         }
                     }
                 }
@@ -2193,10 +2107,10 @@ ApplicationWindow {
            }
     }
     onClosing: {
-        ra2snes.saveWindowSize(windowWidth, windowHeight);
+        Ra2snes.saveWindowSize(windowWidth, windowHeight);
         sortedAchievementModel.destroy();
-        delete userInfoModel;
-        delete gameInfoModel;
+        delete UserInfoModel;
+        delete GameInfoModel;
     }
 }
 //Pumpkin

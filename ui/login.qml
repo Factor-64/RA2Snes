@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls.Material 2.15
 import QtQuick.Layouts 1.15
+import CustomModels 1.0
 
 ApplicationWindow {
     id: window
@@ -20,7 +21,7 @@ ApplicationWindow {
     property string loginFailed: ""
 
     function signIn(username, password, remember) {
-        ra2snes.signIn(username, password, remember);
+        Ra2snes.signIn(username, password, remember);
     }
 
     function showErrorMessage(error) {
@@ -62,11 +63,8 @@ ApplicationWindow {
                     }
                     Image {
                         source: {
-                            if(ra2snes)
-                            {
-                                if(ra2snes.console === "SNES")
-                                    "./images/Super_Famicom_logo.png"
-                            }
+                            if(Ra2snes.console === "SNES")
+                                "./images/Super_Famicom_logo.png"
                             else ""
                         }
                         width: 48
@@ -287,7 +285,7 @@ ApplicationWindow {
         }
     }
     Connections {
-        target: ra2snes
+        target: Ra2snes
         function onLoginFailed(error) {
             window.showErrorMessage(error);
         }
