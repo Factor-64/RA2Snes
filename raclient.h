@@ -64,7 +64,6 @@ public:
     void handleNetworkReply(QNetworkReply *reply);
     bool isGameBeaten();
     bool isGameMastered();
-    void freeModelMemory();
     void clearAchievements();
     void clearGame();
     void clearUser();

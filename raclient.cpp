@@ -181,13 +181,6 @@ void RAClient::clearQueue()
     queue.clear();
 }
 
-void RAClient::freeModelMemory()
-{
-    delete userinfo_model;
-    delete gameinfo_model;
-    delete achievement_model;
-}
-
 void RAClient::setWidthHeight(int w, int h)
 {
     userinfo_model->height(h);

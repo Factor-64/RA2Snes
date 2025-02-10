@@ -34,7 +34,6 @@ ApplicationWindow {
     property string modeFailed: ""
     property bool disableChange: false
     property bool setupFinished: false
-    property string appDir: Qt.application.arguments[0].substring(0, Qt.application.arguments[0].lastIndexOf("/"))
 
     onWidthChanged: windowWidth = width
     onHeightChanged: windowHeight = height
@@ -62,7 +61,7 @@ ApplicationWindow {
         FolderListModel {
             id: folderModelMastered
             nameFilters: ["*.mp3", "*.wav", "*.ogg", "*.flac"]
-            folder: "file:///" + appDirPath + "/fanfares/mastered"
+            folder: "file:///" + Ra2snes.appDirPath + "/fanfares/mastered"
         }
 
         function playMasteredSound()
@@ -104,7 +103,7 @@ ApplicationWindow {
         FolderListModel {
             id: folderModelBeaten
             nameFilters: ["*.mp3", "*.wav", "*.ogg", "*.flac"]
-            folder: "file:///" + appDirPath + "/fanfares/beaten"
+            folder: "file:///" + Ra2snes.appDirPath + "/fanfares/beaten"
         }
 
         function playBeatenSound()
@@ -163,7 +162,7 @@ ApplicationWindow {
         FolderListModel {
             id: folderModel
             nameFilters: ["*.mp3", "*.wav", "*.ogg", "*.flac"]
-            folder: "file:///" + appDirPath + "/sounds"
+            folder: "file:///" + Ra2snes.appDirPath + "/sounds"
         }
 
         function playRandomSound()
@@ -2108,9 +2107,6 @@ ApplicationWindow {
     }
     onClosing: {
         Ra2snes.saveWindowSize(windowWidth, windowHeight);
-        sortedAchievementModel.destroy();
-        delete UserInfoModel;
-        delete GameInfoModel;
     }
 }
 //Pumpkin

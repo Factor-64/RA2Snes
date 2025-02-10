@@ -1,5 +1,5 @@
 #include "ra2snes.h"
-//#include <QDebug>
+#include <QDebug>
 
 ra2snes::ra2snes(QObject *parent)
     : QObject(parent)
@@ -21,6 +21,8 @@ ra2snes::ra2snes(QObject *parent)
     raclient->setHardcore(true);
     raclient->setAutoHardcore(false);
     saveWindowSize(600, 600);
+
+    loadSettings();
 
     connect(usb2snes, &Usb2Snes::connected, this, [=]() {
         usb2snes->setAppName("ra2snes");
@@ -121,7 +123,7 @@ ra2snes::ra2snes(QObject *parent)
 
     connect(reader, &MemoryReader::modifiedAddresses, this, [=] {
         updateAddresses = true;
-        qDebug() << "Time to update";
+        //qDebug() << "Time to update";
     });
 
     //connect(reader, &MemoryReader::leaderboardCompleted, this, [=](unsigned int id, unsigned int score) {
@@ -129,18 +131,11 @@ ra2snes::ra2snes(QObject *parent)
     //    if(!raclient->isQueueRunning())
     //        QThreadPool::globalInstance()->start([=] { raclient->runQueue(); });
     //});
-
-    loadSettings();
 }
 
 ra2snes::~ra2snes()
 {
     createSettingsFile();
-    usb2snes->close();
-    delete usb2snes;
-    raclient->freeModelMemory();
-    delete raclient;
-    delete reader;
 }
 
 void ra2snes::signIn(const QString &username, const QString &password, bool remember)
@@ -438,9 +433,7 @@ void ra2snes::saveWindowSize(int w, int h)
 
 void ra2snes::createSettingsFile()
 {
-    QString appDir = QCoreApplication::applicationDirPath();
-
-    QString settingsFilePath = appDir + QDir::separator() + "settings.ini";
+    QString settingsFilePath = m_appDirPath + QDir::separator() + "settings.ini";
 
     QSettings settings(settingsFilePath, QSettings::IniFormat);
 
@@ -601,4 +594,17 @@ void ra2snes::runAddressesLogic()
         }
     }
     usb2snes->getAddresses(uniqueMemoryAddresses);
+}
+
+void ra2snes::setAppDirPath(const QString &appDirPath)
+{
+    if (m_appDirPath != appDirPath) {
+        m_appDirPath = appDirPath;
+        emit appDirPathChanged();
+    }
+}
+
+QString ra2snes::appDirPath() const
+{
+    return m_appDirPath;
 }
