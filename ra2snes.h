@@ -12,6 +12,7 @@ class ra2snes : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString console READ console WRITE setConsole NOTIFY consoleChanged)
+    Q_PROPERTY(QString appDirPath READ appDirPath WRITE setAppDirPath NOTIFY appDirPathChanged)
 
 public:
     enum Task {
@@ -41,6 +42,8 @@ public:
     QString xorEncryptDecrypt(const QString &token, const QString &key);
     QString console() const;
     void setConsole(const QString &console);
+    QString appDirPath() const;
+    void setAppDirPath(const QString &appDirPath);
 
 public slots:
     void signIn(const QString &username, const QString &password, bool remember);
@@ -60,6 +63,7 @@ signals:
     void displayMessage(QString error, bool iserror);
     void autoModeChanged();
     void consoleChanged();
+    void appDirPathChanged();
 
 private:
     explicit ra2snes(QObject *parent = nullptr);  // Private constructor
@@ -82,6 +86,7 @@ private:
     QDateTime millisecPassed;
     Task doThisTaskNext;
     QList<QPair<int, int>> uniqueMemoryAddresses;
+    QString m_appDirPath;
 
     void createSettingsFile();
     void loadSettings();
