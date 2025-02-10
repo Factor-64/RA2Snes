@@ -15,29 +15,15 @@ int main(int argc, char *argv[])
 
     qmlRegisterType<AchievementSortFilterProxyModel>("CustomModels", 1, 0, "AchievementSortFilterProxyModel");
 
-    // Register singletons
-    qmlRegisterSingletonType<ra2snes>("CustomModels", 1, 0, "Ra2snes",
-                                      [](QQmlEngine*, QJSEngine*) -> QObject* {
-                                          return ra2snes::instance();
-                                      });
+    // Register singletons as non-creatable
+    qmlRegisterSingletonInstance("CustomModels", 1, 0, "Ra2snes", ra2snes::instance());
+    qmlRegisterSingletonInstance("CustomModels", 1, 0, "AchievementModel", AchievementModel::instance());
+    qmlRegisterSingletonInstance("CustomModels", 1, 0, "GameInfoModel", GameInfoModel::instance());
+    qmlRegisterSingletonInstance("CustomModels", 1, 0, "UserInfoModel", UserInfoModel::instance());
 
-    qmlRegisterSingletonType<AchievementModel>("CustomModels", 1, 0, "AchievementModel",
-                                               [](QQmlEngine*, QJSEngine*) -> QObject* {
-                                                   return AchievementModel::instance();
-                                               });
-
-    qmlRegisterSingletonType<GameInfoModel>("CustomModels", 1, 0, "GameInfoModel",
-                                            [](QQmlEngine*, QJSEngine*) -> QObject* {
-                                                return GameInfoModel::instance();
-                                            });
-
-    qmlRegisterSingletonType<UserInfoModel>("CustomModels", 1, 0, "UserInfoModel",
-                                            [](QQmlEngine*, QJSEngine*) -> QObject* {
-                                                return UserInfoModel::instance();
-                                            });
+    ra2snes::instance()->setAppDirPath(QCoreApplication::applicationDirPath());
 
     QQmlApplicationEngine engine;
-    engine.rootContext()->setContextProperty("appDirPath", QCoreApplication::applicationDirPath());
     engine.load(QUrl(QStringLiteral("qrc:/ui/login.qml")));
 
     QObject::connect(ra2snes::instance(), &ra2snes::loginSuccess, &engine, [&engine]() {
@@ -47,7 +33,7 @@ int main(int argc, char *argv[])
         if (!rootObjects.isEmpty()) {
             loginWindow = rootObjects.first();
         }
-        if(loginWindow)
+        if (loginWindow)
             loginWindow->deleteLater();
         engine.load(QUrl(QStringLiteral("qrc:/ui/mainwindow.qml")));
         engine.clearComponentCache();
@@ -60,7 +46,7 @@ int main(int argc, char *argv[])
         if (!rootObjects.isEmpty()) {
             mainWindow = rootObjects.first();
         }
-        if(mainWindow)
+        if (mainWindow)
             mainWindow->deleteLater();
         engine.load(QUrl(QStringLiteral("qrc:/ui/login.qml")));
         engine.clearComponentCache();
