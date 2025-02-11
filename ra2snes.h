@@ -68,8 +68,8 @@ signals:
     void consoleDisconnect();
 
 private:
-    explicit ra2snes(QObject *parent = nullptr);  // Private constructor
-    ~ra2snes();  // Private destructor
+    explicit ra2snes(QObject *parent = nullptr);
+    ~ra2snes();
     ra2snes(const ra2snes&) = delete;
     ra2snes& operator=(const ra2snes&) = delete;
 
@@ -82,7 +82,6 @@ private:
     bool remember_me;
     bool isGB;
     bool reset;
-    bool refreshData;
     QAtomicInt updateAddresses;
     QString m_console;
     unsigned int framesPassed;
