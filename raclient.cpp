@@ -19,6 +19,7 @@ RAClient::RAClient(QObject *parent)
     connect(networkManager, &QNetworkAccessManager::finished, this, &RAClient::handleNetworkReply);
     queue.clear();
     running = false;
+    warning = false;
 }
 
 
@@ -499,9 +500,15 @@ void RAClient::handlePatchResponse(const QJsonObject& jsonObject)
             //info.rarity = data["Rarity"].toInt();
             //info.rarity_hardcore = data["RarityHardcore"].toInt();
             info.title = data["Title"].toString();
+            if(info.title != "Warning: Unknown Emulator")
+                info.unlocked = false;
+            else
+            {
+                warning = true;
+                info.unlocked = true;
+            }
             info.type = data["Type"].toString();
             info.author = data["Author"].toString();
-            info.unlocked = false;
             info.time_unlocked_string = "";
             info.time_unlocked = QDateTime(QDate(1990, 11, 21), QTime(0, 0, 0));
             info.achievement_link = QUrl(baseUrl + "achievement/" + QString::number(info.id));
@@ -517,7 +524,7 @@ void RAClient::handlePatchResponse(const QJsonObject& jsonObject)
     }
     gameinfo_model->missable_count(missables);
     gameinfo_model->point_total(total);
-    gameinfo_model->achievement_count(achievement_model->rowCount());
+    gameinfo_model->achievement_count(achievement_model->rowCount() - warning);
 
     if (userinfo_model->hardcore())
     {
@@ -590,9 +597,9 @@ bool RAClient::isGameBeaten()
 
 bool RAClient::isGameMastered()
 {
-    if(!(achievement_model->rowCount() > 0))
+    if(achievement_model->rowCount() < 0)
         return false;
-    if(gameinfo_model->completion_count() == achievement_model->rowCount())
+    if(gameinfo_model->completion_count() == (achievement_model->rowCount() - warning))
     {
         gameinfo_model->mastered(true);
         return true;
