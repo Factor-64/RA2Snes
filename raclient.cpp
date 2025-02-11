@@ -566,10 +566,6 @@ void RAClient::handleStartSessionResponse(const QJsonObject& jsonObject)
             {
                 achievement_model->setUnlockedState(achievement.id, true, QDateTime::fromSecsSinceEpoch(unlock["When"].toInt()));
                 gameinfo_model->updatePointCount(achievement.points);
-                if(userinfo_model->hardcore())
-                    userinfo_model->updateHardcoreScore(achievement.points);
-                else
-                    userinfo_model->updateSoftcoreScore(achievement.points);
             }
         }
     }
