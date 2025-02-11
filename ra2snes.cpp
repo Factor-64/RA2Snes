@@ -17,7 +17,6 @@ ra2snes::ra2snes(QObject *parent)
     remember_me = false;
     framesPassed = 0;
     updateAddresses = false;
-    refreshData = false;
 
     raclient->setHardcore(true);
     raclient->setAutoHardcore(false);
