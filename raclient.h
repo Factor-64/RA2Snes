@@ -102,6 +102,7 @@ private:
     void handleStartSessionResponse(const QJsonObject& jsonObject);
     QString latestRequest;
     bool running;
+    bool warning;
     QNetworkAccessManager* networkManager;
     UserInfoModel* userinfo_model;
     GameInfoModel* gameinfo_model;
