@@ -36,7 +36,7 @@ The SD2nes firmware may have crashed power cycling the SNES should fix the issue
 
 ### Preemptive Unlocks
 
-Some achievements may activate without the requirement being met. This happens because a memory address is not overwritten before it is checked (SD2Snes only updates RAM addresses if they are written to so some values bleed over since they aren't updated). This case is extremely rare (I know of only 1 achievement that had this happen). 
+Some achievements may activate without the requirement being met. This happens because a memory address is not overwritten before it is checked. All known instances occur due to achievement sets not being built with hardware accuracy in mind.
 
 **When this happens click on the achievement title to go to its page on the RetroAchievements Website and reset that achievement!** (You will have to switch between hardcore<->softcore and back to refresh the achievements)
 
