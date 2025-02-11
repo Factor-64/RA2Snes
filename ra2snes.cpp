@@ -17,6 +17,7 @@ ra2snes::ra2snes(QObject *parent)
     remember_me = false;
     framesPassed = 0;
     updateAddresses = false;
+    refreshData = false;
 
     raclient->setHardcore(true);
     raclient->setAutoHardcore(false);
@@ -36,9 +37,10 @@ ra2snes::ra2snes(QObject *parent)
     connect(usb2snes, &Usb2Snes::disconnected, this, [=]() {
         //qDebug() << "Disconnected, trying to reconnect in 1 sec";
         emit displayMessage("QUsb2Snes Not Connected", true);
+        emit disableModeSwitching();
+        emit consoleDisconnect();
         raclient->clearAchievements();
         raclient->stopQueue();
-        emit switchingMode();
         QTimer::singleShot(1000, this, [=] {
             usb2snes->connect();
         });
@@ -94,6 +96,7 @@ ra2snes::ra2snes(QObject *parent)
     });
     connect(raclient, &RAClient::sessionStarted, this, [=] {
         emit achievementModelReady();
+        emit enableModeSwitching();
         if(!raclient->isQueueRunning())
             raclient->startQueue();
         reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getLeaderboards(), usb2snes->getRamSizeData());
@@ -170,6 +173,7 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
         {
             if(raclient->getAutoHardcore() && !raclient->getHardcore())
                 changeMode();
+            emit disableModeSwitching();
             setCurrentConsole();
             emit displayMessage("Loading... Do Not Turn Off Console!", false);
             doThisTaskNext = None;
@@ -200,11 +204,10 @@ void ra2snes::onUsb2SnesGetConfigDataReceived()
     raclient->setCheats(c);
     raclient->setSaveStates(s);
 
-    if(c || s)
-    {
-        if(raclient->getHardcore())
-            changeMode();
-    }
+    if((c || s) && raclient->getHardcore())
+        changeMode();
+    else if(raclient->getAutoHardcore() && !raclient->getHardcore())
+        changeMode();
     if(doThisTaskNext != GetCurrentGameFile)
         usb2snes->infos();
 }
@@ -318,6 +321,7 @@ void ra2snes::onUsb2SnesStateChanged()
             case Reset:
                 doThisTaskNext = None;
                 gameLoaded = false;
+                emit consoleDisconnect();
                 usb2snes->infos();
                 break;
             case NoChecksNeeded:
@@ -514,11 +518,11 @@ void ra2snes::signOut()
 
 void ra2snes::changeMode()
 {
-    qDebug() << "Changing Mode";
+    emit disableModeSwitching();
+    //qDebug() << "Changing Mode";
     UserInfoModel* user = raclient->getUserInfoModel();
     QString reason = "Hardcore Disabled: ";
     bool needsChange = false;
-    emit switchingMode();
 
     if(user->cheats()) {
         reason += QString("Cheats Enabled");
@@ -537,23 +541,30 @@ void ra2snes::changeMode()
     }
     if(!needsChange)
     {
-        if(raclient->getAutoHardcore())
+        if(user->autohardcore())
+        {
             user->hardcore(true);
+            emit displayMessage("Hardcore Enabled", false);
+        }
         else
             user->hardcore(!user->hardcore());
-        reason = "";
     }
     else
     {
         user->hardcore(false);
+        emit displayMessage(reason, true);
     }
-    emit changeModeFailed(reason);
-    if(gameLoaded && loggedin)
+    if(gameLoaded)
     {
         reset = true;
         raclient->clearAchievements();
         raclient->stopQueue();
         onUsb2SnesStateChanged();
+    }
+    else if(!gameLoaded)
+    {
+        //qDebug() << "Enabling Mode Switching";
+        emit enableModeSwitching();
     }
 }
 
@@ -562,7 +573,6 @@ void ra2snes::autoChange(bool ac)
     raclient->setAutoHardcore(ac);
     if(raclient->getAutoHardcore() && !raclient->getHardcore())
         changeMode();
-    emit autoModeChanged();
 }
 
 QString ra2snes::console() const
@@ -607,4 +617,13 @@ void ra2snes::setAppDirPath(const QString &appDirPath)
 QString ra2snes::appDirPath() const
 {
     return m_appDirPath;
+}
+
+void ra2snes::refreshRAData()
+{
+    reset = true;
+    emit disableModeSwitching();
+    raclient->clearAchievements();
+    raclient->stopQueue();
+    onUsb2SnesStateChanged();
 }

@@ -40,7 +40,7 @@ struct AchievementInfo {
 struct LeaderboardInfo {
     QString title;
     QString description;
-    int format;
+    QString format;
     unsigned int id;
     int lower_is_better;
     QString mem_addr;
