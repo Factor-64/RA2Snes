@@ -85,7 +85,7 @@ signals:
     void continueQueue();
 
 private:
-    RAClient(QObject *parent = nullptr);  // Private constructor
+    RAClient(QObject *parent = nullptr);
     RAClient(const RAClient&) = delete;
     RAClient& operator=(const RAClient&) = delete;
 

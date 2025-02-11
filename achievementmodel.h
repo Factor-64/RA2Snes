@@ -54,7 +54,7 @@ signals:
     void unlockedChanged();
 
 private:
-    AchievementModel(QObject *parent = nullptr);  // Private constructor
+    AchievementModel(QObject *parent = nullptr);
     AchievementModel(const AchievementModel&) = delete;
     AchievementModel& operator=(const AchievementModel&) = delete;
 

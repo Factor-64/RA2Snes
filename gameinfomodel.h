@@ -71,7 +71,7 @@ signals:
     void beatenGame();
 
 private:
-    explicit GameInfoModel(QObject *parent = nullptr);  // Private constructor
+    explicit GameInfoModel(QObject *parent = nullptr);
     GameInfoModel(const GameInfoModel&) = delete;
     GameInfoModel& operator=(const GameInfoModel&) = delete;
 

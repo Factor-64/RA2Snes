@@ -61,7 +61,7 @@ signals:
     void dataChanged();
 
 private:
-    explicit UserInfoModel(QObject *parent = nullptr);  // Private constructor
+    explicit UserInfoModel(QObject *parent = nullptr);
     UserInfoModel(const UserInfoModel&) = delete;
     UserInfoModel& operator=(const UserInfoModel&) = delete;
 
