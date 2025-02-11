@@ -98,11 +98,13 @@ void Usb2Snes::onWebSocketDisconnected()
 QStringList Usb2Snes::getJsonResults(QString json)
 {
     QStringList toret;
-    QJsonDocument   jdoc = QJsonDocument::fromJson(json.toLatin1());
-    if (!jdoc.object()["Results"].toArray().isEmpty())
+    QJsonDocument jdoc = QJsonDocument::fromJson(json.toLatin1());
+    QJsonObject jsonObject = jdoc.object();
+    QJsonArray resultsArray = jsonObject["Results"].toArray();
+
+    if (!resultsArray.isEmpty())
     {
-        QJsonArray jarray = jdoc.object()["Results"].toArray();
-        foreach(QVariant entry, jarray.toVariantList())
+        foreach(const QVariant &entry, resultsArray.toVariantList())
         {
             toret << entry.toString();
         }
