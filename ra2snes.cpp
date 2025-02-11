@@ -556,8 +556,6 @@ void ra2snes::changeMode()
     if(gameLoaded)
     {
         reset = true;
-        raclient->clearAchievements();
-        raclient->stopQueue();
         onUsb2SnesStateChanged();
     }
     else if(!gameLoaded)
@@ -622,7 +620,5 @@ void ra2snes::refreshRAData()
 {
     reset = true;
     emit disableModeSwitching();
-    raclient->clearAchievements();
-    raclient->stopQueue();
     onUsb2SnesStateChanged();
 }

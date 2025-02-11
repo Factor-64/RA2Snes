@@ -1153,6 +1153,7 @@ ApplicationWindow {
                                 completionIcon.visible = true;
                                 changeCheckBox.enabled = true;
                                 mainWindow.setupFinished = true;
+                                achievementlist.visible = true;
                             }
                         }
 
@@ -1163,6 +1164,7 @@ ApplicationWindow {
                                 listViewLoader.active = false;
                                 completionHeader.visible = false;
                                 completionIcon.visible = false;
+                                achievementlist.visible = false;
                             }
                         }
 
@@ -1787,6 +1789,7 @@ ApplicationWindow {
                             interactive: false
                             model: sortedAchievementModel
                             clip: true
+                            visible: false;
                             delegate: Rectangle {
                                 height: {
                                     var h = descriptionText.implicitHeight + 28;
