@@ -482,12 +482,12 @@ void RAClient::handlePatchResponse(const QJsonObject& jsonObject)
     achievement_model->clearAchievements();
 
     QJsonArray achievements_data = patch_data["Achievements"].toArray();
-    for (const auto& achievement : achievements_data)
+    for (int i = 0; i < achievements_data.size(); ++i)
     {
-        AchievementInfo info;
-        QJsonObject data = achievement.toObject();
+        QJsonObject data = achievements_data[i].toObject();
         if (data["Flags"].toInt() == 3)
         {
+            AchievementInfo info;
             info.badge_locked_url = QUrl(data["BadgeLockedURL"].toString());
             info.badge_name = data["BadgeName"].toString();
             info.badge_url = QUrl(data["BadgeURL"].toString());
@@ -522,17 +522,18 @@ void RAClient::handlePatchResponse(const QJsonObject& jsonObject)
     if (userinfo_model->hardcore())
     {
         QJsonArray leaderboards_data = patch_data["Leaderboards"].toArray();
-        for (const auto& leaderboard : leaderboards_data)
+        for (int i = 0; i < leaderboards_data.size(); ++i)
         {
+            QJsonObject data = leaderboards_data[i].toObject();
             LeaderboardInfo info;
-            QJsonObject data = leaderboard.toObject();
             info.description = data["Description"].toString();
-            info.format = data["Format"].isString();
+            info.format = data["Format"].toString();
             info.id = data["id"].toInt();
             info.lower_is_better = data["LowerIsBetter"].toInt();
             info.mem_addr = data["Mem"].toString();
             info.leaderboard_link = QUrl(baseUrl + "leaderboard/" + QString::number(info.id));
         }
+
     }
 
     emit finishedGameSetup();

@@ -90,36 +90,29 @@ void MemoryReader::remapTriggerAddresses()
         while(nextref != nullptr)
         {
             int memoryOffset = 0;
-            for(const auto& pair : uniqueMemoryAddresses)
+            for(auto it = uniqueMemoryAddresses.cbegin(); it != uniqueMemoryAddresses.cend(); ++it)
             {
                 if(modified)
                 {
-                    if(pair.first == addressMap[nextref->address])
+                    if(it->first == addressMap[nextref->address])
                     {
-                        //qDebug() << "Unique Address: " << pair.first;
-                        //qDebug() << "Trigger Address:" << nextref->address;
-                        temp[memoryOffset] = pair.first;
+                        temp[memoryOffset] = it->first;
                         nextref->address = memoryOffset;
-                        //qDebug() << "Memory Offset: " << memoryOffset;
-                        //qDebug() << "New Trigger Address: " << nextref->address;
                         break;
                     }
                 }
                 else
                 {
-                    if(pair.first == nextref->address)
+                    if(it->first == nextref->address)
                     {
-                        //qDebug() << "Unique Address: " << pair.first;
-                        //qDebug() << "Trigger Address:" << nextref->address;
-                        temp[memoryOffset] = pair.first;
+                        temp[memoryOffset] = it->first;
                         nextref->address = memoryOffset;
-                        //qDebug() << "Memory Offset: " << memoryOffset;
-                        //qDebug() << "New Trigger Address: " << nextref->address;
                         break;
                     }
                 }
-                memoryOffset += pair.second;
+                memoryOffset += it->second;
             }
+
             nextref = nextref->next;
         }
     }

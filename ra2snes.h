@@ -51,6 +51,7 @@ public slots:
     void saveWindowSize(int w, int h);
     void changeMode();
     void autoChange(bool ac);
+    void refreshRAData();
 
 signals:
     void loginSuccess();
@@ -58,12 +59,13 @@ signals:
     void changeModeFailed(QString reason);
     void achievementModelReady();
     void signedOut();
-    void switchingMode();
     void clearedAchievements();
     void displayMessage(QString error, bool iserror);
-    void autoModeChanged();
     void consoleChanged();
     void appDirPathChanged();
+    void disableModeSwitching();
+    void enableModeSwitching();
+    void consoleDisconnect();
 
 private:
     explicit ra2snes(QObject *parent = nullptr);  // Private constructor
@@ -80,6 +82,7 @@ private:
     bool remember_me;
     bool isGB;
     bool reset;
+    bool refreshData;
     QAtomicInt updateAddresses;
     QString m_console;
     unsigned int framesPassed;

@@ -32,7 +32,6 @@ ApplicationWindow {
     property int windowWidth: width
     property int windowHeight: height
     property string modeFailed: ""
-    property bool disableChange: false
     property bool setupFinished: false
 
     onWidthChanged: windowWidth = width
@@ -332,6 +331,26 @@ ApplicationWindow {
                                 Row {
                                     spacing: 4
                                     Layout.fillWidth: true
+
+                                    Connections {
+                                        target: Ra2snes
+                                        function onDisableModeSwitching()
+                                        {
+                                            changeCheckBox.enabled = false;
+                                            mouseAreaMode.enabled = false;
+                                        }
+                                    }
+
+                                    Connections {
+                                        target: Ra2snes
+                                        function onEnableModeSwitching()
+                                        {
+                                            changeCheckBox.enabled = true;
+                                            if(!changeCheckBox.checked)
+                                                mouseAreaMode.enabled = true;
+                                        }
+                                    }
+
                                     CheckBox {
                                         id: changeCheckBox
                                         width: 14
@@ -341,7 +360,13 @@ ApplicationWindow {
                                             width: 14
                                             height: 14
                                             radius: 2
-                                            color: changeCheckBox.checked ? "#005cc8" : "#ffffff"
+                                            color: {
+                                                if(changeCheckBox.enabled)
+                                                    autoHardcore.color = "#2c97fa";
+                                                else
+                                                    autoHardcore.color = "#eeeeee";
+                                                changeCheckBox.checked ? "#005cc8" : "#ffffff";
+                                            }
                                             border.color: changeCheckBox.checked ? "#005cc8" : "#4f4f4f"
 
                                             Text {
@@ -354,15 +379,9 @@ ApplicationWindow {
 
                                         onCheckedChanged: {
                                             if(changeCheckBox.checked)
-                                            {
-                                                disableChange = true;
-                                                mouseAreaMode.disableModeChangeButton();
-                                            }
+                                                mouseAreaMode.enabled = false;
                                             else
-                                            {
-                                                disableChange = false;
-                                                mouseAreaMode.enableModeChangeButton();
-                                            }
+                                                mouseAreaMode.enabled = true;
                                             setupFinished = false;
                                             Ra2snes.autoChange(changeCheckBox.checked);
                                         }
@@ -398,10 +417,8 @@ ApplicationWindow {
                                         radius: 2
                                         color: {
                                             if(mouseAreaMode.enabled)
-                                            {
-                                                "#222222"
-                                            }
-                                            else "#888888"
+                                                "#222222";
+                                            else "#888888";
                                         }
                                     }
                                     contentItem: Text {
@@ -433,28 +450,12 @@ ApplicationWindow {
                                         anchors.fill: parent
                                         hoverEnabled: true
                                         onClicked: {
-                                            disableModeChangeButton();
-                                            mainWindow.setupFinished = false;
+                                            mouseAreaMode.enabled = false;
+                                            setupFinished = false;
                                             Ra2snes.changeMode();
-                                        }
-                                        Component.onCompleted: {
-                                            enableModeChangeButton();
                                         }
                                         onEntered: mode_button.state = "hovered"
                                         onExited: mode_button.state = ""
-
-                                        function disableModeChangeButton()
-                                        {
-                                            mouseAreaMode.enabled = false;
-                                        }
-
-                                        function enableModeChangeButton()
-                                        {
-                                            changeCheckBox.enabled = true;
-                                            autoHardcore.color = "#2c97fa";
-                                            if(!disableChange)
-                                                mouseAreaMode.enabled = true;
-                                        }
                                     }
 
                                     states: [
@@ -550,21 +551,11 @@ ApplicationWindow {
                                     function showErrorMessage(error, iserror) {
                                         mainWindow.modeFailed = error;
                                         if(iserror)
-                                        {
                                             errorMessage.color = "#ff0000";
-                                            mouseAreaMode.enableModeChangeButton();
-                                        }
                                         else
                                             errorMessage.color = "#00ff00";
                                         errorMessage.opacity = 1;
                                         fadeOutTimer.restart();
-                                    }
-
-                                    Connections {
-                                        target: Ra2snes
-                                        function onChangeModeFailed(error) {
-                                            errorMessage.showErrorMessage(error, true);
-                                        }
                                     }
 
                                     Connections {
@@ -757,6 +748,47 @@ ApplicationWindow {
                                     source: GameInfoModel.image_icon_url
                                     width: 36
                                     height: 36
+                                    MouseArea {
+                                        id: mouseAreaGameIcon
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        onClicked: {
+                                            Qt.openUrlExternally(GameInfoModel.game_link)
+                                        }
+                                        onEntered: game.state = "hovered"
+                                        onExited: game.state = ""
+                                    }
+
+                                    states: [
+                                        State {
+                                            name: "hovered"
+                                            PropertyChanges {
+                                                target: game
+                                                color: "#c8c8c8"
+                                            }
+                                        }
+                                    ]
+
+                                    transitions: [
+                                        Transition {
+                                            from: ""
+                                            to: "hovered"
+                                            ColorAnimation {
+                                                target: game
+                                                property: "color"
+                                                duration: 200
+                                            }
+                                        },
+                                        Transition {
+                                            from: "hovered"
+                                            to: ""
+                                            ColorAnimation {
+                                                target: game
+                                                property: "color"
+                                                duration: 200
+                                            }
+                                        }
+                                    ]
                                 }
                                 Column {
                                     Layout.fillWidth: true
@@ -821,47 +853,6 @@ ApplicationWindow {
                                             source: GameInfoModel.console_icon
                                             width: 18
                                             height: 18
-                                            MouseArea {
-                                                id: mouseAreaGameIcon
-                                                anchors.fill: parent
-                                                hoverEnabled: true
-                                                onClicked: {
-                                                    Qt.openUrlExternally(GameInfoModel.game_link)
-                                                }
-                                                onEntered: game.state = "hovered"
-                                                onExited: game.state = ""
-                                            }
-
-                                            states: [
-                                                State {
-                                                    name: "hovered"
-                                                    PropertyChanges {
-                                                        target: game
-                                                        color: "#c8c8c8"
-                                                    }
-                                                }
-                                            ]
-
-                                            transitions: [
-                                                Transition {
-                                                    from: ""
-                                                    to: "hovered"
-                                                    ColorAnimation {
-                                                        target: game
-                                                        property: "color"
-                                                        duration: 200
-                                                    }
-                                                },
-                                                Transition {
-                                                    from: "hovered"
-                                                    to: ""
-                                                    ColorAnimation {
-                                                        target: game
-                                                        property: "color"
-                                                        duration: 200
-                                                    }
-                                                }
-                                            ]
                                         }
                                         Text {
                                             text: GameInfoModel.console
@@ -892,6 +883,107 @@ ApplicationWindow {
                             radius: 6
                             visible: false
                             clip: true
+
+                            Rectangle {
+                                id: refreshRectangle
+                                anchors.right: parent.right
+                                anchors.top: parent.top
+                                anchors.topMargin: 4
+                                anchors.rightMargin: 4
+                                width: 30
+                                height: 30
+                                radius: 50
+                                color: "#161616"
+                                z: 2
+
+                                Text {
+                                    z: 3
+                                    id: refreshText
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 20
+                                    font.bold: true
+                                    font.family: "Verdana"
+                                    font.pixelSize: 10
+                                    text: qsTr("Refresh RetroAchievements Data")
+                                    color: "#e5e5e5"
+                                    visible: false
+                                    opacity: 0.0
+
+                                    Behavior on opacity {
+                                        NumberAnimation {
+                                            duration: 250
+                                        }
+                                    }
+
+                                    Behavior on anchors.leftMargin {
+                                        NumberAnimation {
+                                            duration: 250
+                                        }
+                                    }
+                                }
+
+                                Image {
+                                    z: 4
+                                    id: refreshImage
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.rightMargin: 5
+                                    width: 20
+                                    height: 20
+                                    source: "./images/refresh.svg"
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onEntered: refreshRectangle.state = "hovered"
+                                    onExited: refreshRectangle.state = ""
+                                    hoverEnabled: true
+                                    onClicked: {
+                                        Ra2snes.refreshRAData();
+                                    }
+                                }
+
+                                states: [
+                                    State {
+                                        name: "hovered"
+                                        PropertyChanges {
+                                            target: refreshRectangle
+                                            width: refreshText.width + 38
+                                        }
+                                        PropertyChanges {
+                                            target: refreshText
+                                            visible: true
+                                            anchors.leftMargin: 10
+                                            opacity: 1.0
+                                        }
+                                        PropertyChanges {
+                                            target: refreshImage
+                                        }
+                                    }
+                                ]
+
+                                transitions: [
+                                    Transition {
+                                        from: ""
+                                        to: "hovered"
+                                        PropertyAnimation {
+                                            target: refreshRectangle
+                                            property: "width"
+                                            duration: 50
+                                        }
+                                    },
+                                    Transition {
+                                        from: "hovered"
+                                        to: ""
+                                        PropertyAnimation {
+                                            target: refreshRectangle
+                                            property: "width"
+                                            duration: 200
+                                        }
+                                    }
+                                ]
+                            }
 
                             Column {
                                 spacing: 8
@@ -1036,14 +1128,11 @@ ApplicationWindow {
 
                         Connections {
                             target: Ra2snes
-                            function onSwitchingMode() {
+                            function onConsoleDisconnect() {
                                 achievementHeaderLoader.active = false;
                                 listViewLoader.active = false;
                                 completionHeader.visible = false;
                                 completionIcon.visible = false;
-                                mouseAreaMode.disableModeChangeButton();
-                                changeCheckBox.enabled = false;
-                                autoHardcore.color = "#eeeeee";
                                 mainWindow.setupFinished = false;
                             }
                         }
@@ -1062,9 +1151,7 @@ ApplicationWindow {
                                     progressBar.value = Math.min(Math.max(val, 0), 1);
                                 else progressBar.value = 0;
                                 completionIcon.visible = true;
-                                mouseAreaMode.enableModeChangeButton();
                                 changeCheckBox.enabled = true;
-                                autoHardcore.color = "#2c97fa";
                                 mainWindow.setupFinished = true;
                             }
                         }
