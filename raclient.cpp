@@ -453,7 +453,7 @@ void RAClient::handleLoginResponse(const QJsonObject& jsonObject)
     userinfo_model->softcore_score(jsonObject["SoftcoreScore"].toInt());
     userinfo_model->hardcore_score(jsonObject["Score"].toInt());
     userinfo_model->pfp((mediaUrl + "UserPic/" + userinfo_model->username() + ".png"));
-    userinfo_model->link(("https://retroachievement_model->org/user/" + userinfo_model->username()));
+    userinfo_model->link((baseUrl + "user/" + userinfo_model->username()));
     emit loginSuccess();
 }
 

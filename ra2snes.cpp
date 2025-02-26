@@ -17,6 +17,7 @@ ra2snes::ra2snes(QObject *parent)
     remember_me = false;
     framesPassed = 0;
     updateAddresses = false;
+    m_theme = "Dark";
 
     raclient->setHardcore(true);
     raclient->setAutoHardcore(false);
@@ -36,8 +37,7 @@ ra2snes::ra2snes(QObject *parent)
     connect(usb2snes, &Usb2Snes::disconnected, this, [=]() {
         //qDebug() << "Disconnected, trying to reconnect in 1 sec";
         emit displayMessage("QUsb2Snes Not Connected", true);
-        emit disableModeSwitching();
-        emit consoleDisconnect();
+        emit unloadAchievements();
         raclient->clearAchievements();
         raclient->stopQueue();
         QTimer::singleShot(1000, this, [=] {
@@ -320,7 +320,7 @@ void ra2snes::onUsb2SnesStateChanged()
             case Reset:
                 doThisTaskNext = None;
                 gameLoaded = false;
-                emit consoleDisconnect();
+                emit unloadAchievements();
                 usb2snes->infos();
                 break;
             case NoChecksNeeded:
@@ -445,6 +445,7 @@ void ra2snes::createSettingsFile()
     settings.setValue("Width", raclient->getWidth());
     settings.setValue("Height", raclient->getHeight());
     settings.setValue("Auto", raclient->getAutoHardcore());
+    settings.setValue("Theme", m_theme);
 
     if(remember_me)
     {
@@ -480,11 +481,13 @@ void ra2snes::loadSettings() {
         int width = settings.value("Width").toInt();
         int height = settings.value("Height").toInt();
         bool autoh = settings.value("Auto").toBool();
+        QString theme = settings.value("Theme").toString();
 
         raclient->setHardcore(hardcore);
         raclient->setAutoHardcore(autoh);
         raclient->setWidthHeight(width, height);
         setConsole(console_v);
+        setTheme(theme);
 
         if(username != "" && token != "" && time != "")
         {
@@ -614,6 +617,19 @@ void ra2snes::setAppDirPath(const QString &appDirPath)
 QString ra2snes::appDirPath() const
 {
     return m_appDirPath;
+}
+
+void ra2snes::setTheme(const QString &theme)
+{
+    if (m_theme != theme) {
+        m_theme = theme;
+        emit themeChanged();
+    }
+}
+
+QString ra2snes::theme() const
+{
+    return m_theme;
 }
 
 void ra2snes::refreshRAData()
