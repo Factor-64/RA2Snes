@@ -13,6 +13,7 @@ class ra2snes : public QObject
     Q_OBJECT
     Q_PROPERTY(QString console READ console WRITE setConsole NOTIFY consoleChanged)
     Q_PROPERTY(QString appDirPath READ appDirPath WRITE setAppDirPath NOTIFY appDirPathChanged)
+    Q_PROPERTY(QString theme READ theme WRITE setTheme NOTIFY themeChanged)
 
 public:
     enum Task {
@@ -44,6 +45,7 @@ public:
     void setConsole(const QString &console);
     QString appDirPath() const;
     void setAppDirPath(const QString &appDirPath);
+    QString theme() const;
 
 public slots:
     void signIn(const QString &username, const QString &password, bool remember);
@@ -52,6 +54,7 @@ public slots:
     void changeMode();
     void autoChange(bool ac);
     void refreshRAData();
+    void setTheme(const QString &theme);
 
 signals:
     void loginSuccess();
@@ -63,9 +66,10 @@ signals:
     void displayMessage(QString error, bool iserror);
     void consoleChanged();
     void appDirPathChanged();
+    void themeChanged();
     void disableModeSwitching();
     void enableModeSwitching();
-    void consoleDisconnect();
+    void unloadAchievements();
 
 private:
     explicit ra2snes(QObject *parent = nullptr);
@@ -89,6 +93,7 @@ private:
     Task doThisTaskNext;
     QList<QPair<int, int>> uniqueMemoryAddresses;
     QString m_appDirPath;
+    QString m_theme;
 
     void createSettingsFile();
     void loadSettings();

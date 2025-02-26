@@ -23,16 +23,75 @@ ApplicationWindow {
     }
     minimumWidth: 600
     minimumHeight: 600
-    title: "ra2snes - v1.0.1"
-
-    Material.theme: Material.Dark
-    Material.accent: "#eab308"
-    color: "#1a1a1a"
+    title: "ra2snes - v1.1.1"
 
     property int windowWidth: width
     property int windowHeight: height
     property string modeFailed: ""
     property bool setupFinished: false
+
+    signal themesUpdated()
+    property var themes: ["Dark", "Black", "Light"]
+    property var defaultThemes: ["Dark", "Black", "Light"]
+
+    FolderListModel {
+        id: themeModel
+        folder: "file:///" + Ra2snes.appDirPath + "/themes"
+        nameFilters: ["*.qml"]
+    }
+
+    Timer {
+        id: themeListTimer
+        interval: 3000
+        repeat: true
+        running: true
+        onTriggered: {
+            loadThemes();
+        }
+    }
+
+    function loadThemes()
+    {
+        if(themeModel.count > 0)
+        {
+            themeListTimer.stop();
+            for(var i = 0; i < themeModel.count; i++)
+            {
+                var fullString = themeModel.get(i, "fileURL").toString();
+                var start = fullString.lastIndexOf("/") + 1;
+                var end = fullString.lastIndexOf(".");
+                var theme = fullString.substring(start, end)
+                if(mainWindow.themes.indexOf(theme) < 0)
+                {
+                    mainWindow.themes.push(theme);
+                    console.log(themes);
+                }
+            }
+            mainWindow.themesUpdated();
+        }
+    }
+
+    Loader {
+        id: themeLoader
+        onSourceChanged: {
+            if(themeLoader.item === null)
+            {
+                themeLoader.source = ("./themes/Dark.qml");
+                Ra2snes.setTheme("Dark");
+            }
+        }
+    }
+
+    function setupTheme()
+    {
+        if(mainWindow.defaultThemes.indexOf(Ra2snes.theme) < 0)
+            themeLoader.source = ("file:///" + Ra2snes.appDirPath + "/themes/" + Ra2snes.theme + ".qml");
+        else themeLoader.source = ("./themes/" + Ra2snes.theme + ".qml");
+    }
+
+    color: themeLoader.item.backgroundColor
+    Material.theme: themeLoader.item.darkScrollBar ? Material.Dark : Material.Light
+    Material.accent: themeLoader.item.progressBarColor
 
     onWidthChanged: windowWidth = width
     onHeightChanged: windowHeight = height
@@ -60,7 +119,9 @@ ApplicationWindow {
         FolderListModel {
             id: folderModelMastered
             nameFilters: ["*.mp3", "*.wav", "*.ogg", "*.flac"]
-            folder: "file:///" + Ra2snes.appDirPath + "/fanfares/mastered"
+            showDirs: false
+            showFiles: true
+            folder: "file:///" + Ra2snes.appDirPath + "/sounds/mastered"
         }
 
         function playMasteredSound()
@@ -78,7 +139,7 @@ ApplicationWindow {
         Connections {
             target: GameInfoModel
             function onMasteredGame() {
-                if(setupFinished)
+                if(mainWindow.setupFinished)
                     masteredFanfare.playMasteredSound();
             }
         }
@@ -102,7 +163,9 @@ ApplicationWindow {
         FolderListModel {
             id: folderModelBeaten
             nameFilters: ["*.mp3", "*.wav", "*.ogg", "*.flac"]
-            folder: "file:///" + Ra2snes.appDirPath + "/fanfares/beaten"
+            showDirs: false
+            showFiles: true
+            folder: "file:///" + Ra2snes.appDirPath + "/sounds/beaten"
         }
 
         function playBeatenSound()
@@ -120,7 +183,7 @@ ApplicationWindow {
         Connections {
             target: GameInfoModel
             function onBeatenGame() {
-                if(setupFinished)
+                if(mainWindow.setupFinished)
                     beatenFanfare.playBeatenSound();
             }
         }
@@ -138,7 +201,6 @@ ApplicationWindow {
             onMediaStatusChanged: {
                 if (mediaStatus === MediaPlayer.EndOfMedia)
                 {
-                    //console.log("Queue:", unlockSounds.soundQueue);
                     if (unlockSounds.soundQueue.length > 0)
                     {
                         source = "";
@@ -150,10 +212,7 @@ ApplicationWindow {
                 else if(mediaStatus === MediaPlayer.InvalidMedia)
                     source = "";
                 else if(mediaStatus === MediaPlayer.LoadedMedia && source !== "")
-                {
-                    //console.log("Playing:", source)
                     play();
-                }
 
             }
         }
@@ -161,7 +220,9 @@ ApplicationWindow {
         FolderListModel {
             id: folderModel
             nameFilters: ["*.mp3", "*.wav", "*.ogg", "*.flac"]
-            folder: "file:///" + Ra2snes.appDirPath + "/sounds"
+            showDirs: false
+            showFiles: true
+            folder: "file:///" + Ra2snes.appDirPath + "/sounds/unlocked"
         }
 
         function playRandomSound()
@@ -171,19 +232,17 @@ ApplicationWindow {
                 var now = new Date().getTime();
                 var randomIndex = Math.floor(Math.random() * now % folderModel.count);
                 var fileUrl = folderModel.get(randomIndex, "fileURL").toString();
-                //console.log("File:", fileUrl);
                 if (unlockSound.mediaStatus === MediaPlayer.NoMedia)
                     unlockSound.source = fileUrl;
                 else
                     soundQueue.push(fileUrl);
             }
-            return "";
         }
 
         Connections {
             target: AchievementModel
             function onUnlockedChanged() {
-                if(setupFinished)
+                if(mainWindow.setupFinished)
                     unlockSounds.playRandomSound();
             }
         }
@@ -205,7 +264,7 @@ ApplicationWindow {
                 id: mainLoader
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                anchors.margins: 10
+                Layout.margins: 10
                 sourceComponent: mainComponent
                 active: true
             }
@@ -215,9 +274,9 @@ ApplicationWindow {
                 Rectangle {
                     id: contentForm
                     implicitHeight: contentColumn.implicitHeight
-                    color: "#222222"
+                    color: themeLoader.item.mainWindowBackgroundColor
                     border.width: 2
-                    border.color: "#161616"
+                    border.color: themeLoader.item.mainWindowBorderColor
                     radius: 6
                     anchors.margins: 10
                     clip: false
@@ -227,101 +286,124 @@ ApplicationWindow {
                         anchors.fill: parent
                         spacing: 6
                         Rectangle {
-                            color: "#161616"
+                            color: themeLoader.item.mainWindowDarkAccentColor
                             Layout.fillWidth: true
-                            height: 168
-                            Button {
-                                id: logout_button
+                            implicitHeight: 168
+                            Column {
                                 anchors.top: parent.top
                                 anchors.right: parent.right
                                 anchors.topMargin: 10
                                 anchors.rightMargin: 20
-                                text: qsTr("Sign Out")
-                                font.family: "Verdana"
-                                font.pixelSize: 13
-                                background: Rectangle {
-                                    id: buttonBackground
-                                    color: "#222222"
-                                    border.width: 1
-                                    border.color: "#2a2a2a"
-                                    radius: 2
-                                }
-                                contentItem: Text {
-                                    id: buttonText
+                                Button {
+                                    id: logout_button
                                     text: qsTr("Sign Out")
-                                    color: "#ff0000"
                                     font.family: "Verdana"
                                     font.pixelSize: 13
-                                    horizontalAlignment: Text.AlignHCenter
-                                    verticalAlignment: Text.AlignVCenter
-                                }
-                                MouseArea {
-                                    id: mouseAreaLogout
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    onClicked: {
-                                        Ra2snes.saveWindowSize(windowWidth, windowHeight);
-                                        Ra2snes.signOut();
+                                    background: Rectangle {
+                                        id: buttonBackground
+                                        color: themeLoader.item.buttonBackgroundColor
+                                        border.width: 1
+                                        border.color: themeLoader.item.buttonBorderColor
+                                        radius: 2
                                     }
-                                    onEntered: logout_button.state = "hovered"
-                                    onExited: logout_button.state = ""
-                                }
+                                    contentItem: Text {
+                                        id: buttonText
+                                        text: qsTr("Sign Out")
+                                        color: themeLoader.item.signOutTextColor
+                                        font.family: "Verdana"
+                                        font.pixelSize: 13
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+                                    MouseArea {
+                                        id: mouseAreaLogout
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        onClicked: {
+                                            Ra2snes.saveWindowSize(windowWidth, windowHeight);
+                                            Ra2snes.signOut();
+                                        }
+                                        onEntered: logout_button.state = "hovered"
+                                        onExited: logout_button.state = ""
+                                    }
 
-                                states: [
-                                    State {
-                                        name: "hovered"
-                                        PropertyChanges {
-                                            target: buttonBackground
-                                            color: "#333333"
-                                            border.color: "#c8c8c8"
+                                    states: [
+                                        State {
+                                            name: "hovered"
+                                            PropertyChanges {
+                                                buttonBackground.color: themeLoader.item.highlightedButtonBackgroundColor
+                                                buttonBackground.border.color: themeLoader.item.highlightedButtonBorderColor
+                                            }
+                                            PropertyChanges {
+                                                buttonText.color: themeLoader.item.highlightedButtonTextColor
+                                            }
                                         }
-                                        PropertyChanges {
-                                            target: buttonText
-                                            color: "#eeeeee"
-                                        }
-                                    }
-                                ]
+                                    ]
 
-                                transitions: [
-                                    Transition {
-                                        from: ""
-                                        to: "hovered"
-                                        ColorAnimation {
-                                            target: buttonBackground
-                                            property: "color"
-                                            duration: 200
+                                    transitions: [
+                                        Transition {
+                                            from: ""
+                                            to: "hovered"
+                                            ColorAnimation {
+                                                target: buttonBackground
+                                                property: "color"
+                                                duration: 200
+                                            }
+                                            ColorAnimation {
+                                                target: buttonBackground
+                                                property: "border.color"
+                                                duration: 200
+                                            }
+                                            ColorAnimation {
+                                                target: buttonText
+                                                property: "color"
+                                                duration: 200
+                                            }
+                                        },
+                                        Transition {
+                                            from: "hovered"
+                                            to: ""
+                                            ColorAnimation {
+                                                target: buttonBackground
+                                                property: "color"
+                                                duration: 200
+                                            }
+                                            ColorAnimation {
+                                                target: buttonBackground
+                                                property: "border.color"
+                                                duration: 200
+                                            }
+                                            ColorAnimation {
+                                                target: buttonText
+                                                property: "color"
+                                                duration: 200
+                                            }
                                         }
-                                        ColorAnimation {
-                                            target: buttonBackground
-                                            property: "border.color"
-                                            duration: 200
-                                        }
-                                        ColorAnimation {
-                                            target: buttonText
-                                            property: "color"
-                                            duration: 200
-                                        }
-                                    },
-                                    Transition {
-                                        from: "hovered"
-                                        to: ""
-                                        ColorAnimation {
-                                            target: buttonBackground
-                                            property: "color"
-                                            duration: 200
-                                        }
-                                        ColorAnimation {
-                                            target: buttonBackground
-                                            property: "border.color"
-                                            duration: 200
-                                        }
-                                        ColorAnimation {
-                                            target: buttonText
-                                            property: "color"
-                                            duration: 200
+                                    ]
+                                }
+                                ComboBox {
+                                    id: themeSelector
+                                    width: 100
+                                    height: 40
+                                    model: mainWindow.themes
+                                    currentIndex: mainWindow.themes.indexOf(Ra2snes.theme)
+                                    onCurrentIndexChanged: {
+                                        if(currentText !== "")
+                                        {
+                                            var theme = mainWindow.themes[themeSelector.currentIndex];
+                                            Ra2snes.setTheme(theme);
+                                            mainWindow.setupTheme();
                                         }
                                     }
-                                ]
+                                    function updateComboBox() {
+                                        var i = themeSelector.currentIndex;
+                                        themeSelector.model = mainWindow.themes;
+                                        themeSelector.currentIndex = i;
+                                    }
+                                    Component.onCompleted: {
+                                        mainWindow.themesUpdated.connect(updateComboBox);
+                                    }
+                                }
                             }
                             Column {
                                 anchors.bottom: parent.bottom
@@ -362,17 +444,17 @@ ApplicationWindow {
                                             radius: 2
                                             color: {
                                                 if(changeCheckBox.enabled)
-                                                    autoHardcore.color = "#2c97fa";
+                                                    autoHardcore.color = themeLoader.item.basicTextColor;
                                                 else
-                                                    autoHardcore.color = "#eeeeee";
-                                                changeCheckBox.checked ? "#005cc8" : "#ffffff";
+                                                    autoHardcore.color = themeLoader.item.disabledTextColor;
+                                                changeCheckBox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedColor;
                                             }
-                                            border.color: changeCheckBox.checked ? "#005cc8" : "#4f4f4f"
+                                            border.color: changeCheckBox.checked ? themeLoader.item.checkBoxCheckedBorderColor : themeLoader.item.checkBoxCheckedBorderColor
 
                                             Text {
                                                 anchors.centerIn: parent
                                                 text: changeCheckBox.checked ? "\u2713" : ""
-                                                color: "#ffffff"
+                                                color: themeLoader.item.checkBoxCheckColor
                                                 font.pixelSize: 12
                                             }
                                         }
@@ -382,7 +464,7 @@ ApplicationWindow {
                                                 mouseAreaMode.enabled = false;
                                             else
                                                 mouseAreaMode.enabled = true;
-                                            setupFinished = false;
+                                            mainWindow.setupFinished = false;
                                             Ra2snes.autoChange(changeCheckBox.checked);
                                         }
                                         Component.onCompleted: {
@@ -394,7 +476,7 @@ ApplicationWindow {
                                         text: qsTr("Auto Hardcore")
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#2c97fa"
+                                        color: themeLoader.item.basicTextColor
                                         verticalAlignment: Text.AlignVCenter
                                         MouseArea {
                                             anchors.fill: parent
@@ -413,12 +495,12 @@ ApplicationWindow {
                                     background: Rectangle {
                                         id: button_Background
                                         border.width: 1
-                                        border.color: "#2a2a2a"
+                                        border.color: themeLoader.item.buttonBorderColor
                                         radius: 2
                                         color: {
                                             if(mouseAreaMode.enabled)
-                                                "#222222";
-                                            else "#888888";
+                                                themeLoader.item.buttonColor;
+                                            else themeLoader.item.disabledButtonBackgroundColor;
                                         }
                                     }
                                     contentItem: Text {
@@ -427,11 +509,11 @@ ApplicationWindow {
                                             if(mouseAreaMode.enabled)
                                             {
                                                 if(UserInfoModel.hardcore)
-                                                    "#00ff00";
+                                                    themeLoader.item.softcoreTextColor;
                                                 else
-                                                    "#ff0000";
+                                                    themeLoader.item.hardcoreTextColor;
                                             }
-                                            else "#bbbbbb";
+                                            else themeLoader.item.disabledButtonTextColor;
 
                                         }
                                         text: {
@@ -451,7 +533,7 @@ ApplicationWindow {
                                         hoverEnabled: true
                                         onClicked: {
                                             mouseAreaMode.enabled = false;
-                                            setupFinished = false;
+                                            mainWindow.setupFinished = false;
                                             Ra2snes.changeMode();
                                         }
                                         onEntered: mode_button.state = "hovered"
@@ -463,12 +545,12 @@ ApplicationWindow {
                                             name: "hovered"
                                             PropertyChanges {
                                                 target: button_Background
-                                                color: "#333333"
-                                                border.color: "#c8c8c8"
+                                                color: themeLoader.item.highlightedButtonBackgroundColor
+                                                border.color: themeLoader.item.highlightedButtonBorderColor
                                             }
                                             PropertyChanges {
                                                 target: button_Text
-                                                color: "#eeeeee"
+                                                color: themeLoader.item.highlightedButtonTextColor
                                             }
                                         }
                                     ]
@@ -529,7 +611,7 @@ ApplicationWindow {
                                     text: mainWindow.modeFailed
                                     font.family: "Verdana"
                                     font.pixelSize: 13
-                                    color: "#ff0000"
+                                    color: themeLoader.item.errorMessageTextColor
                                     width: parent.width
                                     opacity: 1
                                     Behavior on opacity {
@@ -551,9 +633,9 @@ ApplicationWindow {
                                     function showErrorMessage(error, iserror) {
                                         mainWindow.modeFailed = error;
                                         if(iserror)
-                                            errorMessage.color = "#ff0000";
+                                            errorMessage.color = themeLoader.item.errorMessageTextColor;
                                         else
-                                            errorMessage.color = "#00ff00";
+                                            errorMessage.color = themeLoader.item.nonErrorMessageTextColor;
                                         errorMessage.opacity = 1;
                                         fadeOutTimer.restart();
                                     }
@@ -586,7 +668,7 @@ ApplicationWindow {
                                     Text {
                                         id: user
                                         text: UserInfoModel.username
-                                        color: "#cc9900"
+                                        color: themeLoader.item.linkColor
                                         font.bold: true
                                         font.family: "Verdana"
                                         font.pixelSize: 24
@@ -606,7 +688,7 @@ ApplicationWindow {
                                                 name: "hovered"
                                                 PropertyChanges {
                                                     target: user
-                                                    color: "#c8c8c8"
+                                                    color: themeLoader.item.selectedLink
                                                 }
                                             }
                                         ]
@@ -635,7 +717,7 @@ ApplicationWindow {
                                     Row {
                                         Text {
                                             text: qsTr("Points: ")
-                                            color: "#2c97fa"
+                                            color: themeLoader.item.basicTextColor
                                             font.bold: true
                                             font.family: "Verdana"
                                             font.pixelSize: 13
@@ -649,13 +731,13 @@ ApplicationWindow {
                                             }
                                             font.family: "Verdana"
                                             font.pixelSize: 13
-                                            color: "#2c97fa"
+                                            color: themeLoader.item.basicTextColor
                                         }
                                     }
                                     Row {
                                         Text {
                                             text: qsTr("Mode: ")
-                                            color: "#2c97fa"
+                                            color: themeLoader.item.basicTextColor
                                             font.bold: true
                                             font.family: "Verdana"
                                             font.pixelSize: 13
@@ -671,9 +753,9 @@ ApplicationWindow {
                                             font.pixelSize: 13
                                             color: {
                                                 if(UserInfoModel.hardcore)
-                                                    "#ff0000";
+                                                    themeLoader.item.hardcoreTextColor;
                                                 else
-                                                    "#00ff00";
+                                                    themeLoader.softcoreTextColor;
                                             }
                                         }
                                     }
@@ -687,7 +769,7 @@ ApplicationWindow {
                             Layout.bottomMargin: 0
                             Layout.fillWidth: true
                             Text {
-                                color: "#2c97fa"
+                                color: themeLoader.item.basicTextColor
                                 font.bold: true
                                 font.family: "Verdana"
                                 font.pixelSize: 13
@@ -695,14 +777,14 @@ ApplicationWindow {
                             }
                         }
                         Rectangle {
-                            color: "#161616"
+                            color: themeLoader.item.mainWindowDarkAccentColor
                             Layout.leftMargin: 20
                             Layout.bottomMargin: 10
                             Layout.rightMargin: 20
                             Layout.fillWidth: true
                             height: 52
                             border.width: 2
-                            border.color: "#161616"
+                            border.color: themeLoader.item.mainWindowDarkAccentColor
                             radius: 6
                             Rectangle {
                                 id: completionIcon
@@ -711,10 +793,10 @@ ApplicationWindow {
                                 anchors.rightMargin: 16
                                 color: {
                                     if(GameInfoModel.mastered)
-                                        "#eab308";
+                                        themeLoader.item.statusMasteredIconBackgroundColor;
                                     else if(GameInfoModel.beaten)
-                                        "#d4d4d4";
-                                    else "#161616";
+                                        themeLoader.item.statusBeatenIconBackgroundColor;
+                                    else themeLoader.item.mainWindowDarkAccentColor;
                                 }
                                 radius: 50
                                 width: 36
@@ -722,19 +804,13 @@ ApplicationWindow {
                                 border.width: 2
                                 border.color: {
                                     if(GameInfoModel.mastered)
-                                        "#ffd700";
+                                        themeLoader.item.statusMasteredIconBorderColor;
+                                    else if(GameInfoModel.beaten)
+                                        themeLoader.item.statusBeatenIconBorderColor;
                                     else
-                                        "#52525b";
+                                        themeLoader.item.statusUnfinishedIconBorderColor;
                                 }
                                 visible: false
-                            }
-
-                            Rectangle {
-                                id: gameHashRect
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.rightMargin: 32
-
                             }
 
                             Row {
@@ -764,7 +840,7 @@ ApplicationWindow {
                                             name: "hovered"
                                             PropertyChanges {
                                                 target: game
-                                                color: "#c8c8c8"
+                                                color: themeLoader.item.selectedLink
                                             }
                                         }
                                     ]
@@ -796,7 +872,7 @@ ApplicationWindow {
                                     Text {
                                         id: game
                                         text: GameInfoModel.title
-                                        color: "#cc9900"
+                                        color: themeLoader.item.linkColor
                                         font.family: "Verdana"
                                         font.pixelSize: 13
                                         MouseArea {
@@ -820,7 +896,7 @@ ApplicationWindow {
                                                 name: "hovered"
                                                 PropertyChanges {
                                                     target: game
-                                                    color: "#c8c8c8"
+                                                    color: themeLoader.item.selectedLink
                                                 }
                                             }
                                         ]
@@ -858,7 +934,7 @@ ApplicationWindow {
                                             text: GameInfoModel.console
                                             font.family: "Verdana"
                                             font.pixelSize: 13
-                                            color: "#2c97fa"
+                                            color: themeLoader.item.basicTextColor
                                         }
                                     }
                                 }
@@ -875,11 +951,11 @@ ApplicationWindow {
                         }
                         Rectangle {
                             id: completionHeader
-                            color: "#161616"
+                            color: themeLoader.item.mainWindowDarkAccentColor
                             Layout.fillWidth: true
                             height: 108
                             border.width: 2
-                            border.color: "#161616"
+                            border.color: themeLoader.item.mainWindowDarkAccentColor
                             radius: 6
                             visible: false
                             clip: true
@@ -893,7 +969,7 @@ ApplicationWindow {
                                 width: 30
                                 height: 30
                                 radius: 50
-                                color: "#161616"
+                                color: themeLoader.item.popoutBackgroundColor
                                 z: 2
 
                                 Text {
@@ -906,7 +982,7 @@ ApplicationWindow {
                                     font.family: "Verdana"
                                     font.pixelSize: 10
                                     text: qsTr("Refresh RetroAchievements Data")
-                                    color: "#e5e5e5"
+                                    color: themeLoader.item.popoutTextColor
                                     visible: false
                                     opacity: 0.0
 
@@ -931,7 +1007,12 @@ ApplicationWindow {
                                     anchors.rightMargin: 5
                                     width: 20
                                     height: 20
-                                    source: "./images/refresh.svg"
+                                    source: {
+                                        if(themeLoader.item.darkThemeSVGImages)
+                                            "./images/refresh.svg";
+                                        else
+                                            "./images/refresh-light.svg";
+                                    }
                                 }
 
                                 MouseArea {
@@ -1004,10 +1085,10 @@ ApplicationWindow {
                                     font.pixelSize: 18
                                     color: {
                                        if(GameInfoModel.mastered)
-                                           "#ffd700";
+                                           themeLoader.item.statusMasteredTextColor;
                                        else if(GameInfoModel.beaten)
-                                           "#d4d4d4";
-                                       else "#4b4b4b";
+                                           themeLoader.item.statusBeatenTextColor;
+                                       else themeLoader.item.statusUnfinishedTextColor;
                                     }
                                 }
                                 Column {
@@ -1018,25 +1099,25 @@ ApplicationWindow {
                                             font.bold: true
                                             font.family: "Verdana"
                                             font.pixelSize: 13
-                                            color: "#2c97fa"
+                                            color: themeLoader.item.basicTextColor
                                         }
                                         Text {
                                             text: qsTr(" of ")
                                             font.family: "Verdana"
                                             font.pixelSize: 13
-                                            color: "#2c97fa"
+                                            color: themeLoader.item.basicTextColor
                                         }
                                         Text {
                                             text: GameInfoModel.achievement_count;
                                             font.family: "Verdana"
                                             font.pixelSize: 13
-                                            color: "#2c97fa"
+                                            color: themeLoader.item.basicTextColor
                                         }
                                         Text {
                                             text: qsTr(" achievements")
                                             font.family: "Verdana"
                                             font.pixelSize: 13
-                                            color: "#2c97fa"
+                                            color: themeLoader.item.basicTextColor
                                         }
                                     }
                                     Row {
@@ -1045,25 +1126,25 @@ ApplicationWindow {
                                             font.bold: true
                                             font.family: "Verdana"
                                             font.pixelSize: 13
-                                            color: "#2c97fa"
+                                            color: themeLoader.item.basicTextColor
                                         }
                                         Text {
                                             text: qsTr(" of ")
                                             font.family: "Verdana"
                                             font.pixelSize: 13
-                                            color: "#2c97fa"
+                                            color: themeLoader.item.basicTextColor
                                         }
                                         Text {
                                             text: GameInfoModel.point_total
                                             font.family: "Verdana"
                                             font.pixelSize: 13
-                                            color: "#2c97fa"
+                                            color: themeLoader.item.basicTextColor
                                         }
                                         Text {
                                             text: qsTr(" points")
                                             font.family: "Verdana"
                                             font.pixelSize: 13
-                                            color: "#2c97fa"
+                                            color: themeLoader.item.basicTextColor
                                         }
                                     }
                                 }
@@ -1086,13 +1167,13 @@ ApplicationWindow {
                                     Rectangle {
                                         width: parent.width
                                         height: parent.height / 2
-                                        color: "#2a2a2a"
+                                        color: themeLoader.item.progressBarBackgroundColor
                                     }
                                     Rectangle {
                                         width: parent.width
                                         height: parent.height / 2
                                         radius: 6
-                                        color: "#2a2a2a"
+                                        color: themeLoader.item.progressBarBackgroundColor
                                         anchors.bottom: parent.bottom
                                     }
                                 }
@@ -1102,13 +1183,13 @@ ApplicationWindow {
                                     Rectangle {
                                         width: parent.width
                                         height: parent.height / 2
-                                        color: "#eab308"
+                                        color: themeLoader.item.progressBarColor
                                     }
                                     Rectangle {
                                         width: parent.width
                                         height: parent.height / 2
                                         radius: 6
-                                        color: "#eab308"
+                                        color: themeLoader.item.progressBarColor
                                         anchors.bottom: parent.bottom
                                     }
                                 }
@@ -1128,7 +1209,7 @@ ApplicationWindow {
 
                         Connections {
                             target: Ra2snes
-                            function onConsoleDisconnect() {
+                            function onUnloadAchievements() {
                                 achievementHeaderLoader.active = false;
                                 listViewLoader.active = false;
                                 completionHeader.visible = false;
@@ -1182,14 +1263,14 @@ ApplicationWindow {
                                         text: qsTr("There are ")
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#2c97fa"
+                                        color: themeLoader.item.basicTextColor
                                         Layout.fillWidth: true
                                     }
                                     Text {
                                         text: GameInfoModel.achievement_count;
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#2c97fa"
+                                        color: themeLoader.item.basicTextColor
                                         Layout.fillWidth: true
                                         font.bold: true
                                     }
@@ -1197,14 +1278,14 @@ ApplicationWindow {
                                         text: qsTr(" achievements worth ")
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#2c97fa"
+                                        color: themeLoader.item.basicTextColor
                                         Layout.fillWidth: true
                                     }
                                     Text {
                                         text: GameInfoModel.point_total
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#2c97fa"
+                                        color: themeLoader.item.basicTextColor
                                         Layout.fillWidth: true
                                         font.bold: true
                                     }
@@ -1212,7 +1293,7 @@ ApplicationWindow {
                                         text: qsTr(" points.")
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#2c97fa"
+                                        color: themeLoader.item.basicTextColor
                                         Layout.fillWidth: true
                                     }
                                 }
@@ -1223,13 +1304,17 @@ ApplicationWindow {
                                         width: 20
                                         height: 20
                                         radius: 50
-                                        color: "#161616"
+                                        color: themeLoader.item.mainWindowBackgroundColor
                                         Image {
                                             id: missableImage
                                             anchors.centerIn: parent
                                             width: 14
                                             height: 14
-                                            source: "./images/missable.svg"
+                                            source: {
+                                                if(themeLoader.item.darkThemeSVGImages)
+                                                    "./images/missable.svg";
+                                                else "./images/missable-refresh.svg";
+                                            }
                                         }
                                     }
                                     Row {
@@ -1237,21 +1322,21 @@ ApplicationWindow {
                                             text: qsTr("This set has ")
                                             font.family: "Verdana"
                                             font.pixelSize: 13
-                                            color: "#2c97fa"
+                                            color: themeLoader.item.basicTextColor
                                             Layout.fillWidth: true
                                         }
                                         Text {
                                             text: GameInfoModel.missable_count
                                             font.family: "Verdana"
                                             font.pixelSize: 13
-                                            color: "#2c97fa"
+                                            color: themeLoader.item.basicTextColor
                                             Layout.fillWidth: true
                                         }
                                         Text {
                                             text: qsTr(" missable achievements")
                                             font.family: "Verdana"
                                             font.pixelSize: 13
-                                            color: "#2c97fa"
+                                            color: themeLoader.item.basicTextColor
                                             Layout.fillWidth: true
                                         }
                                     }
@@ -1279,7 +1364,7 @@ ApplicationWindow {
                                         text: qsTr("Sort:")
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#2c97fa"
+                                        color: themeLoader.item.basicTextColor
                                         Layout.fillWidth: true
                                     }
                                     Text{
@@ -1287,7 +1372,7 @@ ApplicationWindow {
                                         text: qsTr("Normal")
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#cc9900"
+                                        color: themeLoader.item.linkColor
                                         Layout.fillWidth: true
                                         MouseArea {
                                             id: mouseAreaNormal
@@ -1305,7 +1390,7 @@ ApplicationWindow {
                                                 name: "hovered"
                                                 PropertyChanges {
                                                     target: normal
-                                                    color: "#c8c8c8"
+                                                    color: themeLoader.item.selectedLink
                                                 }
                                             }
                                         ]
@@ -1335,7 +1420,7 @@ ApplicationWindow {
                                         text: "-"
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#2c97fa"
+                                        color: themeLoader.item.basicTextColor
                                         Layout.fillWidth: true
                                     }
                                     Text{
@@ -1343,7 +1428,7 @@ ApplicationWindow {
                                         text: qsTr("Points")
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#cc9900"
+                                        color: themeLoader.item.linkColor
                                         Layout.fillWidth: true
                                         MouseArea {
                                             id: mouseAreaPoints
@@ -1361,7 +1446,7 @@ ApplicationWindow {
                                                 name: "hovered"
                                                 PropertyChanges {
                                                     target: points
-                                                    color: "#c8c8c8"
+                                                    color: themeLoader.item.selectedLink
                                                 }
                                             }
                                         ]
@@ -1391,7 +1476,7 @@ ApplicationWindow {
                                         text: "-"
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#2c97fa"
+                                        color: themeLoader.item.basicTextColor
                                         Layout.fillWidth: true
                                     }
                                     Text{
@@ -1399,7 +1484,7 @@ ApplicationWindow {
                                         text: qsTr("Title")
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#cc9900"
+                                        color: themeLoader.item.linkColor
                                         Layout.fillWidth: true
                                         MouseArea {
                                             id: mouseAreaTitleSort
@@ -1417,7 +1502,7 @@ ApplicationWindow {
                                                 name: "hovered"
                                                 PropertyChanges {
                                                     target: title
-                                                    color: "#c8c8c8"
+                                                    color: themeLoader.item.selectedLink
                                                 }
                                             }
                                         ]
@@ -1447,7 +1532,7 @@ ApplicationWindow {
                                         text: "-"
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#2c97fa"
+                                        color: themeLoader.item.basicTextColor
                                         Layout.fillWidth: true
                                     }
                                     Text{
@@ -1455,7 +1540,7 @@ ApplicationWindow {
                                         text: qsTr("Type")
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#cc9900"
+                                        color: themeLoader.item.linkColor
                                         Layout.fillWidth: true
                                         MouseArea {
                                             id: mouseAreaType
@@ -1473,7 +1558,7 @@ ApplicationWindow {
                                                 name: "hovered"
                                                 PropertyChanges {
                                                     target: type
-                                                    color: "#c8c8c8"
+                                                    color: themeLoader.item.selectedLink
                                                 }
                                             }
                                         ]
@@ -1503,7 +1588,7 @@ ApplicationWindow {
                                         text: "-"
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#2c97fa"
+                                        color: themeLoader.item.basicTextColor
                                         Layout.fillWidth: true
                                     }
                                     Text{
@@ -1511,7 +1596,7 @@ ApplicationWindow {
                                         text: qsTr("Latest")
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#cc9900"
+                                        color: themeLoader.item.linkColor
                                         Layout.fillWidth: true
                                         MouseArea {
                                             id: mouseAreaTime
@@ -1529,7 +1614,7 @@ ApplicationWindow {
                                                 name: "hovered"
                                                 PropertyChanges {
                                                     target: time
-                                                    color: "#c8c8c8"
+                                                    color: themeLoader.item.selectedLink
                                                 }
                                             }
                                         ]
@@ -1559,7 +1644,7 @@ ApplicationWindow {
                                         text: "-"
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#2c97fa"
+                                        color: themeLoader.item.basicTextColor
                                         Layout.fillWidth: true
                                     }
                                     Text{
@@ -1567,7 +1652,7 @@ ApplicationWindow {
                                         text: qsTr("Primed")
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#cc9900"
+                                        color: themeLoader.item.linkColor
                                         Layout.fillWidth: true
                                         MouseArea {
                                             id: mouseAreaPrime
@@ -1585,7 +1670,7 @@ ApplicationWindow {
                                                 name: "hovered"
                                                 PropertyChanges {
                                                     target: primed
-                                                    color: "#c8c8c8"
+                                                    color: themeLoader.item.selectedLink
                                                 }
                                             }
                                         ]
@@ -1615,7 +1700,7 @@ ApplicationWindow {
                                         text: "-"
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#2c97fa"
+                                        color: themeLoader.item.basicTextColor
                                         Layout.fillWidth: true
                                     }
                                     Text{
@@ -1623,7 +1708,7 @@ ApplicationWindow {
                                         text: qsTr("Progress")
                                         font.family: "Verdana"
                                         font.pixelSize: 13
-                                        color: "#cc9900"
+                                        color: themeLoader.item.linkColor
                                         Layout.fillWidth: true
                                         MouseArea {
                                             id: mouseAreaProgress
@@ -1641,7 +1726,7 @@ ApplicationWindow {
                                                 name: "hovered"
                                                 PropertyChanges {
                                                     target: progress
-                                                    color: "#c8c8c8"
+                                                    color: themeLoader.item.selectedLink
                                                 }
                                             }
                                         ]
@@ -1698,13 +1783,13 @@ ApplicationWindow {
                                                 width: 14
                                                 height: 14
                                                 radius: 2
-                                                color: missableCheckBox.checked ? "#005cc8" : "#ffffff"
-                                                border.color: missableCheckBox.checked ? "#005cc8" : "#4f4f4f"
+                                                color: missableCheckBox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedColor
+                                                border.color: missableCheckBox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedBorderColor
 
                                                 Text {
                                                     anchors.centerIn: parent
                                                     text: missableCheckBox.checked ? "\u2713" : ""
-                                                    color: "#ffffff"
+                                                    color: themeLoader.item.checkBoxUnCheckedColor
                                                     font.pixelSize: 12
                                                 }
                                             }
@@ -1721,7 +1806,7 @@ ApplicationWindow {
                                             text: qsTr("Only show missables")
                                             font.family: "Verdana"
                                             font.pixelSize: 13
-                                            color: "#2c97fa"
+                                            color: themeLoader.item.basicTextColor
                                             verticalAlignment: Text.AlignVCenter
                                             MouseArea {
                                                 anchors.fill: parent
@@ -1744,13 +1829,13 @@ ApplicationWindow {
                                                 width: 14
                                                 height: 14
                                                 radius: 2
-                                                color: hideCheckBox.checked ? "#005cc8" : "#ffffff"
-                                                border.color: hideCheckBox.checked ? "#005cc8" : "#4f4f4f"
+                                                color: hideCheckBox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedColor
+                                                border.color: hideCheckBox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedBorderColor
 
                                                 Text {
                                                     anchors.centerIn: parent
                                                     text: hideCheckBox.checked ? "\u2713" : ""
-                                                    color: "#ffffff"
+                                                    color: themeLoader.item.checkBoxUnCheckedColor
                                                     font.pixelSize: 12
                                                 }
                                             }
@@ -1767,7 +1852,7 @@ ApplicationWindow {
                                             text: qsTr("Hide unlocked achievements")
                                             font.family: "Verdana"
                                             font.pixelSize: 13
-                                            color: "#2c97fa"
+                                            color: themeLoader.item.basicTextColor
                                             verticalAlignment: Text.AlignVCenter
                                             MouseArea {
                                                 anchors.fill: parent
@@ -1809,7 +1894,7 @@ ApplicationWindow {
                                        anchors.rightMargin = 20
                                     }
                                 }
-                                color: index % 2 == 0 ? "#282828" : "#222222"
+                                color: index % 2 == 0 ? themeLoader.item.mainWindowLightAccentColor : themeLoader.item.mainWindowBackgroundColor
                                 opacity: 1
                                 z: 1
 
@@ -1839,7 +1924,7 @@ ApplicationWindow {
                                             Text {
                                                 id: titleText
                                                 text: model.title
-                                                color: "#cc9900"
+                                                color: themeLoader.item.linkColor
                                                 font.family: "Verdana"
                                                 font.pixelSize: 13
                                                 Layout.fillWidth: true
@@ -1860,7 +1945,7 @@ ApplicationWindow {
                                                         name: "hovered"
                                                         PropertyChanges {
                                                             target: titleText
-                                                            color: "#c8c8c8"
+                                                            color: themeLoader.item.selectedLink
                                                         }
                                                     }
                                                 ]
@@ -1890,7 +1975,7 @@ ApplicationWindow {
                                                 text: "(" + model.points + ")"
                                                 font.family: "Verdana"
                                                 font.pixelSize: 13
-                                                color: "#2c97fa"
+                                                color: themeLoader.item.basicTextColor
                                                 Layout.fillWidth: true
                                             }
                                         }
@@ -1899,7 +1984,7 @@ ApplicationWindow {
                                             text: model.description
                                             font.family: "Verdana"
                                             font.pixelSize: 13
-                                            color: "#2c97fa"
+                                            color: themeLoader.item.basicTextColor
                                             Layout.fillWidth: true
                                             wrapMode: Text.WordWrap
                                             Layout.preferredWidth: achievement.width - 120
@@ -1912,7 +1997,7 @@ ApplicationWindow {
                                     anchors.bottomMargin: 10
                                     anchors.leftMargin: badge.width + 20
                                     id: unlockedTime
-                                    color: "#7e7e7e"
+                                    color: themeLoader.item.timeStampColor
                                     text: {
                                         if(model.timeUnlockedString !== "")
                                             "Unlocked " + model.timeUnlockedString
@@ -1934,8 +2019,8 @@ ApplicationWindow {
                                         text: model.value + "/" + model.target + " (" + percent + "%)"
                                         color: {
                                             if(model.value > 0)
-                                                "#eab308"
-                                            else index % 2 == 0 ? "#222222" : "#282828"
+                                                themeLoader.item.progressBarColor
+                                            else index % 2 == 0 ? themeLoader.item.mainWindowBackgroundColor : themeLoader.item.mainWindowLightAccentColor
                                         }
                                         font.pixelSize: 10
                                         font.bold: true
@@ -1952,7 +2037,7 @@ ApplicationWindow {
                                                 radius: 6
                                                 width: parent.width
                                                 height: parent.height
-                                                color: index % 2 == 0 ? "#222222" : "#282828"
+                                                color: index % 2 == 0 ? themeLoader.item.mainWindowBackgroundColor : themeLoader.item.mainWindowLightAccentColor
                                                 anchors.bottom: parent.bottom
                                             }
                                         }
@@ -1962,7 +2047,7 @@ ApplicationWindow {
                                             Rectangle {
                                                 width: parent.width
                                                 height: parent.height
-                                                color: "#eab308"
+                                                color: themeLoader.item.progressBarColor
                                                 radius: 6
                                                 anchors.bottom: parent.bottom
                                             }
@@ -1978,7 +2063,7 @@ ApplicationWindow {
                                     width: 28
                                     height: 28
                                     radius: 50
-                                    color: "#161616"
+                                    color: themeLoader.item.mainWindowBackgroundColor
                                     visible: model.primed
                                     z: 2
 
@@ -1992,7 +2077,7 @@ ApplicationWindow {
                                         font.family: "Verdana"
                                         font.pixelSize: 10
                                         text: "Primed"
-                                        color: "#e5e5e5"
+                                        color: themeLoader.item.popoutTextColor
                                         visible: false
                                         opacity: 0.0
 
@@ -2017,7 +2102,11 @@ ApplicationWindow {
                                         anchors.rightMargin: 5
                                         width: 18
                                         height: 18
-                                        source: "./images/primed"
+                                        source: {
+                                            if(themeLoader.item.darkThemeSVGImages)
+                                                "./images/primed";
+                                            else "./images/primed-light";
+                                        }
                                     }
 
                                     MouseArea {
@@ -2077,7 +2166,7 @@ ApplicationWindow {
                                     width: 28
                                     height: 28
                                     radius: 50
-                                    color: "#161616"
+                                    color: themeLoader.item.mainWindowDarkAccentColor
                                     visible: model.type !== ""
                                     z: 2
 
@@ -2099,7 +2188,7 @@ ApplicationWindow {
                                                 "Progression"
                                             else ""
                                         }
-                                        color: "#e5e5e5"
+                                        color: themeLoader.item.popoutTextColor
                                         visible: false
                                         opacity: 0.0
 
@@ -2126,11 +2215,23 @@ ApplicationWindow {
                                         height: 18
                                         source: {
                                             if(model.type === "win_condition")
-                                                "./images/win_condition.svg"
+                                            {
+                                                if(themeLoader.item.darkThemeSVGImages)
+                                                    "./images/win_condition.svg";
+                                                else "./images/win_condition-light.svg";
+                                            }
                                             else if(model.type === "missable")
-                                                "./images/missable.svg"
+                                            {
+                                                if(themeLoader.item.darkThemeSVGImages)
+                                                    "./images/missable.svg";
+                                                else "./images/missable-light.svg";
+                                            }
                                             else if(model.type === "progression")
-                                                "./images/progression.svg"
+                                            {
+                                                if(themeLoader.item.darkThemeSVGImages)
+                                                    "./images/progression.svg";
+                                                else "./images/progression-light.svg";
+                                            }
                                             else ""
                                         }
                                     }
@@ -2194,6 +2295,11 @@ ApplicationWindow {
         ScrollBar.vertical: ScrollBar {
                policy: ScrollBar.AsNeeded
            }
+    }
+
+    Component.onCompleted: {
+        setupTheme();
+        themeListTimer.start();
     }
     onClosing: {
         Ra2snes.saveWindowSize(windowWidth, windowHeight);

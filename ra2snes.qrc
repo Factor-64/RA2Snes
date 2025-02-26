@@ -11,5 +11,14 @@
         <file>ui/images/Super_Famicom_logo.png</file>
         <file>ui/images/primed.svg</file>
         <file>ui/images/refresh.svg</file>
+        <file>ui/images/logout-light.svg</file>
+        <file>ui/images/missable-light.svg</file>
+        <file>ui/images/primed-light.svg</file>
+        <file>ui/images/progression-light.svg</file>
+        <file>ui/images/refresh-light.svg</file>
+        <file>ui/images/win_condition-light.svg</file>
+        <file>ui/themes/Black.qml</file>
+        <file>ui/themes/Dark.qml</file>
+        <file>ui/themes/Light.qml</file>
     </qresource>
 </RCC>
