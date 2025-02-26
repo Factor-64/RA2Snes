@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls.Material 2.15
 import QtQuick.Layouts 1.15
 import CustomModels 1.0
+import Qt.labs.folderlistmodel
 
 ApplicationWindow {
     id: window
@@ -11,11 +12,65 @@ ApplicationWindow {
     minimumHeight: 600
     visible: true
     title: qsTr("ra2snes - login")
-    Material.theme: Material.Dark
-    Material.accent: "#ffffff"
+    property var themes: ["Dark", "Black", "Light"]
+    property var defaultThemes: ["Dark", "Black", "Light"]
+
+    FolderListModel {
+        id: themeModel
+        folder: "file:///" + Ra2snes.appDirPath + "/themes"
+        nameFilters: ["*.qml"]
+    }
+
+    Timer {
+        id: themeListTimer
+        interval: 3000
+        repeat: true
+        running: true
+        onTriggered: {
+            loadThemes();
+        }
+    }
+
+    function loadThemes()
+    {
+        if(themeModel.count > 0)
+        {
+            themeListTimer.stop();
+            for(var i = 0; i < themeModel.count; i++)
+            {
+                var fullString = themeModel.get(i, "fileURL").toString();
+                var start = fullString.lastIndexOf("/") + 1;
+                var end = fullString.lastIndexOf(".");
+                var theme = fullString.substring(start, end)
+                if(themes.indexOf(theme) < 0)
+                    themes.push(theme);
+            }
+        }
+    }
+
+    Loader {
+        id: themeLoader
+        onSourceChanged: {
+            if(themeLoader.item === null)
+            {
+                themeLoader.source = ("./themes/Dark.qml");
+                Ra2snes.setTheme("Dark");
+            }
+        }
+    }
+
+    function setupTheme()
+    {
+        if(window.defaultThemes.indexOf(Ra2snes.theme) < 0)
+            themeLoader.source = ("file:///" + Ra2snes.appDirPath + "/themes/" + Ra2snes.theme + ".qml");
+        else themeLoader.source = ("./themes/" + Ra2snes.theme + ".qml");
+    }
+
+    Material.theme: themeLoader.item.darkScrollBar ? Material.Dark : Material.Light
+    Material.accent: themeLoader.item.progressBarColor
 
     background: Rectangle {
-        color: "#1a1a1a"
+        color: themeLoader.item.backgroundColor
     }
 
     property string loginFailed: ""
@@ -37,9 +92,9 @@ ApplicationWindow {
             Layout.preferredWidth: 320
             Layout.preferredHeight: 320
             Layout.alignment: Qt.AlignHCenter
-            color: "#222222"
+            color: themeLoader.item.mainWindowBackgroundColor
             border.width: 2
-            border.color: "#161616"
+            border.color: themeLoader.item.mainWindowBorderColor
             radius: 6
             Column {
                 spacing: 20
@@ -76,7 +131,7 @@ ApplicationWindow {
                     text: "Sign in to RetroAchievements"
                     font.family: "Verdana"
                     font.pixelSize: 18
-                    color: "#c8c8c8"
+                    color: themeLoader.item.highlightedButtonBorderColor
                     anchors.horizontalCenter: parent.horizontalCenter
                 }
             }
@@ -91,7 +146,7 @@ ApplicationWindow {
                     text: qsTr("Username")
                     font.family: "Verdana"
                     font.pixelSize: 13
-                    color: "#2c97fa"
+                    color: themeLoader.item.basicTextColor
                 }
 
                 TextField {
@@ -100,11 +155,11 @@ ApplicationWindow {
                     Layout.alignment: Qt.AlignTop
                     font.family: "Verdana"
                     font.pixelSize: 13
-                    color: "#c8c8c8"
+                    color: themeLoader.item.selectedLink
                     background: Rectangle {
-                        color: "#161616"
+                        color: themeLoader.item.mainWindowDarkAccentColor
                         border.width: 1
-                        border.color: username_input.focus ? "#ffffff" : "#4b4b4b"
+                        border.color: username_input.focus ? themeLoader.item.checkBoxCheckColor : themeLoader.item.statusUnfinishedTextColor
                         radius: 4
                     }
                     Layout.bottomMargin: -10
@@ -115,7 +170,7 @@ ApplicationWindow {
                     text: qsTr("Password")
                     font.family: "Verdana"
                     font.pixelSize: 13
-                    color: "#2c97fa"
+                    color: themeLoader.item.basicTextColor
                 }
 
                 TextField {
@@ -124,12 +179,12 @@ ApplicationWindow {
                     Layout.alignment: Qt.AlignTop
                     font.family: "Verdana"
                     font.pixelSize: 13
-                    color: "#c8c8c8"
+                    color: themeLoader.item.selectedLink
                     echoMode: TextInput.Password
                     background: Rectangle {
-                        color: "#161616"
+                        color: themeLoader.item.mainWindowDarkAccentColor
                         border.width: 1
-                        border.color: password_input.focus ? "#ffffff" : "#4b4b4b"
+                        border.color: password_input.focus ? themeLoader.item.checkBoxCheckColor : themeLoader.item.statusUnfinishedTextColor
                         radius: 4
                     }
                     Layout.bottomMargin: -8
@@ -150,8 +205,8 @@ ApplicationWindow {
                             width: 14
                             height: 14
                             radius: 2
-                            color: remember_checkbox.checked ? "#005cc8" : "#ffffff"
-                            border.color: remember_checkbox.checked ? "#005cc8" : "#4f4f4f"
+                            color: remember_checkbox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedColor
+                            border.color: remember_checkbox.checked ? themeLoader.item.checkBoxCheckedBorderColor : themeLoader.item.checkBoxUnCheckedBorderColor
 
                             Text {
                                 anchors.centerIn: parent
@@ -166,7 +221,7 @@ ApplicationWindow {
                         text: qsTr("Remember Me")
                         font.family: "Verdana"
                         font.pixelSize: 13
-                        color: "#2c97fa"
+                        color: themeLoader.item.basicTextColor
                         verticalAlignment: Text.AlignVCenter
                     }
                     Layout.topMargin: 0
@@ -181,15 +236,15 @@ ApplicationWindow {
                     font.pixelSize: 13
                     background: Rectangle {
                         id: buttonBackground
-                        color: "#161616"
+                        color: themeLoader.item.mainWindowDarkAccentColor
                         border.width: 1
-                        border.color: "#2a2a2a"
+                        border.color: themeLoader.item.buttonBorderColor
                         radius: 4
                     }
                     contentItem: Text {
                         id: buttonText
                         text: qsTr("Sign in")
-                        color: "#cc9900"
+                        color: themeLoader.item.linkColor
                         font.family: "Verdana"
                         font.pixelSize: 13
                         horizontalAlignment: Text.AlignHCenter
@@ -214,12 +269,12 @@ ApplicationWindow {
                             name: "hovered"
                             PropertyChanges {
                                 target: buttonBackground
-                                color: "#333333"
-                                border.color: "#c8c8c8"
+                                color: themeLoader.item.highlightedButtonBackgroundColor
+                                border.color: themeLoader.item.highlightedButtonBorderColor
                             }
                             PropertyChanges {
                                 target: buttonText
-                                color: "#eeeeee"
+                                color: themeLoader.item.highlightedButtonTextColor
                             }
                         }
                     ]
@@ -276,7 +331,7 @@ ApplicationWindow {
                         text: window.loginFailed
                         font.family: "Verdana"
                         font.pixelSize: 13
-                        color: "#ff0000"
+                        color: themeLoader.item.errorMessageTextColor
                         width: parent.width
                         horizontalAlignment: Text.AlignHCenter
                     }
@@ -289,5 +344,9 @@ ApplicationWindow {
         function onLoginFailed(error) {
             window.showErrorMessage(error);
         }
+    }
+    Component.onCompleted: {
+        setupTheme();
+        themeListTimer.start();
     }
 }
