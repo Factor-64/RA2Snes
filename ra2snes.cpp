@@ -159,18 +159,14 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
         if (m_currentGame.contains("m3nu.bin") || m_currentGame.contains("menu.bin") || reset)
         {
             reset = false;
-            if(gameLoaded)
-                doThisTaskNext = Reset;
-            else
-            {
-                raclient->setPatched(false);
-                raclient->clearAchievements();
-                emit clearedAchievements();
-                raclient->clearGame();
-                setCurrentConsole();
-                //qDebug() << "Menu";
-                usb2snes->getConfig();
-            }
+            gameLoaded = false;
+            raclient->setPatched(false);
+            raclient->clearAchievements();
+            emit clearedAchievements();
+            raclient->clearGame();
+            setCurrentConsole();
+            //qDebug() << "Menu";
+            usb2snes->getConfig();
         }
         else if (!gameLoaded && loggedin)
         {
@@ -206,7 +202,6 @@ void ra2snes::onUsb2SnesGetConfigDataReceived()
         s = !config.contains("SGBEnableState: false");
     raclient->setCheats(c);
     raclient->setSaveStates(s);
-
     if((c || s) && raclient->getHardcore())
         changeMode();
     else if(raclient->getAutoHardcore() && !raclient->getHardcore())
@@ -236,7 +231,7 @@ void ra2snes::onUsb2SnesGetAddressDataReceived()
     //qDebug() << data;
     if (usb2snes->firmwareVersion() > QVersionNumber(7))
     {
-        if (data != QByteArray::fromHex("00000000"))
+        if((data[0] != '\x00') && (data[1] != '\x00') && (data[3] != '\x00'))
             patched = true;
     }
     else if (data[0] != (char)0x60)
@@ -308,10 +303,12 @@ void ra2snes::onUsb2SnesStateChanged()
         switch(doThisTaskNext)
         {
             case GetConsoleInfo:
+                //qDebug() << "infos";
                 doThisTaskNext = CheckPatched;
                 usb2snes->infos();
                 break;
             case CheckPatched:
+                //qDebug() << "check patch";
                 doThisTaskNext = GetConsoleAddresses;
                 if(raclient->getHardcore())
                     usb2snes->isPatchedROM();
@@ -319,31 +316,37 @@ void ra2snes::onUsb2SnesStateChanged()
                     runAddressesLogic();
                 break;
             case GetConsoleAddresses:
+                //qDebug() << "get addresses";
                 runAddressesLogic();
                 break;
             case Reset:
+                //qDebug() << "reset";
                 doThisTaskNext = None;
-                gameLoaded = false;
                 emit unloadAchievements();
                 usb2snes->infos();
                 break;
             case NoChecksNeeded:
+                //qDebug() << "nothing";
                 doThisTaskNext = NoChecksNeeded;
                 usb2snes->infos();
                 break;
             case GetConsoleConfig:
+                //qDebug() << "console config";
                 doThisTaskNext = GetCurrentGameFile;
                 usb2snes->getConfig();
                 break;
             case GetCurrentGameFile:
+                //qDebug() << "get game";
                 doThisTaskNext = None;
                 usb2snes->getFile(m_currentGame);
                 break;
             case GetRomType:
+                //qDebug() << "get rom type";
                 doThisTaskNext = None;
                 usb2snes->getRomType();
                 break;
             case GetRamSize:
+                //qDebug() << "get ram size";
                 doThisTaskNext = GetConsoleConfig;
                 usb2snes->getRamSize();
                 break;
@@ -562,7 +565,10 @@ void ra2snes::changeMode()
     }
     if(gameLoaded)
     {
-        reset = true;
+        if(user->patched())
+            doThisTaskNext = NoChecksNeeded;
+        else
+            reset = true;
         onUsb2SnesStateChanged();
     }
     else if(!gameLoaded)
