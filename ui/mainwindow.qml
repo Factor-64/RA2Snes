@@ -734,7 +734,7 @@ ApplicationWindow {
                                                 if(UserInfoModel.hardcore)
                                                     themeLoader.item.hardcoreTextColor;
                                                 else
-                                                    themeLoader.softcoreTextColor;
+                                                    themeLoader.item.softcoreTextColor;
                                             }
                                         }
                                     }
