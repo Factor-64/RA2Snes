@@ -20,5 +20,7 @@
         <file>ui/themes/Black.qml</file>
         <file>ui/themes/Dark.qml</file>
         <file>ui/themes/Light.qml</file>
+        <file>ui/themes/Test.qml</file>
+        <file>ui/sounds/sound.wav</file>
     </qresource>
 </RCC>

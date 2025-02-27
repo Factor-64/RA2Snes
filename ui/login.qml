@@ -67,7 +67,7 @@ ApplicationWindow {
     }
 
     Material.theme: themeLoader.item.darkScrollBar ? Material.Dark : Material.Light
-    Material.accent: themeLoader.item.progressBarColor
+    Material.accent: themeLoader.item.accentColor
 
     background: Rectangle {
         color: themeLoader.item.backgroundColor

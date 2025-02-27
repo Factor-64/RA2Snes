@@ -60,6 +60,7 @@ Item {
 	
 	//Misc
 	property color backgroundColor: "#1a1a1a"
+	property color accentColor: "#bbbbbb"
 	property bool darkScrollBar: true
 	
 	property color popoutTextColor: "#e5e5e5"
