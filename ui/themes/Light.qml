@@ -1,12 +1,12 @@
-// Default Black Theme
+// Default Light Theme
 import QtQuick 2.15
 
 Item {
 	//Main Window
-	property color mainWindowBackgroundColor: "#131313"
-	property color mainWindowDarkAccentColor: "#000000"
-	property color mainWindowLightAccentColor: "#1f1f1f"
-	property color mainWindowBorderColor: "#000000"
+	property color mainWindowBackgroundColor: "#222222"
+	property color mainWindowDarkAccentColor: "#161616"
+	property color mainWindowLightAccentColor: "#282828"
+	property color mainWindowBorderColor: "#161616"
 	
 	//Generic Text
 	property color basicTextColor: "#2c97fa"
@@ -59,13 +59,14 @@ Item {
 	property color statusMasteredTextColor: "#ffd700"
 	
 	//Misc
-	property color backgroundColor: "#0a0a0a"
+	property color backgroundColor: "#1a1a1a"
+	property color accentColor: "#f8f8f8"
 	property bool darkScrollBar: true
 	
 	property color popoutTextColor: "#e5e5e5"
-	property color popoutBackgroundColor: "#000000"
+	property color popoutBackgroundColor: "#161616"
 	property bool darkThemeSVGImages: true
 	
 	property color progressBarColor: "#eab308"
-	property color progressBarBackgroundColor: "#1e1e1e"
+	property color progressBarBackgroundColor: "#2a2a2a"
 }

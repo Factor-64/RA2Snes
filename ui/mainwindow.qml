@@ -28,7 +28,7 @@ ApplicationWindow {
     property int windowWidth: width
     property int windowHeight: height
     property string modeFailed: ""
-    property bool setupFinished: false
+    property bool setupFinished: true
 
     signal themesUpdated()
     property var themes: ["Dark", "Black", "Light"]
@@ -62,10 +62,7 @@ ApplicationWindow {
                 var end = fullString.lastIndexOf(".");
                 var theme = fullString.substring(start, end)
                 if(mainWindow.themes.indexOf(theme) < 0)
-                {
                     mainWindow.themes.push(theme);
-                    console.log(themes);
-                }
             }
             mainWindow.themesUpdated();
         }
@@ -79,6 +76,10 @@ ApplicationWindow {
                 themeLoader.source = ("./themes/Dark.qml");
                 Ra2snes.setTheme("Dark");
             }
+            else if(mainWindow.defaultThemes.length === 4)
+            {
+                mainWindow.defaultThemes.pop();
+            }
         }
     }
 
@@ -91,7 +92,7 @@ ApplicationWindow {
 
     color: themeLoader.item.backgroundColor
     Material.theme: themeLoader.item.darkScrollBar ? Material.Dark : Material.Light
-    Material.accent: themeLoader.item.progressBarColor
+    Material.accent: themeLoader.item.accentColor
 
     onWidthChanged: windowWidth = width
     onHeightChanged: windowHeight = height
@@ -102,96 +103,7 @@ ApplicationWindow {
     }
 
     Item {
-        id: masteredFanfare
-
-        MediaPlayer {
-            id: mfanfare
-            source: ""
-            audioOutput: AudioOutput {}
-            onMediaStatusChanged: {
-                if(mediaStatus === MediaPlayer.LoadedMedia)
-                    play();
-                else if(mediaStatus === MediaPlayer.InvalidMedia)
-                    source = "";
-            }
-        }
-
-        FolderListModel {
-            id: folderModelMastered
-            nameFilters: ["*.mp3", "*.wav", "*.ogg", "*.flac"]
-            showDirs: false
-            showFiles: true
-            folder: "file:///" + Ra2snes.appDirPath + "/sounds/mastered"
-        }
-
-        function playMasteredSound()
-        {
-            if (folderModelMastered.count > 0)
-            {
-                var now = new Date().getTime();
-                var randomIndex = Math.floor(Math.random() * now % folderModelMastered.count);
-                var fileUrl = folderModelMastered.get(randomIndex, "fileURL").toString();
-                if (mfanfare.mediaStatus === MediaPlayer.NoMedia)
-                    mfanfare.source = fileUrl;
-            }
-        }
-
-        Connections {
-            target: GameInfoModel
-            function onMasteredGame() {
-                if(mainWindow.setupFinished)
-                    masteredFanfare.playMasteredSound();
-            }
-        }
-    }
-
-    Item {
-        id: beatenFanfare
-
-        MediaPlayer {
-            id: bfanfare
-            source: ""
-            audioOutput: AudioOutput {}
-            onMediaStatusChanged: {
-                if(mediaStatus === MediaPlayer.LoadedMedia)
-                    play();
-                else if(mediaStatus === MediaPlayer.InvalidMedia)
-                    source = "";
-            }
-        }
-
-        FolderListModel {
-            id: folderModelBeaten
-            nameFilters: ["*.mp3", "*.wav", "*.ogg", "*.flac"]
-            showDirs: false
-            showFiles: true
-            folder: "file:///" + Ra2snes.appDirPath + "/sounds/beaten"
-        }
-
-        function playBeatenSound()
-        {
-            if (folderModelBeaten.count > 0)
-            {
-                var now = new Date().getTime();
-                var randomIndex = Math.floor(Math.random() * now % folderModelBeaten.count);
-                var fileUrl = folderModelBeaten.get(randomIndex, "fileURL").toString();
-                if (bfanfare.mediaStatus === MediaPlayer.NoMedia)
-                    bfanfare.source = fileUrl;
-            }
-        }
-
-        Connections {
-            target: GameInfoModel
-            function onBeatenGame() {
-                if(mainWindow.setupFinished)
-                    beatenFanfare.playBeatenSound();
-            }
-        }
-    }
-
-    Item {
         id: unlockSounds
-
         property var soundQueue: []
 
         MediaPlayer {
@@ -218,20 +130,37 @@ ApplicationWindow {
         }
 
         FolderListModel {
-            id: folderModel
+            id: folderModelUnlocked
             nameFilters: ["*.mp3", "*.wav", "*.ogg", "*.flac"]
             showDirs: false
             showFiles: true
             folder: "file:///" + Ra2snes.appDirPath + "/sounds/unlocked"
         }
 
-        function playRandomSound()
+        FolderListModel {
+            id: folderModelBeaten
+            nameFilters: ["*.mp3", "*.wav", "*.ogg", "*.flac"]
+            showDirs: false
+            showFiles: true
+            folder: "file:///" + Ra2snes.appDirPath + "/sounds/beaten"
+        }
+        anchors.fill: parent
+
+        FolderListModel {
+            id: folderModelMastered
+            nameFilters: ["*.mp3", "*.wav", "*.ogg", "*.flac"]
+            showDirs: false
+            showFiles: true
+            folder: "file:///" + Ra2snes.appDirPath + "/sounds/mastered"
+        }
+
+        function playRandomSound(model)
         {
-            if (folderModel.count > 0)
+            if (model.count > 0)
             {
                 var now = new Date().getTime();
-                var randomIndex = Math.floor(Math.random() * now % folderModel.count);
-                var fileUrl = folderModel.get(randomIndex, "fileURL").toString();
+                var randomIndex = Math.floor(Math.random() * now % model.count);
+                var fileUrl = model.get(randomIndex, "fileURL").toString();
                 if (unlockSound.mediaStatus === MediaPlayer.NoMedia)
                     unlockSound.source = fileUrl;
                 else
@@ -243,7 +172,24 @@ ApplicationWindow {
             target: AchievementModel
             function onUnlockedChanged() {
                 if(mainWindow.setupFinished)
-                    unlockSounds.playRandomSound();
+                    unlockSounds.playRandomSound(folderModelUnlocked);
+            }
+        }
+        focus: true
+
+        Connections {
+            target: GameInfoModel
+            function onBeatenGame() {
+                if(mainWindow.setupFinished)
+                    beatenFanfare.playRandomSound(folderModelBeaten);
+            }
+        }
+
+        Connections {
+            target: GameInfoModel
+            function onMasteredGame() {
+                if(mainWindow.setupFinished)
+                    masteredFanfare.playRandomSound(folderModelMastered);
             }
         }
     }
@@ -289,6 +235,7 @@ ApplicationWindow {
                             color: themeLoader.item.mainWindowDarkAccentColor
                             Layout.fillWidth: true
                             implicitHeight: 168
+
                             Column {
                                 anchors.top: parent.top
                                 anchors.right: parent.right
@@ -383,7 +330,7 @@ ApplicationWindow {
                                 }
                                 ComboBox {
                                     id: themeSelector
-                                    width: 100
+                                    width: 105
                                     height: 40
                                     model: mainWindow.themes
                                     currentIndex: mainWindow.themes.indexOf(Ra2snes.theme)
@@ -403,6 +350,38 @@ ApplicationWindow {
                                     Component.onCompleted: {
                                         mainWindow.themesUpdated.connect(updateComboBox);
                                     }
+                                    property var events: []
+                                    function themeSeletorEvents(event) {
+                                        events.push(event.key); var m = 0;
+                                        if (events.length > 10)
+                                            events.shift();
+                                        if (events.length === 10) {
+                                            events.forEach((el, i) => {
+                                                switch (i) {
+                                                    case 0: case 1: if (el === 16777235) { m++; } break;
+                                                    case 2: case 3: if (el === 16777237) { m++; } break;
+                                                    case 4: case 6: if (el === 16777234) { m++; } break;
+                                                    case 5: case 7: if (el === 16777236) { m++; } break;
+                                                    case 8: if (el === 66) { m++; } break;
+                                                    case 9: if (el === 65) { m++; } break;
+                                                }
+                                            });
+                                            if (m === 10) {
+                                                var r = '';
+                                                for(var i = 0; i < 70; i += 2) {
+                                                    r += String.fromCharCode(parseInt(
+                                                    "2e2f7468656d65732f546573742e716d6c2e2f736f756e64732f736f756e642e776176".substr(i, 2),
+                                                    16));
+                                                }
+                                                themeLoader.source = r.substring(0,17);
+                                                if (unlockSound.mediaStatus === MediaPlayer.NoMedia)
+                                                    unlockSound.source = r.substring(17,36);
+                                                else
+                                                    soundQueue.push(r.substring(17,36));
+                                            }
+                                        }
+                                    }
+                                    Keys.onPressed: event => themeSeletorEvents(event)
                                 }
                             }
                             Column {
@@ -1155,6 +1134,7 @@ ApplicationWindow {
                                 anchors.bottom: parent.bottom
                                 width: parent.width
                                 height: 8
+                                z: 1
                                 value: {
                                     let val = (GameInfoModel.completion_count / GameInfoModel.achievement_count);
                                     if(val >= 0)
@@ -1162,6 +1142,7 @@ ApplicationWindow {
                                     else return 0;
                                 }
                                 Item {
+                                    z: 1
                                     width: progressBar.width
                                     height: progressBar.height
                                     Rectangle {
@@ -1171,13 +1152,14 @@ ApplicationWindow {
                                     }
                                     Rectangle {
                                         width: parent.width
-                                        height: parent.height / 2
+                                        height: parent.height
                                         radius: 6
                                         color: themeLoader.item.progressBarBackgroundColor
                                         anchors.bottom: parent.bottom
                                     }
                                 }
                                 Item {
+                                    z: 2
                                     width: progressBar.width * progressBar.value
                                     height: progressBar.height
                                     Rectangle {
@@ -1186,11 +1168,23 @@ ApplicationWindow {
                                         color: themeLoader.item.progressBarColor
                                     }
                                     Rectangle {
+                                        id: roundedBar
                                         width: parent.width
-                                        height: parent.height / 2
+                                        height: parent.height
                                         radius: 6
                                         color: themeLoader.item.progressBarColor
                                         anchors.bottom: parent.bottom
+                                    }
+                                    Rectangle {
+                                        width: 5
+                                        height: {
+                                            if(parent.width < progressBar.width - 5)
+                                                parent.height;
+                                            else progressBar.width - parent.width;
+                                        }
+                                        color: themeLoader.item.progressBarColor
+                                        anchors.left: roundedBar.right
+                                        anchors.leftMargin: -5
                                     }
                                 }
                             }
@@ -1313,7 +1307,7 @@ ApplicationWindow {
                                             source: {
                                                 if(themeLoader.item.darkThemeSVGImages)
                                                     "./images/missable.svg";
-                                                else "./images/missable-refresh.svg";
+                                                else "./images/missable-light.svg";
                                             }
                                         }
                                     }

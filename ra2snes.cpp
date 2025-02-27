@@ -37,9 +37,9 @@ ra2snes::ra2snes(QObject *parent)
     connect(usb2snes, &Usb2Snes::disconnected, this, [=]() {
         //qDebug() << "Disconnected, trying to reconnect in 1 sec";
         emit displayMessage("QUsb2Snes Not Connected", true);
-        emit unloadAchievements();
         raclient->clearAchievements();
-        raclient->stopQueue();
+        emit clearedAchievements();
+        raclient->clearGame();
         QTimer::singleShot(1000, this, [=] {
             usb2snes->connect();
         });
@@ -48,14 +48,18 @@ ra2snes::ra2snes(QObject *parent)
     connect(usb2snes, &Usb2Snes::deviceListDone, this, [=] (QStringList devices) {
         if (!devices.empty())
         {
+            doThisTaskNext = None;
+            reset = true;
             usb2snes->attach(devices.at(0));
             usb2snes->infos(true);
-            reset = true;
             emit displayMessage("Console Connected", false);
         }
         else
         {
             m_currentGame = "";
+            raclient->clearAchievements();
+            emit clearedAchievements();
+            raclient->clearGame();
             emit displayMessage("Console Not Connected", true);
             QTimer::singleShot(1000, this, [=] {
                 if (usb2snes->state() == Usb2Snes::Connected)
