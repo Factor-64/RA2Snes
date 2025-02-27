@@ -22,7 +22,7 @@ Once RA2Snes has been run for the first time, the settings.ini file is created i
 
 ### Currently Unsupported Games
 
-SD2Snes cannot currently read the memory of games with certain [enhancement chips](https://en.wikipedia.org/wiki/List_of_Super_NES_enhancement_chips).
+SD2Snes cannot currently read the memory of Super Game Boy and games with certain [enhancement chips](https://en.wikipedia.org/wiki/List_of_Super_NES_enhancement_chips).
 | Chip | Supported |
 |------|-----------|
 | Base |     Y     | 
@@ -33,8 +33,6 @@ SD2Snes cannot currently read the memory of games with certain [enhancement chip
 | SA1  |     N     |
 | SDD1 |     N     |
 | SGB  |     N     |
-
-SD2Snes cannot currently read the memory of the Super Game Boy.
 
 ---
 
