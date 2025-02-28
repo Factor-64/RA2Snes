@@ -259,21 +259,21 @@ void MemoryReader::checkAchievements()
                 /* raise events for each of the possible new states */
                 switch (new_state)
                 {
-                    case RC_TRIGGER_STATE_TRIGGERED:
-                        //qDebug() << "Achievement Unlocked: " << it.key();
-                        ids.append(it.key());
-                        emit updateAchievementInfo(it.key(), Value, trigger->measured_value);
-                        emit updateAchievementInfo(it.key(), Percent, 100);
-                        emit achievementUnlocked(it.key(), QDateTime::currentDateTime());
-                        decrementAddressCounts(trigger->memrefs);
-                        break;
+                case RC_TRIGGER_STATE_TRIGGERED:
+                    //qDebug() << "Achievement Unlocked: " << it.key();
+                    ids.append(it.key());
+                    emit updateAchievementInfo(it.key(), Value, trigger->measured_value);
+                    emit updateAchievementInfo(it.key(), Percent, 100);
+                    emit achievementUnlocked(it.key(), QDateTime::currentDateTime());
+                    decrementAddressCounts(trigger->memrefs);
+                    break;
 
-                    case RC_TRIGGER_STATE_PRIMED:
-                        emit updateAchievementInfo(it.key(), Primed, true);
-                        break;
+                case RC_TRIGGER_STATE_PRIMED:
+                    emit updateAchievementInfo(it.key(), Primed, true);
+                    break;
 
-                    default:
-                        break;
+                default:
+                    break;
                 }
             }
             for(const auto& id : ids)
