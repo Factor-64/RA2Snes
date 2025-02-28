@@ -479,7 +479,7 @@ void RAClient::handlePatchResponse(const QJsonObject& jsonObject)
     gameinfo_model->achievement_count(0);
     int missables = 0;
     int total = 0;
-
+    warning = false;
     achievement_model->clearAchievements();
 
     QJsonArray achievements_data = patch_data["Achievements"].toArray();
@@ -494,18 +494,21 @@ void RAClient::handlePatchResponse(const QJsonObject& jsonObject)
             info.badge_url = QUrl(data["BadgeURL"].toString());
             info.description = data["Description"].toString();
             info.flags = data["Flags"].toInt();
-            info.id = data["ID"].toInt();
             info.mem_addr = data["MemAddr"].toString();
             info.points = data["Points"].toInt();
             //info.rarity = data["Rarity"].toInt();
             //info.rarity_hardcore = data["RarityHardcore"].toInt();
             info.title = data["Title"].toString();
             if(info.title != "Warning: Unknown Emulator")
+            {
                 info.unlocked = false;
+                info.id = data["ID"].toInt();
+            }
             else
             {
                 warning = true;
                 info.unlocked = true;
+                info.id = 0;
             }
             info.type = data["Type"].toString();
             info.author = data["Author"].toString();
@@ -556,26 +559,27 @@ void RAClient::handleStartSessionResponse(const QJsonObject& jsonObject)
     //qDebug() << jsonObject;
     QJsonArray unlock_data;
     if(userinfo_model->hardcore())
-    {
         unlock_data = jsonObject["HardcoreUnlocks"].toArray();
-    }
     else
         unlock_data = jsonObject["Unlocks"].toArray();
-    gameinfo_model->completion_count(unlock_data.count());
+    int complete = unlock_data.count();
     for (int i = 0; i < unlock_data.size(); ++i)
     {
         QJsonObject unlock = unlock_data[i].toObject();
+        if(unlock["ID"].toInt() == 101000001)
+            complete--;
         for (auto& achievement : achievement_model->getAchievements())
         {
             if(achievement.type == "progression" || achievement.type == "win_condition")
                 progressionMap[achievement.id] = achievement.unlocked;
-            if (unlock["ID"].toInt() == achievement.id)
+            if(unlock["ID"].toInt() == achievement.id)
             {
                 achievement_model->setUnlockedState(achievement.id, true, QDateTime::fromSecsSinceEpoch(unlock["When"].toInt()));
                 gameinfo_model->updatePointCount(achievement.points);
             }
         }
     }
+    gameinfo_model->completion_count(complete);
     isGameBeaten();
     isGameMastered();
     emit sessionStarted();

@@ -52,6 +52,7 @@ Item {
     property bool darkScrollBar: true
     property color popoutTextColor: "#e5e5e5"
     property color popoutBackgroundColor: "#161616"
+    property color popoutBorderColor: "#161616"
     property bool darkThemeSVGImages: true
     property color progressBarColor: "#eab308"
     property color progressBarBackgroundColor: "#2a2a2a"
@@ -110,6 +111,7 @@ Item {
             popoutBackgroundColor = getRandomColor();
             progressBarColor = getRandomColor();
             progressBarBackgroundColor = getRandomColor();
+            popoutBorderColor = getRandomColor();
             darkScrollBar = getRandomBool();
             darkThemeSVGImages = getRandomBool();
         }
@@ -155,6 +157,7 @@ Item {
     Behavior on accentColor { ColorAnimation { duration: ms } }
     Behavior on popoutTextColor { ColorAnimation { duration: ms } }
     Behavior on popoutBackgroundColor { ColorAnimation { duration: ms } }
+    Behavior on popoutBorderColor { ColorAnimation { duration: ms } }
     Behavior on progressBarColor { ColorAnimation { duration: ms } }
     Behavior on progressBarBackgroundColor { ColorAnimation { duration: ms } }
 }

@@ -259,7 +259,7 @@ void ra2snes::onLoginSuccess()
 void ra2snes::onRequestFailed(QJsonObject error)
 {
     QString errorMessage = error["Error"].toString();
-    qDebug() << "Code:" << error["Code"].toString() << "Error:" << errorMessage;
+    //qDebug() << "Code:" << error["Code"].toString() << "Error:" << errorMessage;
     if(error["Code"].toString() == "invalid_credentials")
     {
         if(errorMessage.contains("token"))

@@ -65,6 +65,7 @@ Item {
 	
 	property color popoutTextColor: "#e5e5e5"
 	property color popoutBackgroundColor: "#000000"
+	property color popoutBorderColor: "#000000"
 	property bool darkThemeSVGImages: true
 	
 	property color progressBarColor: "#eab308"
