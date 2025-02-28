@@ -3,10 +3,10 @@ import QtQuick 2.15
 
 Item {
 	//Main Window
-	property color mainWindowBackgroundColor: "#222222"
-	property color mainWindowDarkAccentColor: "#161616"
-	property color mainWindowLightAccentColor: "#282828"
-	property color mainWindowBorderColor: "#161616"
+	property color mainWindowBackgroundColor: "#fefefe"
+	property color mainWindowDarkAccentColor: "#f0f0f0"
+	property color mainWindowLightAccentColor: "#e5e5e5"
+	property color mainWindowBorderColor: "#ececec"
 	
 	//Generic Text
 	property color basicTextColor: "#2c97fa"
@@ -16,7 +16,7 @@ Item {
 	property color timeStampColor: "#7e7e7e"
 	
 	property color linkColor: "#cc9900"
-	property color selectedLink: "#c8c8c8"
+	property color selectedLink: "#000000"
 	
 	property color signOutTextColor: "#ff0000"
 	
@@ -27,15 +27,16 @@ Item {
     property color nonErrorMessageTextColor: "#00ff00"
 	
 	//Buttons
-	property color buttonBackgroundColor: "#222222"
-	property color buttonBorderColor: "#2a2a2a"
-	
-	property color disabledButtonBackgroundColor: "#888888"
-	property color disabledButtonTextColor: "#bbbbbb"
-	
-	property color highlightedButtonBackgroundColor: "#333333"
-	property color highlightedButtonBorderColor: "#c8c8c8"
-	property color highlightedButtonTextColor: "#eeeeee"
+	property color buttonBackgroundColor: "#dddddd"
+    property color buttonBorderColor: "#d6d6d6"
+
+	property color disabledButtonBackgroundColor: "#cccccc"
+	property color disabledButtonTextColor: "#eeeeee"
+
+	property color highlightedButtonBackgroundColor: "#f0f0f0"
+	property color highlightedButtonBorderColor: "#424242"
+	property color highlightedButtonTextColor: "#333333"
+
 	
 	//Checkboxes
 	property color checkBoxCheckedColor: "#005cc8"
@@ -59,14 +60,15 @@ Item {
 	property color statusMasteredTextColor: "#ffd700"
 	
 	//Misc
-	property color backgroundColor: "#1a1a1a"
-	property color accentColor: "#f8f8f8"
-	property bool darkScrollBar: true
+	property color backgroundColor: "#f8f8f8"
+	property color accentColor: "#000000"
+	property bool darkScrollBar: false
 	
-	property color popoutTextColor: "#e5e5e5"
-	property color popoutBackgroundColor: "#161616"
-	property bool darkThemeSVGImages: true
+	property color popoutTextColor: "#737373"
+	property color popoutBackgroundColor: "#fafafa"
+	property color popoutBorderColor: "#d4d4d4"
+	property bool darkThemeSVGImages: false
 	
 	property color progressBarColor: "#eab308"
-	property color progressBarBackgroundColor: "#2a2a2a"
+	property color progressBarBackgroundColor: "#e5e5e5"
 }

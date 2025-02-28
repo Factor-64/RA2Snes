@@ -144,7 +144,6 @@ ApplicationWindow {
             showFiles: true
             folder: "file:///" + Ra2snes.appDirPath + "/sounds/beaten"
         }
-        anchors.fill: parent
 
         FolderListModel {
             id: folderModelMastered
@@ -175,7 +174,6 @@ ApplicationWindow {
                     unlockSounds.playRandomSound(folderModelUnlocked);
             }
         }
-        focus: true
 
         Connections {
             target: GameInfoModel
@@ -478,7 +476,7 @@ ApplicationWindow {
                                         radius: 2
                                         color: {
                                             if(mouseAreaMode.enabled)
-                                                themeLoader.item.buttonColor;
+                                                themeLoader.item.buttonBackgroundColor;
                                             else themeLoader.item.disabledButtonBackgroundColor;
                                         }
                                     }
@@ -945,6 +943,8 @@ ApplicationWindow {
                                 anchors.top: parent.top
                                 anchors.topMargin: 4
                                 anchors.rightMargin: 4
+                                border.width: 1
+                                border.color: themeLoader.item.popoutBorderColor
                                 width: 30
                                 height: 30
                                 radius: 50
@@ -1298,6 +1298,8 @@ ApplicationWindow {
                                         width: 20
                                         height: 20
                                         radius: 50
+                                        border.width: 1
+                                        border.color: themeLoader.item.popoutBorderColor
                                         color: themeLoader.item.mainWindowBackgroundColor
                                         Image {
                                             id: missableImage
@@ -2057,6 +2059,8 @@ ApplicationWindow {
                                     width: 28
                                     height: 28
                                     radius: 50
+                                    border.width: 1
+                                    border.color: themeLoader.item.popoutBorderColor
                                     color: themeLoader.item.mainWindowBackgroundColor
                                     visible: model.primed
                                     z: 2
@@ -2160,6 +2164,8 @@ ApplicationWindow {
                                     width: 28
                                     height: 28
                                     radius: 50
+                                    border.width: 1
+                                    border.color: themeLoader.item.popoutBorderColor
                                     color: themeLoader.item.mainWindowDarkAccentColor
                                     visible: model.type !== ""
                                     z: 2
