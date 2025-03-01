@@ -69,7 +69,6 @@ signals:
     void themeChanged();
     void disableModeSwitching();
     void enableModeSwitching();
-    void unloadAchievements();
 
 private:
     explicit ra2snes(QObject *parent = nullptr);

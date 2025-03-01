@@ -32,7 +32,6 @@ ApplicationWindow {
 
     signal themesUpdated()
     property var themes: ["Dark", "Black", "Light"]
-    property var defaultThemes: ["Dark", "Black", "Light"]
 
     FolderListModel {
         id: themeModel
@@ -61,7 +60,7 @@ ApplicationWindow {
                 var start = fullString.lastIndexOf("/") + 1;
                 var end = fullString.lastIndexOf(".");
                 var theme = fullString.substring(start, end)
-                if(mainWindow.themes.indexOf(theme) < 0)
+                if(mainWindow.themes.indexOf(theme) < 0 && theme !== "" && theme.substring(0,5) !== "file:")
                     mainWindow.themes.push(theme);
             }
             mainWindow.themesUpdated();
@@ -76,16 +75,13 @@ ApplicationWindow {
                 themeLoader.source = ("./themes/Dark.qml");
                 Ra2snes.setTheme("Dark");
             }
-            else if(mainWindow.defaultThemes.length === 4)
-            {
-                mainWindow.defaultThemes.pop();
-            }
         }
     }
 
     function setupTheme()
     {
-        if(mainWindow.defaultThemes.indexOf(Ra2snes.theme) < 0)
+        var defaultThemes = mainWindow.themes.slice(0, 3);
+        if(defaultThemes.indexOf(Ra2snes.theme) < 0)
             themeLoader.source = ("file:///" + Ra2snes.appDirPath + "/themes/" + Ra2snes.theme + ".qml");
         else themeLoader.source = ("./themes/" + Ra2snes.theme + ".qml");
     }
@@ -1182,15 +1178,14 @@ ApplicationWindow {
                                     }
                                     Rectangle {
                                         width: {
-                                            if(roundedBar.width) 4;
+                                            if(roundedBar.width) 5;
                                             else 0;
                                         }
                                         height: {
-                                            if(roundedBar.width < (parent.width - 4))
+                                            if(roundedBar.width < (progressBar.width - 3))
                                                 parent.height;
                                             else roundedBar.width - parent.width
                                         }
-
                                         anchors.left: roundedBar.right
                                         anchors.leftMargin: -4
                                         color: themeLoader.item.progressBarColor
@@ -1209,17 +1204,6 @@ ApplicationWindow {
                             Layout.topMargin: 10
                             sourceComponent: listViewComponent
                             active: false
-                        }
-
-                        Connections {
-                            target: Ra2snes
-                            function onUnloadAchievements() {
-                                achievementHeaderLoader.active = false;
-                                listViewLoader.active = false;
-                                completionHeader.visible = false;
-                                completionIcon.visible = false;
-                                mainWindow.setupFinished = false;
-                            }
                         }
 
                         Connections {
@@ -1250,6 +1234,7 @@ ApplicationWindow {
                                 completionHeader.visible = false;
                                 completionIcon.visible = false;
                                 achievementlist.visible = false;
+                                mainWindow.setupFinished = false;
                             }
                         }
 

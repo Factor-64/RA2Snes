@@ -322,7 +322,6 @@ void ra2snes::onUsb2SnesStateChanged()
             case Reset:
                 //qDebug() << "reset";
                 doThisTaskNext = None;
-                emit unloadAchievements();
                 usb2snes->infos();
                 break;
             case NoChecksNeeded:
