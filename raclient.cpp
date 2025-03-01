@@ -566,18 +566,20 @@ void RAClient::handleStartSessionResponse(const QJsonObject& jsonObject)
     for (int i = 0; i < unlock_data.size(); ++i)
     {
         QJsonObject unlock = unlock_data[i].toObject();
-        if(unlock["ID"].toInt() == 101000001)
-            complete--;
-        for (auto& achievement : achievement_model->getAchievements())
+        if(unlock["ID"].toInt() != 101000001)
         {
-            if(achievement.type == "progression" || achievement.type == "win_condition")
-                progressionMap[achievement.id] = achievement.unlocked;
-            if(unlock["ID"].toInt() == achievement.id)
+            for(auto& achievement : achievement_model->getAchievements())
             {
-                achievement_model->setUnlockedState(achievement.id, true, QDateTime::fromSecsSinceEpoch(unlock["When"].toInt()));
-                gameinfo_model->updatePointCount(achievement.points);
+                if(achievement.type == "progression" || achievement.type == "win_condition")
+                    progressionMap[achievement.id] = achievement.unlocked;
+                if(unlock["ID"].toInt() == achievement.id)
+                {
+                    achievement_model->setUnlockedState(achievement.id, true, QDateTime::fromSecsSinceEpoch(unlock["When"].toInt()));
+                    gameinfo_model->updatePointCount(achievement.points);
+                }
             }
         }
+        else complete--;
     }
     gameinfo_model->completion_count(complete);
     isGameBeaten();
