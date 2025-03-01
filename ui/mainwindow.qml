@@ -155,7 +155,7 @@ ApplicationWindow {
 
         function playRandomSound(model)
         {
-            if (model.count > 0)
+            if (model.count > 0 && mainWindow.setupFinished)
             {
                 var now = new Date().getTime();
                 var randomIndex = Math.floor(Math.random() * now % model.count);
@@ -169,25 +169,25 @@ ApplicationWindow {
 
         Connections {
             target: AchievementModel
-            function onUnlockedChanged() {
-                if(mainWindow.setupFinished)
-                    unlockSounds.playRandomSound(folderModelUnlocked);
+            function onUnlockedChanged()
+            {
+                unlockSounds.playRandomSound(folderModelUnlocked);
             }
         }
 
         Connections {
             target: GameInfoModel
-            function onBeatenGame() {
-                if(mainWindow.setupFinished)
-                    beatenFanfare.playRandomSound(folderModelBeaten);
+            function onBeatenGame()
+            {
+                unlockSounds.playRandomSound(folderModelBeaten);
             }
         }
 
         Connections {
             target: GameInfoModel
-            function onMasteredGame() {
-                if(mainWindow.setupFinished)
-                    masteredFanfare.playRandomSound(folderModelMastered);
+            function onMasteredGame()
+            {
+                unlockSounds.playRandomSound(folderModelMastered);
             }
         }
     }
@@ -356,12 +356,12 @@ ApplicationWindow {
                                         if (events.length === 10) {
                                             events.forEach((el, i) => {
                                                 switch (i) {
-                                                    case 0: case 1: if (el === 16777235) { m++; } break;
-                                                    case 2: case 3: if (el === 16777237) { m++; } break;
-                                                    case 4: case 6: if (el === 16777234) { m++; } break;
-                                                    case 5: case 7: if (el === 16777236) { m++; } break;
-                                                    case 8: if (el === 66) { m++; } break;
-                                                    case 9: if (el === 65) { m++; } break;
+                                                    case 0: case 1: if (el === 16777235) m++; break;
+                                                    case 2: case 3: if (el === 16777237) m++; break;
+                                                    case 4: case 6: if (el === 16777234) m++; break;
+                                                    case 5: case 7: if (el === 16777236) m++; break;
+                                                    case 8: if (el === 66) m++; break;
+                                                    case 9: if (el === 65) m++; break;
                                                 }
                                             });
                                             if (m === 10) {
@@ -1131,8 +1131,9 @@ ApplicationWindow {
                             ProgressBar {
                                 id: progressBar
                                 anchors.left: parent.left
+                                anchors.leftMargin: 1
                                 anchors.bottom: parent.bottom
-                                width: parent.width
+                                width: parent.width - 2
                                 height: 8
                                 z: 1
                                 value: {
@@ -1143,8 +1144,10 @@ ApplicationWindow {
                                 }
                                 Item {
                                     z: 1
-                                    width: progressBar.width
+                                    width: progressBar.width + 2
                                     height: progressBar.height
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: -1
                                     Rectangle {
                                         width: parent.width
                                         height: parent.height / 2
@@ -1160,8 +1163,10 @@ ApplicationWindow {
                                 }
                                 Item {
                                     z: 2
-                                    width: progressBar.width * progressBar.value
+                                    width: (progressBar.width + 2) * progressBar.value
                                     height: progressBar.height
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: -1
                                     Rectangle {
                                         width: parent.width
                                         height: parent.height / 2
@@ -1176,15 +1181,20 @@ ApplicationWindow {
                                         anchors.bottom: parent.bottom
                                     }
                                     Rectangle {
-                                        width: 5
-                                        height: {
-                                            if(parent.width < progressBar.width - 5)
-                                                parent.height;
-                                            else progressBar.width - parent.width;
+                                        width: {
+                                            if(roundedBar.width) 4;
+                                            else 0;
                                         }
-                                        color: themeLoader.item.progressBarColor
+                                        height: {
+                                            if(roundedBar.width < (parent.width - 4))
+                                                parent.height;
+                                            else roundedBar.width - parent.width
+                                        }
+
                                         anchors.left: roundedBar.right
-                                        anchors.leftMargin: -5
+                                        anchors.leftMargin: -4
+                                        color: themeLoader.item.progressBarColor
+                                        anchors.top: parent.top
                                     }
                                 }
                             }
@@ -2023,28 +2033,37 @@ ApplicationWindow {
                                     }
                                     ProgressBar {
                                         id: achievementProgressBar
-                                        width: 200
+                                        width: 198
                                         height: 6
                                         value: model.percent / 100
+                                        anchors.leftMargin: 1
+                                        z: 2
                                         Item {
-                                            width: achievementProgressBar.width
+                                            z: 1
+                                            width: achievementProgressBar.width + 2
                                             height: achievementProgressBar.height
+                                            anchors.left: parent.left
+                                            anchors.leftMargin: -1
                                             Rectangle {
-                                                radius: 6
                                                 width: parent.width
                                                 height: parent.height
+                                                radius: 6
                                                 color: index % 2 == 0 ? themeLoader.item.mainWindowBackgroundColor : themeLoader.item.mainWindowLightAccentColor
                                                 anchors.bottom: parent.bottom
                                             }
                                         }
                                         Item {
-                                            width: achievementProgressBar.width * achievementProgressBar.value
+                                            z: 2
+                                            width: (achievementProgressBar.width + 2) * achievementProgressBar.value
                                             height: achievementProgressBar.height
+                                            anchors.left: parent.left
+                                            anchors.leftMargin: -1
                                             Rectangle {
+                                                id: roundedBar2
                                                 width: parent.width
                                                 height: parent.height
-                                                color: themeLoader.item.progressBarColor
                                                 radius: 6
+                                                color: themeLoader.item.progressBarColor
                                                 anchors.bottom: parent.bottom
                                             }
                                         }
@@ -2293,8 +2312,8 @@ ApplicationWindow {
             }
         }
         ScrollBar.vertical: ScrollBar {
-               policy: ScrollBar.AsNeeded
-           }
+            policy: ScrollBar.AsNeeded
+        }
     }
 
     Component.onCompleted: {

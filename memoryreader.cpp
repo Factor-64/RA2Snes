@@ -92,27 +92,15 @@ void MemoryReader::remapTriggerAddresses()
             int memoryOffset = 0;
             for(auto it = uniqueMemoryAddresses.cbegin(); it != uniqueMemoryAddresses.cend(); ++it)
             {
-                if(modified)
+                int addr = modified ? addressMap[nextref->address] : nextref->address;
+                if(it->first == addr)
                 {
-                    if(it->first == addressMap[nextref->address])
-                    {
-                        temp[memoryOffset] = it->first;
-                        nextref->address = memoryOffset;
-                        break;
-                    }
-                }
-                else
-                {
-                    if(it->first == nextref->address)
-                    {
-                        temp[memoryOffset] = it->first;
-                        nextref->address = memoryOffset;
-                        break;
-                    }
+                    temp[memoryOffset] = it->first;
+                    nextref->address = memoryOffset;
+                    break;
                 }
                 memoryOffset += it->second;
             }
-
             nextref = nextref->next;
         }
     }
