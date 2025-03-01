@@ -1,8 +1,3 @@
-## Note
-rcheevos may update and break RA2Snes.
-
-Latest known working version of rcheevos: **11.6.0**
-
 ## Windows
 
 1) Install Qt 6.7.3 and Qt Creator using the [qt-online-installer](https://www.qt.io/download-qt-installer)
