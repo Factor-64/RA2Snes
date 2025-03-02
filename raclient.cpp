@@ -427,22 +427,27 @@ void RAClient::handleAwardAchievementResponse(const QJsonObject& jsonObject)
         {
             achievement_model->setUnlockedState(achievement.id, true, queue.first().unlock_time);
             gameinfo_model->updatePointCount(achievement.points);
-            //qDebug() << "AWARDED";
+            //qDebug() << "AWARDED" << achievement.id;
             gameinfo_model->updateCompletionCount();
             if(userinfo_model->hardcore())
                 userinfo_model->updateHardcoreScore(achievement.points);
             else
                 userinfo_model->updateSoftcoreScore(achievement.points);
+            if(progressionMap.contains(achievement.id))
+            {
+                progressionMap[achievement.id] = true;
+                if(!gameinfo_model->beaten())
+                    isGameBeaten();
+            }
+            break;
         }
     }
+    isGameMastered();
     if(running)
     {
         queue.removeFirst();
-        if(!gameinfo_model->mastered())
-            if(!isGameMastered())
-                if(!gameinfo_model->beaten())
-                    isGameBeaten();
-        emit continueQueue();
+        if(!queue.isEmpty())
+            emit continueQueue();
     }
 }
 
@@ -589,7 +594,7 @@ void RAClient::handleStartSessionResponse(const QJsonObject& jsonObject)
 
 bool RAClient::isGameBeaten()
 {
-    if(progressionMap.empty() && achievement_model->rowCount() > 0)
+    if(progressionMap.empty() && achievement_model->rowCount() < 1)
         return false;
     for(auto it = progressionMap.constBegin(); it != progressionMap.constEnd(); ++it) {
         if(!it.value()) {
@@ -603,9 +608,9 @@ bool RAClient::isGameBeaten()
 
 bool RAClient::isGameMastered()
 {
-    if(achievement_model->rowCount() < 0)
+    if(achievement_model->rowCount() < 1)
         return false;
-    if(gameinfo_model->completion_count() == (achievement_model->rowCount() - warning))
+    if((gameinfo_model->completion_count() + warning) == achievement_model->rowCount())
     {
         gameinfo_model->mastered(true);
         return true;
