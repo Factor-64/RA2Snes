@@ -72,3 +72,5 @@ Item {
 	property color progressBarColor: "#eab308"
 	property color progressBarBackgroundColor: "#e5e5e5"
 }
+
+cmake --build .
