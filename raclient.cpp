@@ -382,15 +382,6 @@ void RAClient::handleNetworkReply(QNetworkReply *reply)
     else
     {
         handleSuccessResponse(jsonObject);
-        if(running)
-        {
-            queue.removeFirst();
-            if(!gameinfo_model->mastered())
-                if(!isGameMastered())
-                    if(!gameinfo_model->beaten())
-                        isGameBeaten();
-            emit continueQueue();
-        }
     }
     reply->deleteLater();
 }
@@ -430,9 +421,9 @@ void RAClient::handleSuccessResponse(const QJsonObject& jsonObject)
 
 void RAClient::handleAwardAchievementResponse(const QJsonObject& jsonObject)
 {
-    for (auto& achievement : achievement_model->getAchievements())
+    for(auto& achievement : achievement_model->getAchievements())
     {
-        if (achievement.id == jsonObject["AchievementID"].toInt())
+        if(achievement.id == jsonObject["AchievementID"].toInt())
         {
             achievement_model->setUnlockedState(achievement.id, true, queue.first().unlock_time);
             gameinfo_model->updatePointCount(achievement.points);
@@ -443,6 +434,15 @@ void RAClient::handleAwardAchievementResponse(const QJsonObject& jsonObject)
             else
                 userinfo_model->updateSoftcoreScore(achievement.points);
         }
+    }
+    if(running)
+    {
+        queue.removeFirst();
+        if(!gameinfo_model->mastered())
+            if(!isGameMastered())
+                if(!gameinfo_model->beaten())
+                    isGameBeaten();
+        emit continueQueue();
     }
 }
 

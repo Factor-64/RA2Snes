@@ -853,7 +853,7 @@ ApplicationWindow {
                                             anchors.fill: parent
                                             hoverEnabled: true
                                             onClicked: {
-                                                Qt.openUrlExternally(gameInfoModel.game_link)
+                                                Qt.openUrlExternally(GameInfoModel.game_link)
                                             }
                                             onEntered: game.state = "hovered"
                                             onExited: game.state = ""
