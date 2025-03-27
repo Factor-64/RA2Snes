@@ -18,8 +18,6 @@ Item {
 	property color linkColor: "#cc9900"
 	property color selectedLink: "#000000"
 	
-	property color signOutTextColor: "#ff0000"
-	
 	property color hardcoreTextColor: "#ff0000"
     property color softcoreTextColor: "#00ff00"
 	
@@ -32,6 +30,10 @@ Item {
 
 	property color disabledButtonBackgroundColor: "#cccccc"
 	property color disabledButtonTextColor: "#eeeeee"
+	
+	property color refreshIconColor: "#000000"
+    property color signOutIconColor: "#ff0000"
+    property color signOutTextColor: "#ff0000"
 
 	property color highlightedButtonBackgroundColor: "#f0f0f0"
 	property color highlightedButtonBorderColor: "#424242"
@@ -67,10 +69,12 @@ Item {
 	property color popoutTextColor: "#737373"
 	property color popoutBackgroundColor: "#fafafa"
 	property color popoutBorderColor: "#d4d4d4"
-	property bool darkThemeSVGImages: false
+	
+	property color missableIconColor: "#000000"
+    property color progressionIconColor: "#000000"
+    property color winConditionIconColor: "#000000"
+    property color primedIconColor: "#000000"
 	
 	property color progressBarColor: "#eab308"
 	property color progressBarBackgroundColor: "#e5e5e5"
 }
-
-cmake --build .

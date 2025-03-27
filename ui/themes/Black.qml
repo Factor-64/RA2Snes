@@ -18,8 +18,6 @@ Item {
 	property color linkColor: "#cc9900"
 	property color selectedLink: "#c8c8c8"
 	
-	property color signOutTextColor: "#ff0000"
-	
 	property color hardcoreTextColor: "#ff0000"
     property color softcoreTextColor: "#00ff00"
 	
@@ -32,6 +30,10 @@ Item {
 	
 	property color disabledButtonBackgroundColor: "#888888"
 	property color disabledButtonTextColor: "#bbbbbb"
+	
+	property color refreshIconColor: "#ffffff"
+    property color signOutIconColor: "#ff0000"
+    property color signOutTextColor: "#ff0000"
 	
 	property color highlightedButtonBackgroundColor: "#333333"
 	property color highlightedButtonBorderColor: "#c8c8c8"
@@ -66,7 +68,11 @@ Item {
 	property color popoutTextColor: "#e5e5e5"
 	property color popoutBackgroundColor: "#000000"
 	property color popoutBorderColor: "#000000"
-	property bool darkThemeSVGImages: true
+	
+	property color missableIconColor: "#ffffff"
+    property color progressionIconColor: "#ffffff"
+    property color winConditionIconColor: "#ffffff"
+    property color primedIconColor: "#ffffff"
 	
 	property color progressBarColor: "#eab308"
 	property color progressBarBackgroundColor: "#1e1e1e"
