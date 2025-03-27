@@ -235,48 +235,82 @@ ApplicationWindow {
                                 anchors.right: parent.right
                                 anchors.topMargin: 10
                                 anchors.rightMargin: 20
-                                Button {
-                                    id: logout_button
-                                    text: qsTr("Sign Out")
-                                    font.family: "Verdana"
-                                    font.pixelSize: 13
-                                    background: Rectangle {
-                                        id: buttonBackground
-                                        color: themeLoader.item.buttonBackgroundColor
-                                        border.width: 1
-                                        border.color: themeLoader.item.buttonBorderColor
-                                        radius: 2
-                                    }
-                                    contentItem: Text {
-                                        id: buttonText
+                                width: 150
+                                spacing: 10
+                                Rectangle {
+                                    id: signOutRectangle
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: -8
+                                    width: 24
+                                    height: 24
+                                    color: themeLoader.item.mainWindowDarkAccentColor
+                                    z: 2
+
+                                    Text {
+                                        z: 3
+                                        id: signOutText
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 20
+                                        font.bold: true
+                                        font.family: "Verdana"
+                                        font.pixelSize: 12
                                         text: qsTr("Sign Out")
                                         color: themeLoader.item.signOutTextColor
-                                        font.family: "Verdana"
-                                        font.pixelSize: 13
-                                        horizontalAlignment: Text.AlignHCenter
-                                        verticalAlignment: Text.AlignVCenter
+                                        visible: false
+                                        opacity: 0.0
+
+                                        Behavior on opacity {
+                                            NumberAnimation {
+                                                duration: 250
+                                            }
+                                        }
+
+                                        Behavior on anchors.leftMargin {
+                                            NumberAnimation {
+                                                duration: 250
+                                            }
+                                        }
                                     }
+
+                                    IconImage {
+                                        z: 4
+                                        id: signOutImage
+                                        anchors.right: parent.right
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        anchors.rightMargin: 5
+                                        width: 24
+                                        height: 24
+                                        source: "./images/signout.svg"
+                                        color: themeLoader.item.signOutIconColor
+
+                                    }
+
                                     MouseArea {
-                                        id: mouseAreaLogout
                                         anchors.fill: parent
+                                        onEntered: signOutRectangle.state = "hovered"
+                                        onExited: signOutRectangle.state = ""
                                         hoverEnabled: true
                                         onClicked: {
-                                            Ra2snes.saveWindowSize(windowWidth, windowHeight);
                                             Ra2snes.signOut();
                                         }
-                                        onEntered: logout_button.state = "hovered"
-                                        onExited: logout_button.state = ""
                                     }
 
                                     states: [
                                         State {
                                             name: "hovered"
                                             PropertyChanges {
-                                                buttonBackground.color: themeLoader.item.highlightedButtonBackgroundColor
-                                                buttonBackground.border.color: themeLoader.item.highlightedButtonBorderColor
+                                                target: signOutRectangle
+                                                width: signOutText.width + 48
                                             }
                                             PropertyChanges {
-                                                buttonText.color: themeLoader.item.highlightedButtonTextColor
+                                                target: signOutText
+                                                visible: true
+                                                anchors.leftMargin: 10
+                                                opacity: 1.0
+                                            }
+                                            PropertyChanges {
+                                                target: signOutImage
                                             }
                                         }
                                     ]
@@ -285,47 +319,29 @@ ApplicationWindow {
                                         Transition {
                                             from: ""
                                             to: "hovered"
-                                            ColorAnimation {
-                                                target: buttonBackground
-                                                property: "color"
-                                                duration: 200
-                                            }
-                                            ColorAnimation {
-                                                target: buttonBackground
-                                                property: "border.color"
-                                                duration: 200
-                                            }
-                                            ColorAnimation {
-                                                target: buttonText
-                                                property: "color"
-                                                duration: 200
+                                            PropertyAnimation {
+                                                target: signOutRectangle
+                                                property: "width"
+                                                duration: 50
                                             }
                                         },
                                         Transition {
                                             from: "hovered"
                                             to: ""
-                                            ColorAnimation {
-                                                target: buttonBackground
-                                                property: "color"
-                                                duration: 200
-                                            }
-                                            ColorAnimation {
-                                                target: buttonBackground
-                                                property: "border.color"
-                                                duration: 200
-                                            }
-                                            ColorAnimation {
-                                                target: buttonText
-                                                property: "color"
+                                            PropertyAnimation {
+                                                target: signOutRectangle
+                                                property: "width"
                                                 duration: 200
                                             }
                                         }
                                     ]
                                 }
+
                                 ComboBox {
                                     id: themeSelector
                                     width: 105
                                     height: 40
+                                    anchors.right: parent.right
                                     model: mainWindow.themes
                                     currentIndex: mainWindow.themes.indexOf(Ra2snes.theme)
                                     onCurrentIndexChanged: {
@@ -378,6 +394,7 @@ ApplicationWindow {
                                     Keys.onPressed: event => themeSeletorEvents(event)
                                 }
                             }
+
                             Column {
                                 anchors.bottom: parent.bottom
                                 anchors.right: parent.right
@@ -974,7 +991,7 @@ ApplicationWindow {
                                     }
                                 }
 
-                                Image {
+                                IconImage {
                                     z: 4
                                     id: refreshImage
                                     anchors.right: parent.right
@@ -982,12 +999,9 @@ ApplicationWindow {
                                     anchors.rightMargin: 5
                                     width: 20
                                     height: 20
-                                    source: {
-                                        if(themeLoader.item.darkThemeSVGImages)
-                                            "./images/refresh.svg";
-                                        else
-                                            "./images/refresh-light.svg";
-                                    }
+                                    source: "./images/refresh.svg"
+                                    color: themeLoader.item.refreshIconColor
+
                                 }
 
                                 MouseArea {
@@ -1296,16 +1310,13 @@ ApplicationWindow {
                                         border.width: 1
                                         border.color: themeLoader.item.popoutBorderColor
                                         color: themeLoader.item.mainWindowBackgroundColor
-                                        Image {
+                                        IconImage {
                                             id: missableImage
                                             anchors.centerIn: parent
                                             width: 14
                                             height: 14
-                                            source: {
-                                                if(themeLoader.item.darkThemeSVGImages)
-                                                    "./images/missable.svg";
-                                                else "./images/missable-light.svg";
-                                            }
+                                            source: "./images/missable.svg"
+                                            color: themeLoader.item.missableIconColor;
                                         }
                                     }
                                     Row {
@@ -2096,7 +2107,7 @@ ApplicationWindow {
                                         }
                                     }
 
-                                    Image {
+                                    IconImage {
                                         z: 4
                                         id: svgPrimed
                                         anchors.right: parent.right
@@ -2104,11 +2115,8 @@ ApplicationWindow {
                                         anchors.rightMargin: 5
                                         width: 18
                                         height: 18
-                                        source: {
-                                            if(themeLoader.item.darkThemeSVGImages)
-                                                "./images/primed";
-                                            else "./images/primed-light";
-                                        }
+                                        source: "./images/primed"
+                                        color: themeLoader.item.primedIconColor
                                     }
 
                                     MouseArea {
@@ -2209,7 +2217,7 @@ ApplicationWindow {
                                         }
                                     }
 
-                                    Image {
+                                    IconImage {
                                         z: 4
                                         id: svgImage
                                         anchors.right: parent.right
@@ -2220,21 +2228,18 @@ ApplicationWindow {
                                         source: {
                                             if(model.type === "win_condition")
                                             {
-                                                if(themeLoader.item.darkThemeSVGImages)
-                                                    "./images/win_condition.svg";
-                                                else "./images/win_condition-light.svg";
+                                                svgImage.color = themeLoader.item.winConditionIconColor;
+                                                "./images/win_condition.svg";
                                             }
                                             else if(model.type === "missable")
                                             {
-                                                if(themeLoader.item.darkThemeSVGImages)
-                                                    "./images/missable.svg";
-                                                else "./images/missable-light.svg";
+                                                svgImage.color = themeLoader.item.missableIconColor;
+                                                "./images/missable.svg";
                                             }
                                             else if(model.type === "progression")
                                             {
-                                                if(themeLoader.item.darkThemeSVGImages)
-                                                    "./images/progression.svg";
-                                                else "./images/progression-light.svg";
+                                                svgImage.color = themeLoader.item.progressionIconColor;
+                                                "./images/progression.svg";
                                             }
                                             else ""
                                         }
