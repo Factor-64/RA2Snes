@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls.Material 2.15
 import QtQuick.Layouts 1.15
 import CustomModels 1.0
+import QtQuick.Effects
 import QtMultimedia
 import Qt.labs.folderlistmodel
 
@@ -273,7 +274,7 @@ ApplicationWindow {
                                         }
                                     }
 
-                                    IconImage {
+                                    Image {
                                         z: 4
                                         id: signOutImage
                                         anchors.right: parent.right
@@ -282,9 +283,15 @@ ApplicationWindow {
                                         width: 24
                                         height: 24
                                         source: "./images/signout.svg"
-                                        color: themeLoader.item.signOutIconColor
+                                        layer.enabled: true
+                                        layer.effect: MultiEffect {
+                                            colorization: 1.0
+                                            colorizationColor: themeLoader.item.signOutIconColor
+                                        }
 
                                     }
+
+
 
                                     MouseArea {
                                         anchors.fill: parent
@@ -991,7 +998,7 @@ ApplicationWindow {
                                     }
                                 }
 
-                                IconImage {
+                                Image {
                                     z: 4
                                     id: refreshImage
                                     anchors.right: parent.right
@@ -1000,8 +1007,11 @@ ApplicationWindow {
                                     width: 20
                                     height: 20
                                     source: "./images/refresh.svg"
-                                    color: themeLoader.item.refreshIconColor
-
+                                    layer.enabled: true
+                                    layer.effect: MultiEffect {
+                                        colorization: 1.0
+                                        colorizationColor: themeLoader.item.refreshIconColor
+                                    }
                                 }
 
                                 MouseArea {
@@ -1310,13 +1320,18 @@ ApplicationWindow {
                                         border.width: 1
                                         border.color: themeLoader.item.popoutBorderColor
                                         color: themeLoader.item.mainWindowBackgroundColor
-                                        IconImage {
+
+                                        Image {
                                             id: missableImage
                                             anchors.centerIn: parent
                                             width: 14
                                             height: 14
                                             source: "./images/missable.svg"
-                                            color: themeLoader.item.missableIconColor;
+                                            layer.enabled: true
+                                            layer.effect: MultiEffect {
+                                                colorization: 1.0
+                                                colorizationColor: themeLoader.item.missableIconColor
+                                            }
                                         }
                                     }
                                     Row {
@@ -2107,7 +2122,7 @@ ApplicationWindow {
                                         }
                                     }
 
-                                    IconImage {
+                                    Image {
                                         z: 4
                                         id: svgPrimed
                                         anchors.right: parent.right
@@ -2116,7 +2131,11 @@ ApplicationWindow {
                                         width: 18
                                         height: 18
                                         source: "./images/primed"
-                                        color: themeLoader.item.primedIconColor
+                                        layer.enabled: true
+                                        layer.effect: MultiEffect {
+                                            colorization: 1.0
+                                            colorizationColor: themeLoader.item.signOutIconColor
+                                        }
                                     }
 
                                     MouseArea {
@@ -2217,7 +2236,8 @@ ApplicationWindow {
                                         }
                                     }
 
-                                    IconImage {
+                                    Image {
+                                        property color type: "#ffffff"
                                         z: 4
                                         id: svgImage
                                         anchors.right: parent.right
@@ -2228,20 +2248,25 @@ ApplicationWindow {
                                         source: {
                                             if(model.type === "win_condition")
                                             {
-                                                svgImage.color = themeLoader.item.winConditionIconColor;
+                                                svgImage.type = themeLoader.item.winConditionIconColor;
                                                 "./images/win_condition.svg";
                                             }
                                             else if(model.type === "missable")
                                             {
-                                                svgImage.color = themeLoader.item.missableIconColor;
+                                                svgImage.type = themeLoader.item.missableIconColor;
                                                 "./images/missable.svg";
                                             }
                                             else if(model.type === "progression")
                                             {
-                                                svgImage.color = themeLoader.item.progressionIconColor;
+                                                svgImage.type = themeLoader.item.progressionIconColor;
                                                 "./images/progression.svg";
                                             }
                                             else ""
+                                        }
+                                        layer.enabled: true
+                                        layer.effect: MultiEffect {
+                                            colorization: 1.0
+                                            colorizationColor: svgImage.type
                                         }
                                     }
 
