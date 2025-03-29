@@ -70,7 +70,7 @@ See [COMPILING.md](COMPILING.md)
 
 ## Credits & Thanks
 
-* [Skarsnik](https://github.com/Skarsnik) for QUsb2Snes, usb2snes client, and helping with various implementations used in RA2Snes (Check out their sister project [TCheeve](https://github.com/Skarsnik/TCheeve)!)
+* [Skarsnik](https://github.com/Skarsnik) for QUsb2Snes, usb2snes client, and helping with various implementations used in RA2Snes
 * [rcheevos](https://github.com/RetroAchievements/rcheevos) and its [contributors](https://github.com/RetroAchievements/rcheevos/graphs/contributors)
 * Many users in the RetroAchievements [Discord](https://discord.gg/dq2E4hE)'s coding channel for helping answer any questions I had.
 
@@ -80,6 +80,11 @@ See [COMPILING.md](COMPILING.md)
 * RetroAchievements SVG Icons
 * Wikipedia's [Famicom SVG](https://en.wikipedia.org/wiki/File:Super_Famicom_logo.svg)
 * Famicom Logo by Nintendo
+
+### Similar Projects
+
+* [NES RA Adapter](https://github.com/odelot/nes-ra-adapter) - Repository for everything related with the RetroAchievements adapter for the real NES hardware
+* [TCheeve](https://github.com/Skarsnik/TCheeve) - A client for RetroAchievement using the Emulator Network Access protocol
 
 ---
 
