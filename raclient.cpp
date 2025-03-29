@@ -486,6 +486,8 @@ void RAClient::handlePatchResponse(const QJsonObject& jsonObject)
     int total = 0;
     warning = false;
     achievement_model->clearAchievements();
+    progressionMap.clear();
+    winMap.clear();
 
     QJsonArray achievements_data = patch_data["Achievements"].toArray();
     for (int i = 0; i < achievements_data.size(); ++i)
@@ -516,6 +518,10 @@ void RAClient::handlePatchResponse(const QJsonObject& jsonObject)
                 info.id = 0;
             }
             info.type = data["Type"].toString();
+            if(info.type == "progression")
+                progressionMap[info.id] = info.unlocked;
+            else if(info.type == "win_condition")
+                winMap[info.id] = info.unlocked;
             info.author = data["Author"].toString();
             info.time_unlocked_string = "";
             info.time_unlocked = QDateTime(QDate(1990, 11, 21), QTime(0, 0, 0));
@@ -575,8 +581,10 @@ void RAClient::handleStartSessionResponse(const QJsonObject& jsonObject)
         {
             for(auto& achievement : achievement_model->getAchievements())
             {
-                if(achievement.type == "progression" || achievement.type == "win_condition")
+                if(achievement.type == "progression")
                     progressionMap[achievement.id] = achievement.unlocked;
+                else if(achievement.type == "win_condition")
+                    winMap[achievement.id] = achievement.unlocked;
                 if(unlock["ID"].toInt() == achievement.id)
                 {
                     achievement_model->setUnlockedState(achievement.id, true, QDateTime::fromSecsSinceEpoch(unlock["When"].toInt()));
@@ -587,14 +595,16 @@ void RAClient::handleStartSessionResponse(const QJsonObject& jsonObject)
         else complete--;
     }
     gameinfo_model->completion_count(complete);
-    isGameBeaten();
-    isGameMastered();
+    if(!isGameMastered())
+        isGameBeaten();
     emit sessionStarted();
 }
 
 bool RAClient::isGameBeaten()
 {
-    if(progressionMap.empty() && achievement_model->rowCount() < 1)
+    //qDebug() << progressionMap;
+    //qDebug() << winMap;
+    if(progressionMap.empty() || achievement_model->rowCount() < 1)
         return false;
     for(auto it = progressionMap.constBegin(); it != progressionMap.constEnd(); ++it) {
         if(!it.value()) {
@@ -602,8 +612,14 @@ bool RAClient::isGameBeaten()
             return false;
         }
     }
-    gameinfo_model->beaten(true);
-    return true;
+    for(auto it = winMap.constBegin(); it != winMap.constEnd(); ++it) {
+        if(it.value()) {
+            gameinfo_model->beaten(true);
+            return true;
+        }
+    }
+    gameinfo_model->beaten(false);
+    return false;
 }
 
 bool RAClient::isGameMastered()
