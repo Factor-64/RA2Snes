@@ -108,6 +108,7 @@ private:
     GameInfoModel* gameinfo_model;
     AchievementModel* achievement_model;
     QMap<unsigned int, bool> progressionMap;
+    QMap<unsigned int, bool> winMap;
     QQueue<RequestData> queue;
     QList<LeaderboardInfo> leaderboards;
 };
