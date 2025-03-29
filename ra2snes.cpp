@@ -158,6 +158,8 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
         m_currentGame.replace("?", " ");
         if (m_currentGame.contains("m3nu.bin") || m_currentGame.contains("menu.bin") || reset)
         {
+            emit displayMessage("", false);
+            doThisTaskNext = None;
             reset = false;
             gameLoaded = false;
             raclient->setPatched(false);
@@ -195,19 +197,25 @@ void ra2snes::onUsb2SnesGetConfigDataReceived()
 {
     //qDebug() << "Checking config";
     QString config = QString::fromUtf8(usb2snes->getBinaryData());
-    bool c = !config.contains("EnableCheats: false");
-    bool s = !config.contains("EnableIngameSavestate: 0");
+    //qDebug() << config;
+    if(config.contains("EnableCheats"))
+    {
+        bool c = !config.contains("EnableCheats: false");
+        bool s = !config.contains("EnableIngameSavestate: 0");
 
-    if(isGB)
-        s = !config.contains("SGBEnableState: false");
-    raclient->setCheats(c);
-    raclient->setSaveStates(s);
-    if((c || s) && raclient->getHardcore())
-        changeMode();
-    else if(raclient->getAutoHardcore() && !raclient->getHardcore())
-        changeMode();
-    if(doThisTaskNext != GetCurrentGameFile)
-        usb2snes->infos();
+        if(isGB)
+            s = !config.contains("SGBEnableState: false");
+        raclient->setCheats(c);
+        raclient->setSaveStates(s);
+        if((c || s) && raclient->getHardcore())
+            changeMode();
+        else if(raclient->getAutoHardcore() && !raclient->getHardcore())
+            changeMode();
+        if(doThisTaskNext != GetCurrentGameFile)
+            usb2snes->infos();
+    }
+    else
+        reset = true;
 }
 
 void ra2snes::onUsb2SnesGetAddressesDataReceived()
@@ -229,9 +237,11 @@ void ra2snes::onUsb2SnesGetAddressDataReceived()
     bool patched = false;
     //qDebug() << "Checking for patched rom";
     //qDebug() << data;
+    if(data[0] != '\x00')
+        qDebug() << "RESET";
     if (usb2snes->firmwareVersion() > QVersionNumber(7))
     {
-        if((data[0] != '\x00') && (data[1] != '\x00') && (data[3] != '\x00'))
+        if(data[1] != '\x00' && data[3] != '\x00')
             patched = true;
     }
     else if (data[0] != (char)0x60)
@@ -288,7 +298,6 @@ void ra2snes::onRequestError(bool net)
         onUsb2SnesStateChanged();
     }
     //qDebug() << "request error";
-
 }
 
 void ra2snes::onUsb2SnesStateChanged()
