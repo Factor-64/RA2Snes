@@ -2134,7 +2134,7 @@ ApplicationWindow {
                                         layer.enabled: true
                                         layer.effect: MultiEffect {
                                             colorization: 1.0
-                                            colorizationColor: themeLoader.item.signOutIconColor
+                                            colorizationColor: themeLoader.item.primedIconColor
                                         }
                                     }
 
