@@ -222,7 +222,7 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
 {
     doThisTaskNext = GetConsoleInfo;
     //qDebug() << "Current Time:" << QDateTime::currentDateTime();
-    framesPassed = std::round(std::abs(millisecPassed.msecsTo(QDateTime::currentDateTime())) * 0.06009);
+    framesPassed = std::round(std::abs(millisecPassed.msecsTo(QDateTime::currentDateTime())) * 0.0600988138974405);
     //qDebug() << "Frames: " << framesPassed;
     millisecPassed = QDateTime::currentDateTime();
     reader->addFrameToQueues(usb2snes->getBinaryData(), framesPassed);

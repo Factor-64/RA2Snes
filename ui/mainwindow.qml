@@ -1,6 +1,6 @@
-import QtQuick 2.15
-import QtQuick.Controls.Material 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls.Material
+import QtQuick.Layouts
 import CustomModels 1.0
 import QtQuick.Effects
 import QtMultimedia
@@ -11,6 +11,7 @@ import Qt.labs.folderlistmodel
 ApplicationWindow {
     id: mainWindow
     visible: true
+
     width: {
         if(UserInfoModel.width >= 600)
             UserInfoModel.width;
@@ -46,7 +47,7 @@ ApplicationWindow {
         repeat: true
         running: true
         onTriggered: {
-            loadThemes();
+            mainWindow.loadThemes();
         }
     }
 
@@ -194,6 +195,13 @@ ApplicationWindow {
         anchors.fill: parent
         contentHeight: infoColumn.height
         flickableDirection: Flickable.VerticalFlick
+        focus: true
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                flickable.focus = true;
+            }
+        }
 
         ColumnLayout {
             id: infoColumn
@@ -359,6 +367,7 @@ ApplicationWindow {
                                             mainWindow.setupTheme();
                                         }
                                     }
+
                                     function updateComboBox() {
                                         var i = themeSelector.currentIndex;
                                         themeSelector.model = mainWindow.themes;
@@ -779,7 +788,7 @@ ApplicationWindow {
                             Layout.bottomMargin: 10
                             Layout.rightMargin: 20
                             Layout.fillWidth: true
-                            height: 52
+                            implicitHeight: 52
                             border.width: 2
                             border.color: themeLoader.item.mainWindowDarkAccentColor
                             radius: 6
@@ -950,7 +959,7 @@ ApplicationWindow {
                             id: completionHeader
                             color: themeLoader.item.mainWindowDarkAccentColor
                             Layout.fillWidth: true
-                            height: 108
+                            implicitHeight: 108
                             border.width: 2
                             border.color: themeLoader.item.mainWindowDarkAccentColor
                             radius: 6
@@ -1887,7 +1896,7 @@ ApplicationWindow {
                             implicitHeight: contentHeight
                             Layout.fillWidth: true
                             layoutDirection: Qt.Vertical
-                            anchors.margins: 10
+                            Layout.margins: 10
                             interactive: false
                             model: sortedAchievementModel
                             clip: true
