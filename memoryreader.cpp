@@ -152,7 +152,8 @@ QList<QPair<int, int>> MemoryReader::getUniqueMemoryAddresses()
     return uniqueMemoryAddresses;
 }
 
-static uint32_t peek(uint32_t address, uint32_t num_bytes, void* ud) {
+static uint32_t peek(uint32_t address, uint32_t num_bytes, void* ud) //Modified verion of a test for runtime in rcheevos
+{
     uint8_t* memory = (uint8_t*)ud;
 
     switch (num_bytes) {
@@ -201,7 +202,7 @@ void MemoryReader::decrementAddressCounts(rc_memref_t* nextref)
         emit modifiedAddresses();
 }
 
-void MemoryReader::checkAchievements()
+void MemoryReader::checkAchievements() // Modified version of runtime.c from rcheevos
 {
     //qDebug() << achievementFrames;
     while(achievementFrames.size() > 0)
