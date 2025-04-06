@@ -158,7 +158,8 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
         m_currentGame.replace("?", " ");
         if (m_currentGame.contains("m3nu.bin") || m_currentGame.contains("menu.bin") || reset)
         {
-            emit displayMessage("", false);
+            if(reset)
+                emit displayMessage("", false);
             doThisTaskNext = None;
             reset = false;
             gameLoaded = false;
@@ -177,8 +178,7 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
             emit disableModeSwitching();
             setCurrentConsole();
             emit displayMessage("Loading... Do Not Turn Off Console!", false);
-            doThisTaskNext = None;
-            usb2snes->getRomType();
+            doThisTaskNext = GetRomType;
         }
     }
 }
@@ -212,7 +212,7 @@ void ra2snes::onUsb2SnesGetConfigDataReceived()
         else if(raclient->getAutoHardcore() && !raclient->getHardcore())
             changeMode();
         if(doThisTaskNext != GetCurrentGameFile)
-            usb2snes->infos();
+            doThisTaskNext = NoChecksNeeded;
     }
     else
         reset = true;
@@ -262,8 +262,8 @@ void ra2snes::onLoginSuccess()
     loggedin = true;
     createSettingsFile();
     reset = true;
-    onUsb2SnesStateChanged();
     emit loginSuccess();
+    onUsb2SnesStateChanged();
 }
 
 void ra2snes::onRequestFailed(QJsonObject error)
@@ -320,13 +320,26 @@ void ra2snes::onUsb2SnesStateChanged()
                 //qDebug() << "check patch";
                 doThisTaskNext = GetConsoleAddresses;
                 if(raclient->getHardcore())
+                {
                     usb2snes->isPatchedROM();
-                else
-                    runAddressesLogic();
-                break;
+                    break;
+                }
             case GetConsoleAddresses:
                 //qDebug() << "get addresses";
-                runAddressesLogic();
+                doThisTaskNext = GetConsoleInfo;
+                if(updateAddresses)
+                {
+                    updateAddresses = false;
+                    uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
+                    //qDebug() << "New Unique Addresses:" << uniqueMemoryAddresses;
+                    if(uniqueMemoryAddresses.empty())
+                    {
+                        doThisTaskNext = NoChecksNeeded;
+                        usb2snes->infos();
+                        return;
+                    }
+                }
+                usb2snes->getAddresses(uniqueMemoryAddresses);
                 break;
             case Reset:
                 //qDebug() << "reset";
@@ -540,7 +553,8 @@ void ra2snes::changeMode()
     UserInfoModel* user = raclient->getUserInfoModel();
     QString reason = "Hardcore Disabled: ";
     bool needsChange = false;
-
+    bool alreadySoftcore = !user->hardcore();
+    qDebug() << alreadySoftcore;
     if(user->cheats()) {
         reason += QString("Cheats Enabled");
         needsChange = true;
@@ -571,19 +585,24 @@ void ra2snes::changeMode()
         user->hardcore(false);
         emit displayMessage(reason, true);
     }
-    if(gameLoaded)
+    if(!alreadySoftcore)
     {
-        if(user->patched())
-            doThisTaskNext = NoChecksNeeded;
-        else
-            reset = true;
-        onUsb2SnesStateChanged();
+        if(gameLoaded)
+        {
+            if(user->patched())
+                doThisTaskNext = NoChecksNeeded;
+            else
+                reset = true;
+            onUsb2SnesStateChanged();
+        }
+        else if(!gameLoaded)
+        {
+            //qDebug() << "Enabling Mode Switching";
+            emit enableModeSwitching();
+        }
     }
-    else if(!gameLoaded)
-    {
-        //qDebug() << "Enabling Mode Switching";
+    else
         emit enableModeSwitching();
-    }
 }
 
 void ra2snes::autoChange(bool ac)
@@ -604,24 +623,6 @@ void ra2snes::setConsole(const QString &console)
         m_console = console;
         emit consoleChanged();
     }
-}
-
-void ra2snes::runAddressesLogic()
-{
-    doThisTaskNext = GetConsoleInfo;
-    if(updateAddresses)
-    {
-        updateAddresses = false;
-        uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
-        //qDebug() << "New Unique Addresses:" << uniqueMemoryAddresses;
-        if(uniqueMemoryAddresses.empty())
-        {
-            doThisTaskNext = NoChecksNeeded;
-            usb2snes->infos();
-            return;
-        }
-    }
-    usb2snes->getAddresses(uniqueMemoryAddresses);
 }
 
 void ra2snes::setAppDirPath(const QString &appDirPath)

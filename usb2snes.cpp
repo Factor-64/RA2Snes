@@ -19,7 +19,7 @@
 //#include <QDebug>
 
 Q_LOGGING_CATEGORY(log_Usb2snes, "USB2SNES")
-//#define //sDebug() qCDebug(log_Usb2snes)
+//#define sDebug() qCDebug(log_Usb2snes)
 
 Usb2Snes::Usb2Snes(bool autoAttach) : QObject()
 {
