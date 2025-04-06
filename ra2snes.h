@@ -106,7 +106,6 @@ private:
     void onUsb2SnesGetFileDataReceived();
     void onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos);
     void setCurrentConsole();
-    void runAddressesLogic();
 };
 
 #endif // RA2SNES_H
