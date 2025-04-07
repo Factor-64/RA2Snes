@@ -30,7 +30,7 @@ ApplicationWindow {
     property int windowHeight: height
     property string modeFailed: ""
     property bool setupFinished: true
-    property bool compact: false
+    property bool compact: true
 
     signal themesUpdated()
     property var themes: ["Dark", "Black", "Light"]
