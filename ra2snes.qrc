@@ -19,5 +19,6 @@
         <file>ui/images/signout.svg</file>
         <file>ui/noncompact.qml</file>
         <file>ui/compact.qml</file>
+        <file>ui/images/hamburger.svg</file>
     </qresource>
 </RCC>

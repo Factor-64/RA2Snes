@@ -39,6 +39,11 @@ Item {
 	property color highlightedButtonBorderColor: "#c8c8c8"
 	property color highlightedButtonTextColor: "#eeeeee"
 	
+	property color popupBackgroundColor: "#1e1e1e"
+	property color popupHighlightColor: "#000000"
+	property color popupItemDisabled: "#000000"
+	property color popupLineColor: "#464646"
+	
 	//Checkboxes
 	property color checkBoxCheckedColor: "#005cc8"
 	property color checkBoxCheckedBorderColor: "#005cc8"
@@ -60,6 +65,13 @@ Item {
 	property color statusMasteredIconBorderColor: "#ffd700"
 	property color statusMasteredTextColor: "#ffd700"
 	
+	//Icons
+	property color missableIconColor: "#ffffff"
+    property color progressionIconColor: "#ffffff"
+    property color winConditionIconColor: "#ffffff"
+    property color primedIconColor: "#ffffff"
+	property color hamburgerIconColor: "#ffffff"
+	
 	//Misc
 	property color backgroundColor: "#0a0a0a"
 	property color accentColor: "#ffffff"
@@ -68,11 +80,6 @@ Item {
 	property color popoutTextColor: "#e5e5e5"
 	property color popoutBackgroundColor: "#000000"
 	property color popoutBorderColor: "#000000"
-	
-	property color missableIconColor: "#ffffff"
-    property color progressionIconColor: "#ffffff"
-    property color winConditionIconColor: "#ffffff"
-    property color primedIconColor: "#ffffff"
 	
 	property color progressBarColor: "#eab308"
 	property color progressBarBackgroundColor: "#1e1e1e"

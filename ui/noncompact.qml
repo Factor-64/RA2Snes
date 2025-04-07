@@ -84,8 +84,6 @@ Rectangle {
 
                     }
 
-
-
                     MouseArea {
                         anchors.fill: parent
                         onEntered: signOutRectangle.state = "hovered"
@@ -262,6 +260,7 @@ Rectangle {
                             changeCheckBox.checked = UserInfoModel.autohardcore;
                         }
                     }
+
                     Text {
                         id: autoHardcore
                         text: qsTr("Auto Hardcore")
@@ -2125,6 +2124,23 @@ Rectangle {
         }
         Item {
             implicitHeight: 10
+        }
+    }
+    Component.onCompleted: {
+        if(mainWindow.setupFinished)
+        {
+            achievementHeaderLoader.active = true;
+            listViewLoader.active = true;
+            completionHeader.visible = true;
+            let val =(GameInfoModel.completion_count / GameInfoModel.achievement_count);
+            if(val >= 0)
+                progressBar.value = Math.min(Math.max(val, 0), 1);
+            else progressBar.value = 0;
+            completionIcon.visible = true;
+            changeCheckBox.enabled = true;
+            mainWindow.setupFinished = true;
+            achievementlist.visible = true;
+            mainWindow.modeFailed = "";
         }
     }
 }
