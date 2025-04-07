@@ -82,6 +82,7 @@ private:
     QString m_currentGame;
     bool loggedin;
     bool gameLoaded;
+    bool loadingGame;
     bool remember_me;
     bool isGB;
     bool reset;
