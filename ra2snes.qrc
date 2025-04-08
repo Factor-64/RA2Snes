@@ -20,5 +20,11 @@
         <file>ui/noncompact.qml</file>
         <file>ui/compact.qml</file>
         <file>ui/images/hamburger.svg</file>
+        <file>ui/popupmenu.qml</file>
+        <file>ui/refreshbutton.qml</file>
+        <file>ui/errormessage.qml</file>
+        <file>ui/progressbar.qml</file>
+        <file>ui/listview.qml</file>
+        <file>ui/sorting.qml</file>
     </qresource>
 </RCC>
