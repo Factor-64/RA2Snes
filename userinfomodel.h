@@ -18,6 +18,7 @@ class UserInfoModel : public QObject {
     Q_PROPERTY(bool cheats READ cheats NOTIFY dataChanged)
     Q_PROPERTY(bool patched READ patched NOTIFY dataChanged)
     Q_PROPERTY(bool autohardcore READ autohardcore NOTIFY dataChanged)
+    Q_PROPERTY(bool compact READ compact CONSTANT)
 
 public:
     static UserInfoModel* instance() {
@@ -42,6 +43,7 @@ public:
     bool patched() const;
     void clearUser();
     bool autohardcore() const;
+    bool compact() const;
 
     void username(QString u);
     void token(QString t);
@@ -50,12 +52,13 @@ public:
     void pfp(QUrl p);
     void hardcore(bool h);
     void link(QUrl l);
-    void width(int w);
-    void height(int h);
     void savestates(bool s);
     void cheats(bool c);
     void patched(bool p);
     void autohardcore(bool a);
+    void width(int w);
+    void height(int h);
+    void compact(bool c);
 
 signals:
     void dataChanged();

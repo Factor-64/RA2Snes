@@ -39,6 +39,7 @@ Item {
 	property color highlightedButtonBorderColor: "#424242"
 	property color highlightedButtonTextColor: "#333333"
 	
+	//Popup
 	property color popupBackgroundColor: "#e6e6e6"
 	property color popupHighlightColor: "#f0f0f0"
 	property color popupItemDisabled: "#ffffff"
