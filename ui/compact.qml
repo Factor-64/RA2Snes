@@ -607,6 +607,7 @@ Rectangle {
                         }
                     }
                 }
+
             Popup {
                 id: menuPopup
                 x: hamburgerRectangle.x - width + hamburgerRectangle.width
@@ -638,6 +639,12 @@ Rectangle {
                     }
                     else mode.color = themeLoader.item.popupItemDisabled;
                 }
+                enter: Transition {
+                    NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 0}
+                }
+                exit: Transition {
+                    NumberAnimation { property: "opacity"; from: 1.0; to: 0.0; duration: 0}
+                }
 
                 Popup {
                     id: themePopup
@@ -651,7 +658,6 @@ Rectangle {
                         id: themePopupBG
                         color: themeLoader.item.popupBackgroundColor
                     }
-
                     ListView {
                         id: themesList
                         anchors.fill: parent
@@ -696,6 +702,16 @@ Rectangle {
                                     signout.color = themeLoader.item.selectedLink;
                                     compactMode.color = themeLoader.item.selectedLink;
                                     hamburgerRectangle.color = themeLoader.item.popupBackgroundColor;
+                                    for(let i = 0; i < themesList.contentItem.children.length; i++) {
+                                        let item = themesList.contentItem.children[i];
+                                        item.color = themeLoader.item.popupBackgroundColor;
+                                        item.children.forEach(child => {
+                                            if(child.color !== undefined)
+                                                child.color = themeLoader.item.selectedLink;
+                                        });
+                                    }
+                                    themeDel.color = themeLoader.item.popupHighlightColor;
+                                    themeName.color = themeLoader.item.linkColor;
                                 }
                                 onEntered: {
                                     themeDel.color = themeLoader.item.popupHighlightColor;
@@ -723,6 +739,20 @@ Rectangle {
                         themeRect.color = themeLoader.item.popupHighlightColor;
                         theme.color = themeLoader.item.linkColor;
                     }
+                    enter: Transition {
+                        NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 0}
+                    }
+                    exit: Transition {
+                        NumberAnimation { property: "opacity"; from: 1.0; to: 0.0; duration: 0}
+                    }
+                    function updateComboBox()
+                    {
+                        themesList.model = mainWindow.themes;
+                        height = (mainWindow.themes.length * 24) + 8;
+                    }
+                    Component.onCompleted: {
+                        mainWindow.themesUpdated.connect(updateComboBox);
+                    }
                 }
 
                 Column {
@@ -748,6 +778,7 @@ Rectangle {
                                 target: Ra2snes
                                 function onDisableModeSwitching()
                                 {
+                                    mainWindow.setupFinished = false;
                                     changeCheckBox.enabled = false;
                                     mode.color = themeLoader.item.popupItemDisabled;
                                 }
@@ -757,6 +788,7 @@ Rectangle {
                                 target: Ra2snes
                                 function onEnableModeSwitching()
                                 {
+                                    mainWindow.setupFinished = true;
                                     changeCheckBox.enabled = true;
                                     menuPopup.changeModeColor();
                                 }
@@ -789,7 +821,6 @@ Rectangle {
                                 }
 
                                 onCheckedChanged: {
-                                    mainWindow.setupFinished = false;
                                     if(themeLoader.item)
                                         menuPopup.changeModeColor();
                                     Ra2snes.autoChange(changeCheckBox.checked);
@@ -848,7 +879,11 @@ Rectangle {
                             anchors.left: parent.left
                             anchors.leftMargin: 10
                             anchors.verticalCenter: parent.verticalCenter
-                            text: qsTr("Change Mode")
+                            text: {
+                                if(UserInfoModel.hardcore)
+                                    qsTr("Softcore Mode");
+                                else qsTr("Hardcore Mode");
+                            }
                             font.family: "Verdana"
                             font.pixelSize: 13
                             color: {
@@ -861,10 +896,7 @@ Rectangle {
                             hoverEnabled: true
                             onClicked: {
                                 if(changeCheckBox.enabled)
-                                {
-                                    mainWindow.setupFinished = false;
                                     Ra2snes.changeMode();
-                                }
                             }
                             onEntered: {
                                 if(changeCheckBox.enabled)
@@ -935,7 +967,7 @@ Rectangle {
                                     height: 14
                                     radius: 2
                                     border.color: compactCheckBox.checked ? themeLoader.item.checkBoxCheckedBorderColor : themeLoader.item.checkBoxCheckedBorderColor
-
+                                    color: compactCheckBox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedColor;
                                     Text {
                                         anchors.centerIn: parent
                                         text: compactCheckBox.checked ? "\u2713" : ""
@@ -945,10 +977,10 @@ Rectangle {
                                 }
 
                                 onCheckedChanged: {
-                                    if(compactCheckBox.checked)
-                                        mainWindow.compact = true;
-                                    else
-                                        mainWindow.compact = false;
+                                    mainWindow.compact = compactCheckBox.checked;
+                                }
+                                Component.onCompleted: {
+                                    compactCheckBox.checked = mainWindow.compact;
                                 }
                             }
 
@@ -965,8 +997,7 @@ Rectangle {
                             anchors.fill: parent
                             hoverEnabled: true
                             onClicked: {
-                                if(compactCheckBox.enabled)
-                                    compactCheckBox.checked = !compactCheckBox.checked
+                                compactCheckBox.checked = !compactCheckBox.checked
                             }
                             onEntered: {
                                 compactRect.color = themeLoader.item.popupHighlightColor;
@@ -2126,6 +2157,7 @@ Rectangle {
             mainWindow.setupFinished = true;
             achievementlist.visible = true;
             mainWindow.modeFailed = "";
+            gameInfo.visible = true;
         }
     }
 }

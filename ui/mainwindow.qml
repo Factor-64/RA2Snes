@@ -29,8 +29,8 @@ ApplicationWindow {
     property int windowWidth: width
     property int windowHeight: height
     property string modeFailed: ""
-    property bool setupFinished: true
-    property bool compact: true
+    property bool setupFinished: false
+    property bool compact: UserInfoModel.compact
 
     signal themesUpdated()
     property var themes: ["Dark", "Black", "Light"]
@@ -216,6 +216,10 @@ ApplicationWindow {
                 Layout.margins: 10
                 source: mainWindow.compact ? "./compact.qml" : "./noncompact.qml"
                 active: true
+                Component.onCompleted: {
+                    setupTheme();
+                    themeListTimer.restart();
+                }
             }
         }
         ScrollBar.vertical: ScrollBar {
@@ -223,12 +227,12 @@ ApplicationWindow {
         }
     }
 
-    Component.onCompleted: {
-        setupTheme();
-        themeListTimer.start();
+    onCompactChanged: {
+        themeListTimer.stop();
     }
+
     onClosing: {
-        Ra2snes.saveWindowSize(windowWidth, windowHeight);
+        Ra2snes.saveUISettings(windowWidth, windowHeight, compact);
     }
 }
 //Pumpkin

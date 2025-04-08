@@ -183,12 +183,6 @@ void RAClient::clearQueue()
     queue.clear();
 }
 
-void RAClient::setWidthHeight(int w, int h)
-{
-    userinfo_model->height(h);
-    userinfo_model->width(w);
-}
-
 void RAClient::setPatched(bool p)
 {
     userinfo_model->patched(p);
@@ -244,16 +238,6 @@ UserInfoModel* RAClient::getUserInfoModel()
 GameInfoModel* RAClient::getGameInfoModel()
 {
     return gameinfo_model;
-}
-
-int RAClient::getWidth()
-{
-    return userinfo_model->width();
-}
-
-int RAClient::getHeight()
-{
-    return userinfo_model->height();
 }
 
 AchievementModel* RAClient::getAchievementModel()
