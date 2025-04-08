@@ -22,7 +22,7 @@ ra2snes::ra2snes(QObject *parent)
 
     raclient->setHardcore(true);
     raclient->setAutoHardcore(false);
-    saveWindowSize(600, 600);
+    saveUISettings(600, 600, false);
 
     loadSettings();
 
@@ -431,21 +431,6 @@ void ra2snes::setCurrentConsole()
     }
 }
 
-AchievementModel* ra2snes::achievementModel()
-{
-    return raclient->getAchievementModel();
-}
-
-GameInfoModel* ra2snes::gameInfoModel()
-{
-    return raclient->getGameInfoModel();
-}
-
-UserInfoModel* ra2snes::userInfoModel()
-{
-    return raclient->getUserInfoModel();
-}
-
 bool ra2snes::isRemembered()
 {
     return remember_me;
@@ -462,9 +447,12 @@ QString ra2snes::xorEncryptDecrypt(const QString &token, const QString &key) {
     return result;
 }
 
-void ra2snes::saveWindowSize(int w, int h)
+void ra2snes::saveUISettings(int w, int h, bool c)
 {
-    raclient->setWidthHeight(w, h);
+    UserInfoModel* user = raclient->getUserInfoModel();
+    user->width(w);
+    user->height(h);
+    user->compact(c);
 }
 
 void ra2snes::createSettingsFile()
@@ -473,17 +461,19 @@ void ra2snes::createSettingsFile()
 
     QSettings settings(settingsFilePath, QSettings::IniFormat);
 
-    settings.setValue("Hardcore", raclient->getHardcore());
+    UserInfoModel* user = raclient->getUserInfoModel();
+
+    settings.setValue("Hardcore", user->hardcore());
     settings.setValue("Console", m_console);
-    settings.setValue("Width", raclient->getWidth());
-    settings.setValue("Height", raclient->getHeight());
-    settings.setValue("Auto", raclient->getAutoHardcore());
+    settings.setValue("Width", user->width());
+    settings.setValue("Height", user->height());
+    settings.setValue("Auto", user->autohardcore());
+    settings.setValue("Compact", user->compact());
     settings.setValue("Theme", m_theme);
 
     if(remember_me)
     {
         QString time = QString::number(QDateTime::currentSecsSinceEpoch());
-        UserInfoModel* user = raclient->getUserInfoModel();
         settings.setValue("Username", user->username());
         settings.setValue("Token", xorEncryptDecrypt(user->token(), time));
         settings.setValue("Time", time);
@@ -514,11 +504,15 @@ void ra2snes::loadSettings() {
         int width = settings.value("Width").toInt();
         int height = settings.value("Height").toInt();
         bool autoh = settings.value("Auto").toBool();
+        bool comp = settings.value("Compact").toBool();
         QString theme = settings.value("Theme").toString();
 
-        raclient->setHardcore(hardcore);
-        raclient->setAutoHardcore(autoh);
-        raclient->setWidthHeight(width, height);
+        UserInfoModel* user = raclient->getUserInfoModel();
+        user->hardcore(hardcore);
+        user->autohardcore(autoh);
+        user->width(width);
+        user->height(height);
+        user->compact(comp);
         setConsole(console_v);
         setTheme(theme);
 

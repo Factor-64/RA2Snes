@@ -68,6 +68,10 @@ bool UserInfoModel::autohardcore() const {
     return m_userInfo.autohardcore;
 }
 
+bool UserInfoModel::compact() const {
+    return m_userInfo.compact;
+}
+
 void UserInfoModel::username(QString u)
 {
     m_userInfo.username = u;
@@ -113,13 +117,11 @@ void UserInfoModel::link(QUrl l)
 void UserInfoModel::width(int w)
 {
     m_userInfo.width = w;
-    emit dataChanged();
 }
 
 void UserInfoModel::height(int h)
 {
     m_userInfo.height = h;
-    emit dataChanged();
 }
 
 void UserInfoModel::savestates(bool s)
@@ -144,6 +146,11 @@ void UserInfoModel::autohardcore(bool a)
 {
     m_userInfo.autohardcore = a;
     emit dataChanged();
+}
+
+void UserInfoModel::compact(bool c)
+{
+    m_userInfo.compact = c;
 }
 
 void UserInfoModel::clearUser() {

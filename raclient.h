@@ -48,9 +48,6 @@ public:
     bool getHardcore();
     UserInfoModel* getUserInfoModel();
     GameInfoModel* getGameInfoModel();
-    void setWidthHeight(int w, int h);
-    int getWidth();
-    int getHeight();
     void setSaveStates(bool s);
     void setCheats(bool c);
     void setPatched(bool p);

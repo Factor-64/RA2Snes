@@ -64,6 +64,7 @@ struct UserInfo {
     bool cheats;
     bool patched;
     bool autohardcore;
+    bool compact;
 };
 
 struct GameInfo {
