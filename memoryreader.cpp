@@ -152,7 +152,7 @@ QList<QPair<int, int>> MemoryReader::getUniqueMemoryAddresses()
     return uniqueMemoryAddresses;
 }
 
-static uint32_t peek(uint32_t address, uint32_t num_bytes, void* ud) //Modified verion of a test for runtime in rcheevos
+static uint32_t peek(uint32_t address, uint32_t num_bytes, void* ud) //Modified from a test for runtime in rcheevos
 {
     uint8_t* memory = (uint8_t*)ud;
 
