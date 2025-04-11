@@ -24,7 +24,7 @@ ApplicationWindow {
     }
     minimumWidth: 600
     minimumHeight: 600
-    title: "ra2snes - v1.1.1"
+    title: "ra2snes - v" + Ra2snes.version
 
     property int windowWidth: width
     property int windowHeight: height
@@ -224,6 +224,14 @@ ApplicationWindow {
         }
         ScrollBar.vertical: ScrollBar {
             policy: ScrollBar.AsNeeded
+        }
+    }
+
+    Connections {
+        target: Ra2snes
+        function onNewUpdate() {
+            var component = Qt.createComponent("./updatedialog.qml")
+            var popup = component.createObject(mainWindow)
         }
     }
 

@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 import CustomModels 1.0
-import QtQuick.Effects
+
 Item {
 	Flow {
 		id: sortingSettingsFlow

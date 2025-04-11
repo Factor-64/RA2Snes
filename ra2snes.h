@@ -4,9 +4,8 @@
 #include "usb2snes.h"
 #include "raclient.h"
 #include "memoryreader.h"
-#include "achievementmodel.h"
-#include "gameinfomodel.h"
-#include "userinfomodel.h"
+#include "updater.h"
+#include "version.h"
 
 class ra2snes : public QObject
 {
@@ -14,6 +13,8 @@ class ra2snes : public QObject
     Q_PROPERTY(QString console READ console WRITE setConsole NOTIFY consoleChanged)
     Q_PROPERTY(QString appDirPath READ appDirPath WRITE setAppDirPath NOTIFY appDirPathChanged)
     Q_PROPERTY(QString theme READ theme WRITE setTheme NOTIFY themeChanged)
+    Q_PROPERTY(QString version READ version CONSTANT)
+    Q_PROPERTY(QString latestVersion READ latestVersion NOTIFY newUpdate)
 
 public:
     enum Task {
@@ -36,9 +37,6 @@ public:
         return &instance;
     }
 
-    AchievementModel* achievementModel();
-    GameInfoModel* gameInfoModel();
-    UserInfoModel* userInfoModel();
     bool isRemembered();
     QString xorEncryptDecrypt(const QString &token, const QString &key);
     QString console() const;
@@ -46,6 +44,8 @@ public:
     QString appDirPath() const;
     void setAppDirPath(const QString &appDirPath);
     QString theme() const;
+    QString version() const;
+    QString latestVersion() const;
 
 public slots:
     void signIn(const QString &username, const QString &password, bool remember);
@@ -69,6 +69,7 @@ signals:
     void themeChanged();
     void disableModeSwitching();
     void enableModeSwitching();
+    void newUpdate();
 
 private:
     explicit ra2snes(QObject *parent = nullptr);
@@ -79,7 +80,9 @@ private:
     Usb2Snes *usb2snes;
     RAClient *raclient;
     MemoryReader *reader;
+    Updater *updater;
     QString m_currentGame;
+    const QString m_version = RA2SNES_VERSION_STRING;
     bool loggedin;
     bool gameLoaded;
     bool loadingGame;
@@ -94,6 +97,7 @@ private:
     QList<QPair<int, int>> uniqueMemoryAddresses;
     QString m_appDirPath;
     QString m_theme;
+    QString m_latestVersion;
 
     void createSettingsFile();
     void loadSettings();

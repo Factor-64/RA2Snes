@@ -345,6 +345,7 @@ ApplicationWindow {
             window.showErrorMessage(error);
         }
     }
+
     Component.onCompleted: {
         setupTheme();
         themeListTimer.start();

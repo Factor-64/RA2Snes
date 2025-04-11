@@ -3,7 +3,6 @@ import QtQuick.Controls.Material
 import QtQuick.Layouts
 import CustomModels 1.0
 import QtQuick.Effects
-import QtMultimedia
 
 Rectangle {
     id: contentForm

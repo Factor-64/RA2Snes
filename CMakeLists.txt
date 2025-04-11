@@ -60,6 +60,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 qt_add_executable(ra2snes
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        updater.h updater.cpp
+        version.h
+
     )
     qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 else()
