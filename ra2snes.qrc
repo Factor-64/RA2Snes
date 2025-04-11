@@ -26,5 +26,6 @@
         <file>ui/progressbar.qml</file>
         <file>ui/listview.qml</file>
         <file>ui/sorting.qml</file>
+        <file>ui/updatedialog.qml</file>
     </qresource>
 </RCC>

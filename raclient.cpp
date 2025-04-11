@@ -4,10 +4,11 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include "rc_version.h"
+#include "version.h"
 
 const QString RAClient::baseUrl = "https://retroachievements.org/";
 const QString RAClient::mediaUrl = "https://media.retroachievements.org/";
-const QString RAClient::userAgent = "ra2snes/1.1.1 rcheevos/" + QString(RCHEEVOS_VERSION_STRING);
+const QString RAClient::userAgent = QString("ra2snes/%1 rcheevos/%2").arg(RA2SNES_VERSION_STRING,RCHEEVOS_VERSION_STRING);
 
 RAClient::RAClient(QObject *parent)
     : QObject(parent)

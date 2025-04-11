@@ -7,6 +7,7 @@ ra2snes::ra2snes(QObject *parent)
     usb2snes = new Usb2Snes(false);
     raclient = RAClient::instance();
     reader = new MemoryReader(this);
+    updater = new Updater(this);
     m_currentGame = "";
     loggedin = false;
     gameLoaded = false;
@@ -19,12 +20,18 @@ ra2snes::ra2snes(QObject *parent)
     framesPassed = 0;
     updateAddresses = false;
     m_theme = "Dark";
+    m_latestVersion = "";
 
     raclient->setHardcore(true);
     raclient->setAutoHardcore(false);
     saveUISettings(600, 600, false);
 
     loadSettings();
+
+    connect(updater, &Updater::updateAvailable, this, [=](const QString &latestVersion) {
+        m_latestVersion = latestVersion;
+    });
+    updater->checkForUpdates();
 
     connect(usb2snes, &Usb2Snes::connected, this, [=]() {
         usb2snes->setAppName("ra2snes");
@@ -262,6 +269,8 @@ void ra2snes::onLoginSuccess()
     createSettingsFile();
     reset = true;
     emit loginSuccess();
+    if(m_latestVersion != "")
+        emit newUpdate();
     onUsb2SnesStateChanged();
 }
 
@@ -521,6 +530,10 @@ void ra2snes::loadSettings() {
             remember_me = true;
             raclient->loginToken(username, xorEncryptDecrypt(token, time));
         }
+        else
+        {
+            QTimer::singleShot(0, this, [=] { emit signedOut(); });
+        }
     }
     //else
     //{
@@ -542,7 +555,6 @@ void ra2snes::signOut()
     createSettingsFile();
     loadSettings();
     onUsb2SnesStateChanged();
-    emit signedOut();
 }
 
 void ra2snes::changeMode()
@@ -642,6 +654,16 @@ void ra2snes::setTheme(const QString &theme)
 QString ra2snes::theme() const
 {
     return m_theme;
+}
+
+QString ra2snes::version() const
+{
+    return m_version;
+}
+
+QString ra2snes::latestVersion() const
+{
+    return m_latestVersion;
 }
 
 void ra2snes::refreshRAData()
