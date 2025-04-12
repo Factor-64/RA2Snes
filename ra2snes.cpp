@@ -1,5 +1,5 @@
 #include "ra2snes.h"
-#include <QDebug>
+//#include <QDebug>
 
 ra2snes::ra2snes(QObject *parent)
     : QObject(parent)
@@ -7,7 +7,6 @@ ra2snes::ra2snes(QObject *parent)
     usb2snes = new Usb2Snes(false);
     raclient = RAClient::instance();
     reader = new MemoryReader(this);
-    updater = new Updater(this);
     m_currentGame = "";
     loggedin = false;
     gameLoaded = false;
@@ -21,17 +20,11 @@ ra2snes::ra2snes(QObject *parent)
     updateAddresses = false;
     m_theme = "Dark";
     m_latestVersion = "";
+    downloadUrl = "";
 
     raclient->setHardcore(true);
     raclient->setAutoHardcore(false);
     saveUISettings(600, 600, false);
-
-    loadSettings();
-
-    connect(updater, &Updater::updateAvailable, this, [=](const QString &latestVersion) {
-        m_latestVersion = latestVersion;
-    });
-    updater->checkForUpdates();
 
     connect(usb2snes, &Usb2Snes::connected, this, [=]() {
         usb2snes->setAppName("ra2snes");
@@ -146,6 +139,9 @@ ra2snes::ra2snes(QObject *parent)
     //    if(!raclient->isQueueRunning())
     //        QThreadPool::globalInstance()->start([=] { raclient->runQueue(); });
     //});
+
+    checkForUpdate();
+    loadSettings();
 }
 
 ra2snes::~ra2snes()
@@ -268,9 +264,12 @@ void ra2snes::onLoginSuccess()
     loggedin = true;
     createSettingsFile();
     reset = true;
+    //qDebug() << "logged";
     emit loginSuccess();
-    if(m_latestVersion != "")
-        emit newUpdate();
+    QTimer::singleShot(1000, this, [=] {
+        if(downloadUrl != "")
+            emit newUpdate();
+    });
     onUsb2SnesStateChanged();
 }
 
@@ -531,14 +530,13 @@ void ra2snes::loadSettings() {
             raclient->loginToken(username, xorEncryptDecrypt(token, time));
         }
         else
-        {
             QTimer::singleShot(0, this, [=] { emit signedOut(); });
-        }
     }
-    //else
-    //{
-      //qDebug() << "Settings file does not exist.";
-    //}
+    else
+    {
+        createSettingsFile();
+        QTimer::singleShot(0, this, [=] { emit signedOut(); });
+    }
     setCurrentConsole();
 }
 
@@ -672,3 +670,64 @@ void ra2snes::refreshRAData()
     emit disableModeSwitching();
     onUsb2SnesStateChanged();
 }
+
+void ra2snes::checkForUpdate() {
+    QNetworkAccessManager *tempNetworkManager = new QNetworkAccessManager(this);
+
+    connect(tempNetworkManager, &QNetworkAccessManager::finished, this, [this, tempNetworkManager](QNetworkReply *reply) {
+        if (reply->error() == QNetworkReply::NoError) {
+            QJsonDocument jsonDoc = QJsonDocument::fromJson(reply->readAll());
+            QJsonObject jsonObj = jsonDoc.object();
+            m_latestVersion = jsonObj["tag_name"].toString().mid(1);
+            if (QVersionNumber::fromString(m_latestVersion) > QVersionNumber::fromString(m_version)) {
+                QJsonArray assets = jsonObj["assets"].toArray();
+
+                for (int i = 0; i < assets.size(); i++) {
+                    const QJsonObject assetObj = assets.at(i).toObject();
+                    const QString assetName = assetObj["name"].toString();
+#ifdef Q_OS_WIN
+                    if (assetName.endsWith("windows-x64.zip")) {
+                        downloadUrl = assetObj["browser_download_url"].toString();
+                        break;
+                    }
+#elif defined(Q_OS_LINUX)
+                    if (assetName.endsWith("linux-x64.zip")) {
+                        downloadUrl = assetObj["browser_download_url"].toString();
+                        break;
+                    }
+#endif
+                }
+            }
+        } else {
+            qDebug() << "Network error:" << reply->errorString();
+        }
+
+        // Clean up
+        reply->deleteLater();               // Delete the reply object
+        tempNetworkManager->deleteLater();  // Delete the temporary network manager
+    });
+
+    // Create and send the request
+    QUrl apiUrl(QString("https://api.github.com/repos/%1/releases/latest").arg(RA2SNES_REPO_URL)); // Replace with your actual API URL
+    QNetworkRequest request(apiUrl);
+    tempNetworkManager->get(request); // Send the GET request
+}
+
+void ra2snes::beginUpdate() {
+#ifdef Q_OS_WIN
+    QString program = m_appDirPath + "/updater.exe";
+#elif defined(Q_OS_LINUX)
+    QString program = m_appDirPath + "/updater";
+#endif
+
+    QStringList arguments;
+    arguments << downloadUrl;
+    // Start the process and wait for it to begin
+    if (QProcess::startDetached(program, arguments)) {
+        qDebug() << "Updater process started successfully.";
+        QCoreApplication::quit(); // Quit the application after updater starts
+    } else {
+        qDebug() << "Failed to start updater process.";
+    }
+}
+

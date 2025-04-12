@@ -4,7 +4,6 @@
 #include "usb2snes.h"
 #include "raclient.h"
 #include "memoryreader.h"
-#include "updater.h"
 #include "version.h"
 
 class ra2snes : public QObject
@@ -55,6 +54,7 @@ public slots:
     void autoChange(bool ac);
     void refreshRAData();
     void setTheme(const QString &theme);
+    void beginUpdate();
 
 signals:
     void loginSuccess();
@@ -80,7 +80,6 @@ private:
     Usb2Snes *usb2snes;
     RAClient *raclient;
     MemoryReader *reader;
-    Updater *updater;
     QString m_currentGame;
     const QString m_version = RA2SNES_VERSION_STRING;
     bool loggedin;
@@ -98,6 +97,7 @@ private:
     QString m_appDirPath;
     QString m_theme;
     QString m_latestVersion;
+    QString downloadUrl;
 
     void createSettingsFile();
     void loadSettings();
@@ -111,6 +111,7 @@ private:
     void onUsb2SnesGetFileDataReceived();
     void onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos);
     void setCurrentConsole();
+    void checkForUpdate();
 };
 
 #endif // RA2SNES_H

@@ -9,8 +9,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets LinguistTools WebSockets Quick Qml QuickWidgets QuickLayouts QuickControls2)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets LinguistTools WebSockets Quick Qml QuickWidgets QuickLayouts QuickControls2)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core LinguistTools WebSockets Quick Qml QuickWidgets QuickLayouts QuickControls2 Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core LinguistTools WebSockets Quick Qml QuickWidgets QuickLayouts QuickControls2 Widgets)
 
 set(TS_FILES ra2snes_en_US.ts)
 
@@ -53,6 +53,22 @@ set(PROJECT_SOURCES
         gameinfomodel.h
         userinfomodel.cpp
         userinfomodel.h
+        version.h
+)
+
+add_executable(updater
+  updater_main.cpp
+  updater.cpp
+  updater.h
+)
+
+target_link_libraries(updater PRIVATE Qt${QT_VERSION_MAJOR}::Core)
+target_link_libraries(updater PRIVATE Qt${QT_VERSION_MAJOR}::Network)
+target_link_libraries(updater PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+
+
+target_include_directories(updater PRIVATE
+    ${CMAKE_SOURCE_DIR}/include
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -60,9 +76,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 qt_add_executable(ra2snes
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        updater.h updater.cpp
-        version.h
-
     )
     qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 else()
@@ -79,7 +92,6 @@ else()
 endif()
 
 target_link_libraries(ra2snes PRIVATE Qt${QT_VERSION_MAJOR}::Core)
-target_link_libraries(ra2snes PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(ra2snes PRIVATE Qt${QT_VERSION_MAJOR}::WebSockets)
 target_link_libraries(ra2snes PRIVATE Qt${QT_VERSION_MAJOR}::Quick)
 target_link_libraries(ra2snes PRIVATE Qt${QT_VERSION_MAJOR}::Qml)
@@ -104,8 +116,7 @@ set_target_properties(ra2snes PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-include(GNUInstallDirs)
-install(TARGETS ra2snes
+install(TARGETS ra2snes updater
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

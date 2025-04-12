@@ -34,6 +34,7 @@ int main(int argc, char *argv[]) {
     ra2snes::instance()->setAppDirPath(QCoreApplication::applicationDirPath());
 
     QObject::connect(ra2snes::instance(), &ra2snes::loginSuccess, &engine, [&engine]() {
+        //qDebug() << "Loggedin";
         loadQml(engine, "qrc:/ui/mainwindow.qml");
     });
 

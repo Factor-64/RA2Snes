@@ -24,7 +24,6 @@ RAClient::RAClient(QObject *parent)
     //qDebug() << userAgent;
 }
 
-
 void RAClient::loginPassword(const QString& username, const QString& password)
 {
     QJsonObject post_content;
@@ -130,12 +129,12 @@ void RAClient::queueAchievementRequest(unsigned int id, QDateTime achieved) {
         startQueue();
 }
 
-void RAClient::queueLeaderboardRequest(unsigned int id, QDateTime achieved, unsigned int score) {
+/*void RAClient::queueLeaderboardRequest(unsigned int id, QDateTime achieved, unsigned int score) {
     RequestData data = {LeaderboardRequest, id, true, achieved, score};
     queue.enqueue(data);
     if(!running)
         startQueue();
-}
+}*/
 
 void RAClient::runQueue() {
     //qDebug() << "Queue Size: " << queue.size();
@@ -154,11 +153,6 @@ void RAClient::runQueue() {
         }
     }
     else running = false;
-}
-
-int RAClient::queueSize()
-{
-    return queue.size();
 }
 
 bool RAClient::isQueueRunning()
@@ -231,21 +225,6 @@ bool RAClient::getHardcore()
     return userinfo_model->hardcore();
 }
 
-UserInfoModel* RAClient::getUserInfoModel()
-{
-    return userinfo_model;
-}
-
-GameInfoModel* RAClient::getGameInfoModel()
-{
-    return gameinfo_model;
-}
-
-AchievementModel* RAClient::getAchievementModel()
-{
-    return achievement_model;
-}
-
 void RAClient::clearAchievements()
 {
     achievement_model->clearAchievements();
@@ -270,6 +249,16 @@ void RAClient::setConsole(const QString& c, const QUrl& icon)
 {
     gameinfo_model->console(c);
     gameinfo_model->console_icon(icon);
+}
+
+UserInfoModel* RAClient::getUserInfoModel()
+{
+    return userinfo_model;
+}
+
+AchievementModel* RAClient::getAchievementModel()
+{
+    return achievement_model;
 }
 
 void RAClient::setAchievementInfo(unsigned int id, AchievementInfoType infotype, int value)
