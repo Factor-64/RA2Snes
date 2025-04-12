@@ -1,29 +1,41 @@
 #ifndef UPDATER_H
 #define UPDATER_H
 
-#include <QObject>
+#include <QWidget>
+#include <QTextEdit>
+#include <QProgressBar>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-#include "version.h"
+#include <QFile>
+#include <QString>
 
-class Updater : public QObject {
+class Updater : public QWidget {
     Q_OBJECT
-
 public:
-    Updater(QObject *parent = nullptr);
+    explicit Updater(QWidget *parent = nullptr);
 
-    void checkForUpdates();
+    // Starts the download process with the given URL
+    void startDownload(const QUrl &url);
+
+    // Shows error messages in the status box
+    void showError(const QString &message);
+
+    // Extracts the given ZIP file
+    void extractFile(const QString &filePath);
+
+    void setAppDir(const QString &dir);
+signals:
+    void finished();
 
 private slots:
-    void onReplyFinished(QNetworkReply *reply);
-
-signals:
-    void updateAvailable(const QString &latestVersion);
+    // Updates the progress bar based on download progress
+    void updateProgress(qint64 bytesReceived, qint64 bytesTotal);
 
 private:
-    QNetworkAccessManager networkManager;
-    const QString repository = RA2SNES_REPO_URL;
-    const QString currentVersion = RA2SNES_VERSION_STRING;
+    QTextEdit *statusBox;               // Displays status messages
+    QProgressBar *progressBar;          // Shows progress (download/extraction)
+    QNetworkAccessManager *networkManager; // Manages network requests
+    QString appdir;
 };
 
 #endif // UPDATER_H

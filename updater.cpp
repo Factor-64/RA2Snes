@@ -1,28 +1,117 @@
 #include "updater.h"
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QVersionNumber>
-#include <QDebug>
+#include <QVBoxLayout>
+#include <QProcess>
+#include <QFileInfo>
+#include <QDir>
+#include <QTimer>
 
-Updater::Updater(QObject *parent)
-    : QObject(parent) {
-    connect(&networkManager, &QNetworkAccessManager::finished, this, &Updater::onReplyFinished);
+Updater::Updater(QWidget *parent)
+    : QWidget(parent),
+    statusBox(new QTextEdit(this)),
+    progressBar(new QProgressBar(this)),
+    networkManager(new QNetworkAccessManager(this)) {
+
+    QVBoxLayout *layout = new QVBoxLayout(this);
+
+    statusBox->setReadOnly(true);
+    layout->addWidget(statusBox);
+
+    progressBar->setValue(0);
+    layout->addWidget(progressBar);
+
+    resize(300, 100);
 }
 
-void Updater::checkForUpdates() {
-    QUrl apiUrl(QString("https://api.github.com/repos/%1/releases/latest").arg(repository));
-    QNetworkRequest request(apiUrl);
-    networkManager.get(request);
-}
+void Updater::startDownload(const QUrl &url) {
+    QNetworkRequest request(url);
+    QNetworkReply *reply = networkManager->get(request);
 
-void Updater::onReplyFinished(QNetworkReply *reply) {
-    if (reply->error() == QNetworkReply::NoError) {
-        QJsonDocument jsonDoc = QJsonDocument::fromJson(reply->readAll());
-        QJsonObject jsonObj = jsonDoc.object();
-        QString latestVersion = jsonObj["tag_name"].toString().mid(1);
-        if (QVersionNumber::fromString(latestVersion) > QVersionNumber::fromString(currentVersion)) {
-            emit updateAvailable(latestVersion);
+    statusBox->append("Starting download: " + url.toString());
+
+    connect(reply, &QNetworkReply::downloadProgress, this, &Updater::updateProgress);
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        if (reply->error() == QNetworkReply::NoError) {
+            QFile file("latest_release.zip");
+            if (file.open(QIODevice::WriteOnly)) {
+                file.write(reply->readAll());
+                file.close();
+                statusBox->append("Download completed!");
+                extractFile(appdir + "/latest_release.zip");
+            }
+        } else {
+            statusBox->append("Error: " + reply->errorString());
         }
+        reply->deleteLater();
+    });
+
+    connect(reply, &QNetworkReply::errorOccurred, this, [this](QNetworkReply::NetworkError error) {
+        statusBox->append("Network Error: " + QString::number(error));
+    });
+}
+
+void Updater::updateProgress(qint64 bytesReceived, qint64 bytesTotal) {
+    if (bytesTotal > 0) {
+        progressBar->setValue(static_cast<int>((bytesReceived * 100) / bytesTotal));
+        statusBox->append(QString("Downloaded %1 of %2 bytes").arg(bytesReceived).arg(bytesTotal));
     }
-    reply->deleteLater();
+}
+
+void Updater::extractFile(const QString &filePath) {
+    QString outputDir = appdir; // Directory where files will be extracted
+
+    // Ensure the output directory exists
+    QDir().mkpath(outputDir);
+
+    statusBox->append("Extracting Update...");
+#ifdef Q_OS_WIN
+    // Use PowerShell to extract ZIP file on Windows
+    QString powershellScript = QString(
+                                   "Expand-Archive -LiteralPath '%1' -DestinationPath '%2' -Force"
+                                   ).arg(QDir::toNativeSeparators(filePath), QDir::toNativeSeparators(outputDir));
+
+    QProcess *process = new QProcess(this);
+    process->start("powershell", QStringList() << "-Command" << powershellScript);
+
+    connect(process, &QProcess::finished, this, [this, process](int exitCode) {
+        if (exitCode == 0) {
+            statusBox->append("Extraction completed successfully!");
+            statusBox->append("Launching RA2SNES...");
+            QProcess::startDetached(appdir + "/ra2snes.exe", QStringList());
+            QTimer::singleShot(1000, this, [=]() {
+                 emit finished();
+            });
+        } else {
+            statusBox->append("Error: Extraction failed!");
+        }
+        process->deleteLater();
+    });
+
+#elif defined(Q_OS_LINUX)
+    // Use the `unzip` command on Linux with the overwrite flag (-o)
+    QProcess *process = new QProcess(this);
+    process->start("unzip", QStringList() << "-o" << filePath << "-d" << outputDir);
+
+    connect(process, &QProcess::finished, this, [this, process](int exitCode) {
+        if (exitCode == 0) {
+            statusBox->append("Extraction completed successfully!");
+            QProcess::startDetached(appdir + "/ra2snes", QStringList());
+        } else {
+            statusBox->append("Error: Extraction failed!");
+        }
+        process->deleteLater();
+    });
+
+#else
+    statusBox->append("Error: Extraction is not supported on this platform.");
+#endif
+}
+
+void Updater::setAppDir(const QString &dir)
+{
+    appdir = dir;
+}
+
+void Updater::showError(const QString &message) {
+    statusBox->append(message);
 }

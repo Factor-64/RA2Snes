@@ -17,8 +17,7 @@ public:
     void remapTriggerAddresses();
     QList<QPair<int, int>> getUniqueMemoryAddresses();
     void checkAchievements();
-    void checkLeaderboards();
-    void freeConsoleMemory();
+    //void checkLeaderboards();
     void addFrameToQueues(QByteArray data, int frames);
     int achievementQueueSize();
 
