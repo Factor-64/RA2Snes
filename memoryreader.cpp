@@ -274,7 +274,7 @@ void MemoryReader::checkAchievements() // Modified version of runtime.c from rch
     }
 }
 
-void MemoryReader::checkLeaderboards()
+/*void MemoryReader::checkLeaderboards()
 {
     emit leaderboardsChecked();
-}
+}*/

@@ -3,7 +3,6 @@
 
 #include <QNetworkReply>
 #include <QQueue>
-
 #include "userinfomodel.h"
 #include "gameinfomodel.h"
 #include "achievementmodel.h"
@@ -40,19 +39,17 @@ public:
     void awardAchievement(unsigned int id, bool hardcore, QDateTime achieved);
     //void getLBPlacements();
     AchievementModel* getAchievementModel();
+    UserInfoModel* getUserInfoModel();
     QList<LeaderboardInfo> getLeaderboards();
     void queueAchievementRequest(unsigned int id, QDateTime achieved);
-    void queueLeaderboardRequest(unsigned int id, QDateTime achieved, unsigned int score);
+    //void queueLeaderboardRequest(unsigned int id, QDateTime achieved, unsigned int score);
     void setHardcore(bool h);
     void setConsole(const QString& c, const QUrl& icon);
     bool getHardcore();
-    UserInfoModel* getUserInfoModel();
-    GameInfoModel* getGameInfoModel();
     void setSaveStates(bool s);
     void setCheats(bool c);
     void setPatched(bool p);
     void setTitle(QString t, QString i, QString l);
-    int queueSize();
     void startQueue();
     void stopQueue();
     void runQueue();

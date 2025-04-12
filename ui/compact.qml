@@ -479,7 +479,7 @@ Rectangle {
                 width: 30
                 height: 30
                 source: "./refreshbutton.qml"
-                active: true
+                active: gameInfo.visible
             }
         }
 
