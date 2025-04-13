@@ -17,6 +17,7 @@ Updater::Updater(QWidget *parent)
     layout->addWidget(statusBox);
 
     progressBar->setValue(0);
+
     layout->addWidget(progressBar);
 
     resize(300, 100);

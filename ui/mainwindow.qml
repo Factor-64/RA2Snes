@@ -5,7 +5,7 @@ import CustomModels 1.0
 import QtMultimedia
 import Qt.labs.folderlistmodel
 
-// I apologize to anyone looking at this
+// I apologize less to anyone looking at my qml
 
 ApplicationWindow {
     id: mainWindow
