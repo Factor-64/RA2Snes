@@ -42,6 +42,7 @@ Item {
         z: 20
         width: 150
         height: popupColumn.implicitHeight
+        clip: true
         background: Rectangle {
             id: menuPopupBG
             width: parent.width
