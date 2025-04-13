@@ -28,13 +28,6 @@ Item {
 	property color buttonBackgroundColor: "#dddddd"
     property color buttonBorderColor: "#d6d6d6"
 
-	property color disabledButtonBackgroundColor: "#cccccc"
-	property color disabledButtonTextColor: "#eeeeee"
-	
-	property color refreshIconColor: "#000000"
-    property color signOutIconColor: "#ff0000"
-    property color signOutTextColor: "#ff0000"
-
 	property color highlightedButtonBackgroundColor: "#f0f0f0"
 	property color highlightedButtonBorderColor: "#424242"
 	property color highlightedButtonTextColor: "#333333"
@@ -45,7 +38,6 @@ Item {
 	property color popupItemDisabled: "#ffffff"
 	property color popupLineColor: "#bebebe"
 
-	
 	//Checkboxes
 	property color checkBoxCheckedColor: "#005cc8"
 	property color checkBoxCheckedBorderColor: "#005cc8"
@@ -73,6 +65,7 @@ Item {
     property color winConditionIconColor: "#000000"
     property color primedIconColor: "#000000"
 	property color hamburgerIconColor: "#000000"
+	property color refreshIconColor: "#000000"
 	
 	//Misc
 	property color backgroundColor: "#f8f8f8"

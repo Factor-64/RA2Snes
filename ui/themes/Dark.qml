@@ -28,10 +28,6 @@ Item {
 	property color buttonBackgroundColor: "#222222"
 	property color buttonBorderColor: "#2a2a2a"
 	
-	property color disabledButtonBackgroundColor: "#888888"
-	property color disabledButtonTextColor: "#bbbbbb"
-	
-    property color refreshIconColor: "#ffffff"
     property color signOutIconColor: "#ff0000"
     property color signOutTextColor: "#ff0000"
 	
@@ -39,6 +35,7 @@ Item {
 	property color highlightedButtonBorderColor: "#c8c8c8"
 	property color highlightedButtonTextColor: "#eeeeee"
 	
+	//Popup
 	property color popupBackgroundColor: "#2a2a2a"
 	property color popupHighlightColor: "#161616"
 	property color popupItemDisabled: "#000000"
@@ -71,6 +68,7 @@ Item {
     property color winConditionIconColor: "#ffffff"
     property color primedIconColor: "#ffffff"
 	property color hamburgerIconColor: "#ffffff"
+	property color refreshIconColor: "#ffffff"
 	
 	//Misc
 	property color backgroundColor: "#1a1a1a"
