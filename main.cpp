@@ -8,7 +8,6 @@
 #include "userinfomodel.h"
 #include "achievementsortfilterproxymodel.h"
 
-// Function to handle transitions between QML screens
 void loadQml(QQmlApplicationEngine &engine, const QString &url) {
     const auto rootObjects = engine.rootObjects();
     QObject *window = nullptr;
