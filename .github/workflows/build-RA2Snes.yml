@@ -72,7 +72,7 @@ jobs:
         mkdir -p build/ra2snes.app/Contents/Frameworks
         cp -R /opt/homebrew/Cellar/qt/6*/lib/Qt*.framework build/ra2snes.app/Contents/Frameworks/
         mkdir -p build/ra2snes.app/Contents/PlugIns
-        cp -R /opt/homebrew/Cellar/qt/6*/plugins/* build/ra2snes.app/Contents/PlugIns/
+        ls /opt/homebrew/Cellar/qt/6*/
         /opt/homebrew/Cellar/qt/6*/bin/macdeployqt6 build/ra2snes.app -dmg -verbose=3
   
     - name: Upload macOS Build Artifacts
