@@ -10,13 +10,14 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: true
-    - name: Upgrade to Ubuntu 24.10
+
+    - name: Add Ubuntu 24.10 Repository and Install qml6-module-qtquick-effects
       run: |
-        sudo apt update && sudo apt upgrade -y
-        sudo sed -i 's/Prompt=lts/Prompt=normal/' /etc/update-manager/release-upgrades
-        sudo do-release-upgrade -d
-        lsb_release -a
-  
+        echo "deb http://archive.ubuntu.com/ubuntu/ oracular main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
+        sudo apt-get update
+        sudo apt-get install -y qml6-module-qtquick-effects
+        sudo sed -i '/oracular/d' /etc/apt/sources.list
+
     - name: Install dependencies
       run: |
         sudo apt-get update
@@ -24,10 +25,10 @@ jobs:
         qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts \
         qml6-module-qtquick-templates qml6-module-qtquick-window qt6-declarative-dev \
         qml6-module-qtqml-workerscript qml6-module-qtmultimedia qml6-module-qt-labs-folderlistmodel \
-        libqt6svg6 qml6-module-qtquick-effects libva-dev libva-glx2 libva-drm2
+        libqt6svg6 libva-dev libva-glx2 libva-drm2
 
     - name: Build rcheevos
-      run: make ARCH=x64 BUILD=c89 CFLAGS='-Wno-unused-but-set-variable' test
+      run: make ARCH=x64 BUILD=c89 HAVE_HASH=0 CFLAGS='-Wno-unused-but-set-variable' test
       working-directory: rcheevos/test
 
     - name: Configure CMake
@@ -46,11 +47,11 @@ jobs:
 
     - name: Install dependencies
       run: |
-        brew update
         brew install cmake qt
+        brew update
 
     - name: Build rcheevos
-      run: make ARCH=x64 BUILD=c89 HAVE_LUA=0 CFLAGS='-Wno-unused-but-set-variable -I/usr/local/include' test
+      run: make ARCH=x64 BUILD=c89 HAVE_HASH=0 CFLAGS='-Wno-unused-but-set-variable' test
       working-directory: rcheevos/test
 
     - name: Configure CMake
