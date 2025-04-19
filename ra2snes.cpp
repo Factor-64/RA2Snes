@@ -700,6 +700,11 @@ void ra2snes::checkForUpdate() {
                         downloadUrl = assetObj["browser_download_url"].toString();
                         break;
                     }
+#elif defined(Q_OS_MACOS)
+                    if (assetName.endsWith("macos-x64.zip")) {
+                        downloadUrl = assetObj["browser_download_url"].toString();
+                        break;
+                    }
 #endif
                 }
             }

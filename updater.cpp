@@ -59,14 +59,13 @@ void Updater::updateProgress(qint64 bytesReceived, qint64 bytesTotal) {
 }
 
 void Updater::extractFile(const QString &filePath) {
-    QString outputDir = appdir; // Directory where files will be extracted
+    QString outputDir = appdir;
 
     // Ensure the output directory exists
     QDir().mkpath(outputDir);
 
     statusBox->append("Extracting Update...");
 #ifdef Q_OS_WIN
-    // Use PowerShell to extract ZIP file on Windows
     QString powershellScript = QString(
                                    "Expand-Archive -LiteralPath '%1' -DestinationPath '%2' -Force"
                                    ).arg(QDir::toNativeSeparators(filePath), QDir::toNativeSeparators(outputDir));
@@ -88,8 +87,7 @@ void Updater::extractFile(const QString &filePath) {
         process->deleteLater();
     });
 
-#elif defined(Q_OS_LINUX)
-    // Use the `unzip` command on Linux with the overwrite flag (-o)
+#elif defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     QProcess *process = new QProcess(this);
     process->start("unzip", QStringList() << "-o" << filePath << "-d" << outputDir);
 
