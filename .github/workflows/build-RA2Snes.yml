@@ -68,7 +68,7 @@ jobs:
       run: |
         export PATH="/opt/homebrew/Cellar/qt/6*/bin:$PATH"
         cp build/updater build/ra2snes.app/Contents/MacOS
-        macdeployqt6 build/ra2snes.app -dmg -verbose=3
+        ls /opt/homebrew/Cellar/qt/6*/lib
   
     - name: Upload macOS Build Artifacts
       uses: actions/upload-artifact@v4
