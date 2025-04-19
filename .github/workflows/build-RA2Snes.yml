@@ -66,10 +66,9 @@ jobs:
 
     - name: Create dmg
       run: |
-        otool -L build/ra2snes.app/Contents/MacOS/ra2snes
         cp build/updater build/ra2snes.app/Contents/MacOS
-        install_name_tool -add_rpath /opt/homebrew/Cellar/qt/6*/lib build/ra2snes.app/Contents/MacOS/ra2snes
-        /opt/homebrew/Cellar/qt/6*/bin/macdeployqt6 build/ra2snes.app -dmg -verbose=3
+        cp -R /opt/homebrew/Cellar/qt/6*/lib/Qt*.framework build/ra2snes.app/Contents/Frameworks/
+        /opt/homebrew/Cellar/qt/6*/bin/macdeployqt6 build/ra2snes.app -dmg
   
     - name: Upload macOS Build Artifacts
       uses: actions/upload-artifact@v4
