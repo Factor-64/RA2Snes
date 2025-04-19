@@ -37,7 +37,8 @@ jobs:
       with:
         name: linux-build
         path: |
-          build/
+          build/ra2snes
+          build/updater
 
   macos-x64:
     runs-on: macos-latest
@@ -68,4 +69,5 @@ jobs:
       with:
         name: macos-build
         path: |
-          build/
+          build/ra2snes.app
+          build/updater
