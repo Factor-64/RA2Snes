@@ -66,8 +66,9 @@ jobs:
 
     - name: Create dmg
       run: |
-        ls /opt/homebrew
-        export PATH="/usr/local/opt/qt*/bin:$PATH"
+        ls /opt/homebrew/Cellar/qt/
+        ls /opt/homebrew/Cellar/qt/6*/bin
+        export PATH="/opt/homebrew/Cellar/qt/6*/bin:$PATH"
         cd build
         cp updater ra2snes.app/Contents/MacOS
         macdeployqt ra2snes.app -dmg
