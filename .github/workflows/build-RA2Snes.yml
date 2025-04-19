@@ -11,16 +11,9 @@ jobs:
       with:
         submodules: true
 
-    - name: Upgrade to Ubuntu 24.10
-      run: |
-        sudo sed -i 's/jammy/mantic/' /etc/apt/sources.list
-        sudo apt-get update
-        sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
-        sudo DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y
-        sudo do-release-upgrade -f DistUpgradeViewNonInteractive    
-
     - name: Install dependencies
       run: |
+        sudo add-apt-repository universe
         sudo apt-get update
         sudo apt-get install -y build-essential cmake qt6-tools-dev qt6-websockets-dev \
         qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts \
@@ -50,9 +43,10 @@ jobs:
       run: |
         brew update
         brew install cmake qt
+        brew install lua
 
     - name: Build rcheevos
-      run: make ARCH=x64 BUILD=c89 CFLAGS='-Wno-unused-but-set-variable' test
+      run: make ARCH=x64 BUILD=c89 CFLAGS='-Wno-unused-but-set-variable -I/usr/local/include' test
       working-directory: rcheevos/test
 
     - name: Configure CMake
