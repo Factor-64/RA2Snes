@@ -726,6 +726,8 @@ void ra2snes::beginUpdate() {
     QString program = m_appDirPath + "/updater.exe";
 #elif defined(Q_OS_LINUX)
     QString program = m_appDirPath + "/updater";
+#elif defined(Q_OS_MACOS)
+    QString program = m_appDirPath + "/updater.app";
 #endif
 
     QStringList arguments;
