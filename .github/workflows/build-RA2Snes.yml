@@ -23,7 +23,7 @@ jobs:
         sudo sed -i '/oracular/d' /etc/apt/sources.list
 
     - name: Build rcheevos
-      run: make ARCH=x64 BUILD=c89 HAVE_HASH=0 CFLAGS='-Wno-unused-but-set-variable' test
+      run: make ARCH=x64 BUILD=c89 HAVE_HASH=0 CFLAGS='-Wno-unused-but-set-variable -DRC_DISABLE_LUA' test
       working-directory: rcheevos/test
 
     - name: Configure CMake
