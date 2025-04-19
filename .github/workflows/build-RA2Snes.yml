@@ -32,6 +32,13 @@ jobs:
     - name: Build project
       run: cmake --build build --config Release
 
+    - name: Upload Linux Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux-build
+        path: |
+          build/
+
   macos-x64:
     runs-on: macos-latest
     steps:
@@ -47,7 +54,6 @@ jobs:
 
     - name: Build rcheevos
       run: make ARCH=x64 BUILD=c89 HAVE_HASH=0 CFLAGS='-Wno-unused-but-set-variable -DRC_DISABLE_LUA' test
-
       working-directory: rcheevos/test
 
     - name: Configure CMake
@@ -56,3 +62,10 @@ jobs:
 
     - name: Build project
       run: cmake --build build --config Release
+
+    - name: Upload macOS Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: macos-build
+        path: |
+          build/
