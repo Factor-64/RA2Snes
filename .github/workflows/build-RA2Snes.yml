@@ -69,7 +69,8 @@ jobs:
         export PATH="/opt/homebrew/Cellar/qt/6*/bin:$PATH"
         cd build
         cp updater ra2snes.app/Contents/MacOS
-        macdeployqt6 ra2snes.app -dmg -verbose=3
+        ls /opt/homebrew/Cellar/qt/6*/lib
+        macdeployqt6 ra2snes.app -dmg
   
     - name: Upload macOS Build Artifacts
       uses: actions/upload-artifact@v4
