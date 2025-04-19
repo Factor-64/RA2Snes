@@ -13,6 +13,7 @@ jobs:
     - name: Upgrade to Ubuntu 24.10
       run: |
         sudo apt update && sudo apt upgrade -y
+        sudo sed -i 's/Prompt=lts/Prompt=normal/' /etc/update-manager/release-upgrades
         sudo do-release-upgrade -d
         lsb_release -a
   
