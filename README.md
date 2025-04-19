@@ -52,6 +52,8 @@ Some achievements may activate without the requirement being met. All known inst
 
 Achievements might have a tight frame window. This may cause achievements not to activate because reading the memory of SD2Snes is not frame-perfect. 
 
+Achievements that utilize SRAM will also be affected as SRAM is not updated continuously on SD2Snes.
+
 I recommend unlocking more achievements before retrying an achievement as the fewer achievements there are to check the fewer memory values are needed to be read from SD2Snes.
 
 If an achievement will not trigger at all please see my RetroAchievements [profile](https://retroachievements.org/user/Factor64) for the SNES games I have completed (all SNES games supported will be completed on RA2Snes).
