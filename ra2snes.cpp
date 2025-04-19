@@ -113,12 +113,15 @@ ra2snes::ra2snes(QObject *parent)
         uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
         //qDebug() << "Unique Addresses:" << uniqueMemoryAddresses;
         if(uniqueMemoryAddresses.empty())
-        {
             doThisTaskNext = NoChecksNeeded;
-            usb2snes->infos();
-        }
         else
-            usb2snes->getAddresses(uniqueMemoryAddresses);
+        {
+            if(raclient->getHardcore())
+                doThisTaskNext = CheckPatched;
+            else
+                doThisTaskNext = GetConsoleAddresses;
+        }
+        usb2snes->infos();
     });
 
     connect(reader, &MemoryReader::achievementUnlocked, this, [=](unsigned int id, QDateTime time) {
@@ -298,9 +301,9 @@ void ra2snes::onRequestError(bool net)
     }
     else
     {
+        doThisTaskNext = NoChecksNeeded;
         emit displayMessage("Game Hash does not exist!", true);
         raclient->setTitleToHash();
-        doThisTaskNext = NoChecksNeeded;
 
         onUsb2SnesStateChanged();
     }
@@ -309,9 +312,9 @@ void ra2snes::onRequestError(bool net)
 
 void ra2snes::onUsb2SnesStateChanged()
 {
-    //qDebug() << "Tasks Finished: " << doThisTaskNext;
-    //qDebug() << "State: " << usb2snes->state();
-    //qDebug() << "Reset? " << reset;
+    qDebug() << "Tasks Finished: " << doThisTaskNext;
+    qDebug() << "State: " << usb2snes->state();
+    qDebug() << "Reset? " << reset;
     if(usb2snes->state() == Usb2Snes::Ready)
     {
         if(reset)
@@ -334,6 +337,8 @@ void ra2snes::onUsb2SnesStateChanged()
                     usb2snes->isPatchedROM();
                     break;
                 }
+                else if(!gameLoaded)
+                    break;
             case GetConsoleAddresses:
                 //qDebug() << "get addresses";
                 doThisTaskNext = GetConsoleInfo;
@@ -371,7 +376,7 @@ void ra2snes::onUsb2SnesStateChanged()
                 break;
             case GetCurrentGameFile:
                 //qDebug() << "get game";
-                doThisTaskNext = CheckPatched;
+                doThisTaskNext = None;
                 usb2snes->getFile(m_currentGame);
                 break;
             case GetRomType:
@@ -702,15 +707,13 @@ void ra2snes::checkForUpdate() {
             qDebug() << "Network error:" << reply->errorString();
         }
 
-        // Clean up
-        reply->deleteLater();               // Delete the reply object
-        tempNetworkManager->deleteLater();  // Delete the temporary network manager
+        reply->deleteLater();
+        tempNetworkManager->deleteLater();
     });
 
-    // Create and send the request
-    QUrl apiUrl(QString("https://api.github.com/repos/%1/releases/latest").arg(RA2SNES_REPO_URL)); // Replace with your actual API URL
+    QUrl apiUrl(QString("https://api.github.com/repos/%1/releases/latest").arg(RA2SNES_REPO_URL));
     QNetworkRequest request(apiUrl);
-    tempNetworkManager->get(request); // Send the GET request
+    tempNetworkManager->get(request);
 }
 
 void ra2snes::beginUpdate() {
@@ -722,11 +725,11 @@ void ra2snes::beginUpdate() {
 
     QStringList arguments;
     arguments << downloadUrl;
-    // Start the process and wait for it to begin
     if (QProcess::startDetached(program, arguments)) {
         qDebug() << "Updater process started successfully.";
-        QCoreApplication::quit(); // Quit the application after updater starts
-    } else {
+        QCoreApplication::quit();
+    }
+    else {
         qDebug() << "Failed to start updater process.";
     }
 }
