@@ -66,7 +66,7 @@ jobs:
 
     - name: Create dmg
       run: |
-        ls /usr/local/opt/
+        ls /usr/local/opt/runner
         export PATH="/usr/local/opt/qt*/bin:$PATH"
         cd build
         cp updater ra2snes.app/Contents/MacOS
