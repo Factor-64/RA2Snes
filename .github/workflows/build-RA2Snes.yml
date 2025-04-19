@@ -77,4 +77,4 @@ jobs:
       with:
         name: macos-build
         path: |
-          build/
+          ra2snes.dmg
