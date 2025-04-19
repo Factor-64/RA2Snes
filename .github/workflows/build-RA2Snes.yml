@@ -66,8 +66,7 @@ jobs:
 
     - name: Create dmg
       run: |
-        cp build/updater build/ra2snes.app/Contents/MacOS
-        install_name_tool -add_rpath /opt/homebrew/Cellar/qt/6*/lib build/ra2snes.app/Contents/MacOS/ra2snes
+        cp build/updater build/ra2snes.app/Contents/MacO
         mkdir -p build/ra2snes.app/Contents/Frameworks
         cp -R /opt/homebrew/Cellar/qt/6*/lib/Qt*.framework build/ra2snes.app/Contents/Frameworks/
         mkdir -p build/ra2snes.app/Contents/PlugIns
