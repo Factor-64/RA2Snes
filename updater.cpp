@@ -61,9 +61,6 @@ void Updater::updateProgress(qint64 bytesReceived, qint64 bytesTotal) {
 void Updater::extractFile(const QString &filePath) {
     QString outputDir = appdir;
 
-    // Ensure the output directory exists
-    QDir().mkpath(outputDir);
-
     statusBox->append("Extracting Update...");
 #ifdef Q_OS_WIN
     QString powershellScript = QString(
@@ -77,12 +74,14 @@ void Updater::extractFile(const QString &filePath) {
         if (exitCode == 0) {
             statusBox->append("Extraction completed successfully!");
             statusBox->append("Launching RA2SNES...");
+            QFile::remove(appdir + "latest_release.zip");
             QProcess::startDetached(appdir + "/ra2snes.exe", QStringList());
-            QTimer::singleShot(1000, this, [=]() {
+            QTimer::singleShot(2000, this, [=]() {
                  emit finished();
             });
         } else {
             statusBox->append("Error: Extraction failed!");
+            statusBox->append("Extract latest_release.zip Manually.");
         }
         process->deleteLater();
     });
@@ -94,9 +93,11 @@ void Updater::extractFile(const QString &filePath) {
     connect(process, &QProcess::finished, this, [this, process](int exitCode) {
         if (exitCode == 0) {
             statusBox->append("Extraction completed successfully!");
+            QFile::remove(appdir + "latest_release.zip");
             QProcess::startDetached(appdir + "/ra2snes", QStringList());
         } else {
             statusBox->append("Error: Extraction failed!");
+            statusBox->append("Extract latest_release.zip Manually.");
         }
         process->deleteLater();
     });
