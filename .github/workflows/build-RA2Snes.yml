@@ -64,10 +64,17 @@ jobs:
     - name: Build project
       run: cmake --build build --config Release
 
+    - name: Create dmg
+      run: |
+        export PATH="/opt/homebrew/Cellar/qt/6*/bin:$PATH"
+        cd build
+        cp updater ra2snes.app/Contents/MacOS
+        ls /opt/homebrew/Cellar/qt/6*/lib
+        macdeployqt6 ra2snes.app -dmg
+  
     - name: Upload macOS Build Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: macos-build
         path: |
-          build/ra2snes.app
-          build/updater
+          build/ra2snes.dmg
