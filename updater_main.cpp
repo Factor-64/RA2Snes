@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QTimer>
 #include "updater.h"
 
 int main(int argc, char *argv[]) {
@@ -17,9 +18,12 @@ int main(int argc, char *argv[]) {
         updater.startDownload(url);
     }
     else
+    {
         updater.showError("Error: No URL provided. Please provide a URL as a command-line argument.");
-    //updater.setAppDir(QCoreApplication::applicationDirPath());
-    //updater.startDownload(QUrl("https://github.com/Factor-64/RA2Snes/releases/download/v1.0.0/RA2Snes-windows-x64.zip"));
+        QTimer::singleShot(2000, &app, [=]() {
+            QCoreApplication::quit();
+        });
+    }
 
     return app.exec();
 }

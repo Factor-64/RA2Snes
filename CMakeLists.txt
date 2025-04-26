@@ -66,7 +66,6 @@ target_link_libraries(updater PRIVATE Qt${QT_VERSION_MAJOR}::Core)
 target_link_libraries(updater PRIVATE Qt${QT_VERSION_MAJOR}::Network)
 target_link_libraries(updater PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
-
 target_include_directories(updater PRIVATE
     ${CMAKE_SOURCE_DIR}/include
 )
