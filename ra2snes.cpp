@@ -229,6 +229,7 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
     //qDebug() << "Current Time:" << QDateTime::currentDateTime();
     framesPassed = std::round(std::abs(millisecPassed.msecsTo(QDateTime::currentDateTime())) * 0.0600988138974405);
     //qDebug() << "Frames: " << framesPassed;
+    //qDebug() << usb2snes->getBinaryData();
     millisecPassed = QDateTime::currentDateTime();
     reader->addFrameToQueues(usb2snes->getBinaryData(), framesPassed);
     //qDebug() << "Queue Size: " << reader->achievementQueueSize();
@@ -312,9 +313,9 @@ void ra2snes::onRequestError(bool net)
 
 void ra2snes::onUsb2SnesStateChanged()
 {
-    qDebug() << "Tasks Finished: " << doThisTaskNext;
-    qDebug() << "State: " << usb2snes->state();
-    qDebug() << "Reset? " << reset;
+    //qDebug() << "Tasks Finished: " << doThisTaskNext;
+    //qDebug() << "State: " << usb2snes->state();
+    //qDebug() << "Reset? " << reset;
     if(usb2snes->state() == Usb2Snes::Ready)
     {
         if(reset)
