@@ -354,6 +354,16 @@ Rectangle {
             visible: false
             clip: true
 
+            Loader {
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.topMargin: 10
+                anchors.rightMargin: 10
+                width: 30
+                height: 30
+                source: "./refreshbutton.qml"
+                active: true
+            }
 
             Column {
                 spacing: 8

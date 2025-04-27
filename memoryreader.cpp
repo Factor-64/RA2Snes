@@ -204,7 +204,7 @@ void MemoryReader::decrementAddressCounts(rc_memref_t* nextref)
 
 void MemoryReader::checkAchievements() // Modified version of runtime.c from rcheevos
 {
-    //qDebug() << achievementFrames;
+    //qDebug() << achievementFrames.first();
     while(achievementFrames.size() > 0)
     {
         for(int frame = 0; frame < achievementFrames.first().second; frame++)
@@ -221,7 +221,7 @@ void MemoryReader::checkAchievements() // Modified version of runtime.c from rch
 
                 old_measured_value = trigger->measured_value;
                 old_state = trigger->state;
-                rc_evaluate_trigger(trigger, peek, achievementFrames.first().first.data(), nullptr);
+                rc_test_trigger(trigger, peek, achievementFrames.first().first.data(), nullptr);
                 new_state = trigger->state;
 
                 if (trigger->measured_value != old_measured_value &&

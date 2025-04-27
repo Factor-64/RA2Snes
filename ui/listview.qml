@@ -209,7 +209,7 @@ ListView {
 			radius: 50
 			border.width: 1
 			border.color: themeLoader.item.popoutBorderColor
-			color: themeLoader.item.mainWindowBackgroundColor
+			color: themeLoader.item.popoutBackgroundColor
 			visible: model.primed
 			z: 2
 
@@ -315,7 +315,7 @@ ListView {
 			radius: 50
 			border.width: 1
 			border.color: themeLoader.item.popoutBorderColor
-			color: themeLoader.item.mainWindowDarkAccentColor
+			color: themeLoader.item.popoutBackgroundColor
 			visible: model.type !== ""
 			z: 2
 
