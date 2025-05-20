@@ -6,7 +6,6 @@
 class UserInfoModel : public QObject {
     Q_OBJECT
     Q_PROPERTY(QString username READ username NOTIFY dataChanged)
-    Q_PROPERTY(QString token READ token NOTIFY dataChanged)
     Q_PROPERTY(int softcore_score READ softcore_score NOTIFY dataChanged)
     Q_PROPERTY(int hardcore_score READ hardcore_score NOTIFY dataChanged)
     Q_PROPERTY(QUrl pfp READ pfp NOTIFY dataChanged)
@@ -14,9 +13,6 @@ class UserInfoModel : public QObject {
     Q_PROPERTY(QUrl link READ link NOTIFY dataChanged)
     Q_PROPERTY(int width READ width CONSTANT)
     Q_PROPERTY(int height READ height CONSTANT)
-    Q_PROPERTY(bool savestates READ savestates NOTIFY dataChanged)
-    Q_PROPERTY(bool cheats READ cheats NOTIFY dataChanged)
-    Q_PROPERTY(bool patched READ patched NOTIFY dataChanged)
     Q_PROPERTY(bool autohardcore READ autohardcore NOTIFY dataChanged)
     Q_PROPERTY(bool compact READ compact CONSTANT)
 
@@ -44,6 +40,7 @@ public:
     void clearUser();
     bool autohardcore() const;
     bool compact() const;
+    bool ingamehooks() const;
 
     void username(QString u);
     void token(QString t);
@@ -59,6 +56,7 @@ public:
     void width(int w);
     void height(int h);
     void compact(bool c);
+    void ingamehooks(bool n);
 
 signals:
     void dataChanged();

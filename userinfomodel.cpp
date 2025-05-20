@@ -72,6 +72,11 @@ bool UserInfoModel::compact() const {
     return m_userInfo.compact;
 }
 
+bool UserInfoModel::ingamehooks() const
+{
+    return m_userInfo.ingamehooks;
+}
+
 void UserInfoModel::username(QString u)
 {
     m_userInfo.username = u;
@@ -127,19 +132,16 @@ void UserInfoModel::height(int h)
 void UserInfoModel::savestates(bool s)
 {
     m_userInfo.savestates = s;
-    emit dataChanged();
 }
 
 void UserInfoModel::cheats(bool c)
 {
     m_userInfo.cheats = c;
-    emit dataChanged();
 }
 
 void UserInfoModel::patched(bool p)
 {
     m_userInfo.patched = p;
-    emit dataChanged();
 }
 
 void UserInfoModel::autohardcore(bool a)
@@ -151,6 +153,11 @@ void UserInfoModel::autohardcore(bool a)
 void UserInfoModel::compact(bool c)
 {
     m_userInfo.compact = c;
+}
+
+void UserInfoModel::ingamehooks(bool n)
+{
+    m_userInfo.ingamehooks = n;
 }
 
 void UserInfoModel::clearUser() {
