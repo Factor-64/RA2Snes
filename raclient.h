@@ -49,6 +49,7 @@ public:
     void setSaveStates(bool s);
     void setCheats(bool c);
     void setPatched(bool p);
+    void setInGameHooks(bool n);
     void setTitle(QString t, QString i, QString l);
     void startQueue();
     void stopQueue();
