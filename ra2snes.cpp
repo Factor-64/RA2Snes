@@ -209,12 +209,18 @@ void ra2snes::onUsb2SnesGetConfigDataReceived()
     {
         bool c = !config.contains("EnableCheats: false");
         bool s = !config.contains("EnableIngameSavestate: 0");
+        bool n = !config.contains("\nEnableIngameHook: false");
 
         if(isGB)
+        {
             s = !config.contains("SGBEnableState: false");
+            n = !config.contains("SGBEnableIngameHook: false");
+        }
         raclient->setCheats(c);
         raclient->setSaveStates(s);
-        if((c || s) && raclient->getHardcore())
+        raclient->setInGameHooks(n);
+        //qDebug() << c << s << n;
+        if((c || s || n) && raclient->getHardcore())
             changeMode();
         else if(raclient->getAutoHardcore() && !raclient->getHardcore())
             changeMode();
@@ -582,6 +588,11 @@ void ra2snes::changeMode()
     }
     if(user->patched()) {
         reason += (QString(needsChange ? ", " : "") + "ROM Patched");
+        needsChange = true;
+    }
+    if(user->ingamehooks())
+    {
+        reason += (QString(needsChange ? ", " : "") + "InGameHooks Enabled");
         needsChange = true;
     }
     if(!needsChange)

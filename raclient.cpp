@@ -203,6 +203,11 @@ void RAClient::setAutoHardcore(bool ac)
     userinfo_model->autohardcore(ac);
 }
 
+void RAClient::setInGameHooks(bool n)
+{
+    userinfo_model->ingamehooks(n);
+}
+
 bool RAClient::getAutoHardcore()
 {
     return userinfo_model->autohardcore();
