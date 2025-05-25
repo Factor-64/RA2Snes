@@ -41,7 +41,7 @@ Item {
         y: hamburgerRectangle.y + hamburgerRectangle.height
         z: 20
         width: 150
-        height: popupColumn.implicitHeight
+        height: popupColumn.implicitHeight + 8
         clip: true
         background: Rectangle {
             id: menuPopupBG
