@@ -17,13 +17,13 @@
 
 1) Install Dependencies
     ```
-    sudo apt-get install build-essential cmake qt6-tools-dev qt6-websockets-dev qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts qml6-module-qtquick-templates qml6-module-qtquick-window qt6-declarative-dev qml6-module-qtqml-workerscript qml6-module-qtmultimedia qml6-module-qt-labs-folderlistmodel libqt6svg6 qml6-module-qtquick-effects libva-dev libva-glx2 libva-drm2
+    sudo apt-get install -y build-essential cmake qt6-tools-dev qt6-websockets-dev qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts qml6-module-qtquick-templates qml6-module-qtquick-window qt6-declarative-dev qml6-module-qtqml-workerscript qml6-module-qtmultimedia qml6-module-qt-labs-folderlistmodel qml6-module-qtquick-effects libqt6svg6 libva-dev libva-glx2 libva-drm2
     ```
     If you are having issues with your version of Linux finding `qml6-module-qtquick-effects` try these commands:
     ```
     echo "deb http://archive.ubuntu.com/ubuntu/ oracular main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
     sudo apt-get update
-    sudo apt-get install -y build-essential cmake qt6-tools-dev qt6-websockets-dev qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts qml6-module-qtquick-templates qml6-module-qtquick-window qt6-declarative-dev qml6-module-qtqml-workerscript qml6-module-qtmultimedia qml6-module-qt-labs-folderlistmodel libqt6svg6 libva-dev libva-glx2 libva-drm2
+    sudo apt-get install -y build-essential cmake qt6-tools-dev qt6-websockets-dev qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts qml6-module-qtquick-templates qml6-module-qtquick-window qt6-declarative-dev qml6-module-qtqml-workerscript qml6-module-qtmultimedia qml6-module-qt-labs-folderlistmodel qml6-module-qtquick-effects libqt6svg6 libva-dev libva-glx2 libva-drm2
     sudo sed -i '/oracular/d' /etc/apt/sources.list
     sudo apt-get update
     ```
