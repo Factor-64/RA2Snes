@@ -40,23 +40,23 @@ SD2Snes cannot currently read the memory of Super Game Boy and games with certai
 
 ### RA2Snes won't load game or update SNES status
 
-The SD2nes firmware may have crashed power cycling the SNES should fix the issue. Ensuring a good usb connection and booting QUsb2Snes and RA2Snes before powering on the SNES will mitigate any crashes.
+The SD2NES firmware may have crashed power cycling the SNES should fix the issue. Ensuring a good USB connection and booting QUsb2Snes and RA2Snes before powering on the SNES will mitigate any crashes.
 
 ### Preemptive Unlocks
 
 Some achievements may activate without the requirement being met. All known instances occur on both emulator and hardware.
 
-**When this happens click on the achievement title to go to its page on the RetroAchievements Website and reset that achievement!** (You will have to switch between hardcore<->softcore and back to refresh the achievements)
+**When this happens, click on the achievement title to go to its page on the RetroAchievements Website and reset that achievement! Then click on the Refresh RetroAchievements Button to reflect the changes.** 
 
 ### Achievement Won't Trigger
 
 Achievements might have a tight frame window. This may cause achievements not to activate because reading the memory of SD2Snes is not frame-perfect. 
 
-Achievements that utilize SRAM will also be affected as SRAM is not updated continuously on SD2Snes.
+Achievements that utilize SRAM will also be affected, as SRAM is not updated continuously on SD2Snes.
 
-I recommend unlocking more achievements before retrying an achievement as the fewer achievements there are to check the fewer memory values are needed to be read from SD2Snes.
+I recommend unlocking more achievements before retrying an achievement, as the fewer achievements there are, the fewer memory values need to be read from SD2Snes.
 
-If an achievement will not trigger at all please see my RetroAchievements [profile](https://retroachievements.org/user/Factor64) for the SNES games I have completed (all SNES games supported will be completed on RA2Snes).
+If an achievement does not trigger at all, please see my RetroAchievements [profile](https://retroachievements.org/user/Factor64) for the SNES games I have completed (all SNES games supported will be completed on RA2Snes).
 
 If an achievement does not trigger and is not completed on my profile, you can send proof of meeting the requirements for an achievement in the Manual Unlocks thread in the RetroAchievements [Discord](https://discord.gg/dq2E4hE) and put in an [issue](https://github.com/Factor-64/ra2snes/issues) so I can look into it.
 
