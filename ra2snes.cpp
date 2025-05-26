@@ -310,7 +310,7 @@ void ra2snes::onRequestError(bool net)
     {
         doThisTaskNext = NoChecksNeeded;
         emit displayMessage("Game Hash does not exist!", true);
-        raclient->setTitleToHash();
+        raclient->setTitleToHash(m_currentGame);
 
         onUsb2SnesStateChanged();
     }
