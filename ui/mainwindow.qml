@@ -71,12 +71,17 @@ ApplicationWindow {
 
     Loader {
         id: themeLoader
+        source: "./themes/Dark.qml"
         onSourceChanged: {
             if(themeLoader.item === null)
             {
-                themeLoader.source = ("./themes/Dark.qml");
+                themeLoader.source = "./themes/Dark.qml";
                 Ra2snes.setTheme("Dark");
             }
+        }
+        active: true
+        Component.onCompleted: {
+            mainLoader.active = true;
         }
     }
 
@@ -215,7 +220,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 Layout.margins: 10
                 source: mainWindow.compact ? "./compact.qml" : "./noncompact.qml"
-                active: true
+                active: false
                 Component.onCompleted: {
                     setupTheme();
                     themeListTimer.restart();
