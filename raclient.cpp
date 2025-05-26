@@ -213,9 +213,10 @@ bool RAClient::getAutoHardcore()
     return userinfo_model->autohardcore();
 }
 
-void RAClient::setTitleToHash()
+void RAClient::setTitleToHash(const QString& currentGame)
 {
     gameinfo_model->title(gameinfo_model->md5hash());
+    gameinfo_model->md5hash(currentGame);
 }
 
 void RAClient::setTitle(QString t, QString i, QString l)
