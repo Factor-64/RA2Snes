@@ -46,7 +46,7 @@ The SD2NES firmware may have crashed power cycling the SNES should fix the issue
 
 Some achievements may activate without the requirement being met. All known instances occur on both emulator and hardware.
 
-**When this happens, click on the achievement title to go to its page on the RetroAchievements Website and reset that achievement! Then click on the Refresh RetroAchievements Button to reflect the changes.** 
+**When this happens, click on the achievement title to go to its page on the RetroAchievements Website and reset that achievement! Then click on the Refresh RetroAchievements Data Button to reflect the changes.**
 
 ### Achievement Won't Trigger
 
