@@ -31,20 +31,28 @@ ApplicationWindow {
     property string modeFailed: ""
     property bool setupFinished: false
     property bool compact: UserInfoModel.compact
+    property string baseDir: {
+        if(Ra2snes.appDirPath[0] === "/")
+            "file://" + Ra2snes.appDirPath;
+        else
+            "file:///" + Ra2snes.appDirPath;
+    }
+    property string themeDir: baseDir + "/themes"
+    property string soundDir: baseDir + "/sounds"
 
     signal themesUpdated()
     property var themes: ["Dark", "Black", "Light"]
 
     FolderListModel {
         id: themeModel
-        folder: "file:///" + Ra2snes.appDirPath + "/themes"
+        folder: mainWindow.themeDir
         nameFilters: ["*.qml"]
     }
 
     Timer {
         id: themeListTimer
         interval: 3000
-        repeat: true
+        repeat: false
         running: true
         onTriggered: {
             mainWindow.loadThemes();
@@ -53,9 +61,9 @@ ApplicationWindow {
 
     function loadThemes()
     {
+        console.log(themeModel.folder, themeModel.count);
         if(themeModel.count > 0)
         {
-            themeListTimer.stop();
             for(var i = 0; i < themeModel.count; i++)
             {
                 var fullString = themeModel.get(i, "fileURL").toString();
@@ -89,7 +97,7 @@ ApplicationWindow {
     {
         var defaultThemes = mainWindow.themes.slice(0, 3);
         if(defaultThemes.indexOf(Ra2snes.theme) < 0)
-            themeLoader.source = ("file:///" + Ra2snes.appDirPath + "/themes/" + Ra2snes.theme + ".qml");
+            themeLoader.source = (mainWindow.themeDir + "/" + Ra2snes.theme + ".qml");
         else themeLoader.source = ("./themes/" + Ra2snes.theme + ".qml");
     }
 
@@ -137,7 +145,7 @@ ApplicationWindow {
             nameFilters: ["*.mp3", "*.wav", "*.ogg", "*.flac"]
             showDirs: false
             showFiles: true
-            folder: "file:///" + Ra2snes.appDirPath + "/sounds/unlocked"
+            folder: (mainWindow.soundDir + "/unlocked")
         }
 
         FolderListModel {
@@ -145,7 +153,7 @@ ApplicationWindow {
             nameFilters: ["*.mp3", "*.wav", "*.ogg", "*.flac"]
             showDirs: false
             showFiles: true
-            folder: "file:///" + Ra2snes.appDirPath + "/sounds/beaten"
+            folder: (mainWindow.soundDir + "/beaten")
         }
 
         FolderListModel {
@@ -153,7 +161,7 @@ ApplicationWindow {
             nameFilters: ["*.mp3", "*.wav", "*.ogg", "*.flac"]
             showDirs: false
             showFiles: true
-            folder: "file:///" + Ra2snes.appDirPath + "/sounds/mastered"
+            folder: (mainWindow.soundDir + "/mastered")
         }
 
         function playRandomSound(model)

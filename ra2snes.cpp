@@ -171,6 +171,7 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
             doThisTaskNext = GetConsoleConfig;
             reset = false;
             gameLoaded = false;
+            reader->clearQueue();
             raclient->setPatched(false);
             raclient->clearAchievements();
             emit clearedAchievements();
