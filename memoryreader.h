@@ -20,6 +20,7 @@ public:
     //void checkLeaderboards();
     void addFrameToQueues(QByteArray data, int frames);
     int achievementQueueSize();
+    void clearQueue();
 
 signals:
     void finishedMemorySetup();

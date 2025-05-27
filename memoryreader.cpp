@@ -142,6 +142,11 @@ void MemoryReader::addFrameToQueues(QByteArray data, int frames)
     //LeaderBoardFramesToCheck.enqueue(qMakePair(data, frames))
 }
 
+void MemoryReader::clearQueue()
+{
+    achievementFrames.clear();
+}
+
 int MemoryReader::achievementQueueSize()
 {
     return achievementFrames.size();
