@@ -23,7 +23,7 @@
     ```
     echo "deb http://archive.ubuntu.com/ubuntu/ oracular main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
     sudo apt-get update
-    sudo apt-get install -y qml6-module-qtquick-effects
+    sudo apt-get install build-essential cmake qt6-tools-dev qt6-websockets-dev qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts qml6-module-qtquick-templates qml6-module-qtquick-window qt6-declarative-dev qml6-module-qtqml-workerscript qml6-module-qtmultimedia qml6-module-qt-labs-folderlistmodel qml6-module-qtquick-effects libqt6svg6 libva-dev libva-glx2 libva-drm2 libgstreamer1.0-dev
     sudo sed -i '/oracular/d' /etc/apt/sources.list
     ```
 2) Clone the repo
