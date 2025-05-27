@@ -21,10 +21,19 @@
     ```
     If you are having issues with your version of Linux finding `qml6-module-qtquick-effects` try these commands:
     ```
-    echo "deb http://archive.ubuntu.com/ubuntu/ oracular main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
-    sudo apt-get update
-    sudo apt-get install build-essential cmake qt6-tools-dev qt6-websockets-dev qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts qml6-module-qtquick-templates qml6-module-qtquick-window qt6-declarative-dev qml6-module-qtqml-workerscript qml6-module-qtmultimedia qml6-module-qt-labs-folderlistmodel qml6-module-qtquick-effects libqt6svg6 libva-dev libva-glx2 libva-drm2 libgstreamer1.0-dev
-    sudo sed -i '/oracular/d' /etc/apt/sources.list
+    sudo sh -c 'cat > /etc/apt/sources.list.d/ubuntu-24.10.list <<EOF
+    deb http://archive.ubuntu.com/ubuntu oracular main restricted universe multiverse
+    deb http://archive.ubuntu.com/ubuntu oracular-updates main restricted universe multiverse
+    EOF
+    cat > /etc/apt/preferences.d/99-ubuntu-oracular <<EOF
+    Package: *
+    Pin: release n=oracular
+    Pin-Priority: 50
+    EOF' && \
+    sudo apt-get update && \
+    sudo apt-get install -t oracular libqt6websockets6 libqt6qml6 libqt6gui6 libqt6svg6 qml6-module-qtquick qml6-module-qtquick-layouts qml6-module-qtquick-controls qml6-module-qtqml-workerscript qml6-module-qtquick-templates qml6-module-qtquick-window qml6-module-qtmultimedia qml6-module-qt-labs-folderlistmodel qml6-module-qtquick-effects libva-dev libva-glx2 libva-drm2 libqt6widgets6 && \
+    sudo rm /etc/apt/sources.list.d/ubuntu-24.10.list /etc/apt/preferences.d/99-ubuntu-oracular
+
     ```
 2) Clone the repo
     ```
