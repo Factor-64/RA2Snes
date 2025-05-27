@@ -19,7 +19,7 @@ jobs:
         qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts \
         qml6-module-qtquick-templates qml6-module-qtquick-window qt6-declarative-dev \
         qml6-module-qtqml-workerscript qml6-module-qtmultimedia qml6-module-qt-labs-folderlistmodel \
-        libqt6svg6 libva-dev libva-glx2 libva-drm2 libgstreamer1.0-dev
+        libqt6svg6 libva-dev libva-glx2 libva-drm2 libgstreamer1.0-dev libgl1-mesa-dev
         sudo sed -i '/oracular/d' /etc/apt/sources.list
 
     - name: Build rcheevos
