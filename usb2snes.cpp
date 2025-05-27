@@ -591,6 +591,11 @@ QByteArray Usb2Snes::getBinaryData()
     return lastBinaryMessage;
 }
 
+void Usb2Snes::clearBinaryData()
+{
+    lastBinaryMessage.clear();
+}
+
 unsigned int Usb2Snes::getRomTypeData()
 {
     return romType;

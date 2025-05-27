@@ -30,7 +30,6 @@ ra2snes::ra2snes(QObject *parent)
         usb2snes->setAppName("ra2snes");
         //qDebug() << "Connected to usb2snes server, trying to find a suitable device";
         raclient->clearAchievements();
-        raclient->stopQueue();
         usb2snes->deviceList();
         emit displayMessage("QUsb2Snes Connected", false);
     });
@@ -102,8 +101,6 @@ ra2snes::ra2snes(QObject *parent)
     connect(raclient, &RAClient::sessionStarted, this, [=] {
         emit achievementModelReady();
         emit enableModeSwitching();
-        if(!raclient->isQueueRunning())
-            raclient->startQueue();
         reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getLeaderboards(), usb2snes->getRamSizeData());
     });
 
@@ -167,7 +164,10 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
         if (m_currentGame.contains("m3nu.bin") || m_currentGame.contains("menu.bin") || reset)
         {
             if(reset)
+            {
                 emit displayMessage("", false);
+                usb2snes->clearBinaryData();
+            }
             doThisTaskNext = GetConsoleConfig;
             reset = false;
             gameLoaded = false;

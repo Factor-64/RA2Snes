@@ -51,8 +51,6 @@ public:
     void setPatched(bool p);
     void setInGameHooks(bool n);
     void setTitle(QString t, QString i, QString l);
-    void startQueue();
-    void stopQueue();
     void runQueue();
     void clearQueue();
     bool isQueueRunning();
@@ -96,7 +94,6 @@ private:
     void handleUnlocksResponse(const QJsonObject& jsonObject);
     void handleStartSessionResponse(const QJsonObject& jsonObject);
     QString latestRequest;
-    bool running;
     bool warning;
     QNetworkAccessManager* networkManager;
     UserInfoModel* userinfo_model;

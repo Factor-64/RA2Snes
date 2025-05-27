@@ -61,7 +61,6 @@ ApplicationWindow {
 
     function loadThemes()
     {
-        console.log(themeModel.folder, themeModel.count);
         if(themeModel.count > 0)
         {
             for(var i = 0; i < themeModel.count; i++)

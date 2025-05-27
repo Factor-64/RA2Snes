@@ -137,6 +137,7 @@ public:
     void                    getRamSize();
     unsigned int            getRomTypeData();
     unsigned int            getRamSizeData();
+    void                    clearBinaryData();
 
 signals:
     void    stateChanged();
