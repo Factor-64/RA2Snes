@@ -19,7 +19,6 @@ RAClient::RAClient(QObject *parent)
     achievement_model = AchievementModel::instance();
     connect(networkManager, &QNetworkAccessManager::finished, this, &RAClient::handleNetworkReply);
     queue.clear();
-    running = false;
     warning = false;
     //qDebug() << userAgent;
 }
@@ -125,8 +124,10 @@ void RAClient::awardAchievement(unsigned int id, bool hardcore, QDateTime achiev
 void RAClient::queueAchievementRequest(unsigned int id, QDateTime achieved) {
     RequestData data = {AchievementRequest, id, userinfo_model->hardcore(), achieved, 0};
     queue.enqueue(data);
-    if(!running)
-        startQueue();
+    if(queue.size() == 1)
+        runQueue();
+    else
+        emit continueQueue();
 }
 
 /*void RAClient::queueLeaderboardRequest(unsigned int id, QDateTime achieved, unsigned int score) {
@@ -138,7 +139,7 @@ void RAClient::queueAchievementRequest(unsigned int id, QDateTime achieved) {
 
 void RAClient::runQueue() {
     //qDebug() << "Queue Size: " << queue.size();
-    if(!queue.isEmpty())
+    if(!queue.isEmpty() && !userinfo_model->token().isEmpty())
     {
         RequestData data = queue.first();
         switch (data.type) {
@@ -152,25 +153,8 @@ void RAClient::runQueue() {
                 break;
         }
     }
-    else running = false;
-}
-
-bool RAClient::isQueueRunning()
-{
-    return running;
-}
-
-void RAClient::stopQueue()
-{
-    //qDebug() << "Queue Stopped";
-    running = false;
-}
-
-void RAClient::startQueue()
-{
-    //qDebug() << "Queue Started";
-    running = true;
-    runQueue();
+    else if(userinfo_model->token().isEmpty())
+        clearQueue();
 }
 
 void RAClient::clearQueue()
@@ -352,8 +336,7 @@ void RAClient::handleNetworkReply(QNetworkReply *reply)
             //qDebug() << "Network error:" << reply->errorString();
             emit requestError(true);
         }
-        if(running)
-            emit continueQueue();
+        emit continueQueue();
     }
     else if (jsonObject.contains("Error"))
     {
@@ -424,12 +407,8 @@ void RAClient::handleAwardAchievementResponse(const QJsonObject& jsonObject)
         }
     }
     isGameMastered();
-    if(running)
-    {
-        queue.removeFirst();
-        if(!queue.isEmpty())
-            emit continueQueue();
-    }
+    queue.removeFirst();
+    emit continueQueue();
 }
 
 void RAClient::handleLoginResponse(const QJsonObject& jsonObject)
