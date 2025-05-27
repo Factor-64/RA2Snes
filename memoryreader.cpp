@@ -254,7 +254,7 @@ void MemoryReader::checkAchievements() // Modified version of runtime.c from rch
                 switch (new_state)
                 {
                 case RC_TRIGGER_STATE_TRIGGERED:
-                    qDebug() << "Achievement Unlocked: " << it.key();
+                    //qDebug() << "Achievement Unlocked: " << it.key();
                     ids.append(it.key());
                     emit updateAchievementInfo(it.key(), Value, trigger->measured_value);
                     emit updateAchievementInfo(it.key(), Percent, 100);
