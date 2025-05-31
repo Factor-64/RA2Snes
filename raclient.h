@@ -53,7 +53,6 @@ public:
     void setTitle(QString t, QString i, QString l);
     void runQueue();
     void clearQueue();
-    bool isQueueRunning();
     void handleNetworkReply(QNetworkReply *reply);
     bool isGameBeaten();
     bool isGameMastered();

@@ -452,11 +452,6 @@ void ra2snes::setCurrentConsole()
     }
 }
 
-bool ra2snes::isRemembered()
-{
-    return remember_me;
-}
-
 QString ra2snes::xorEncryptDecrypt(const QString &token, const QString &key) {
     QString result = token;
     int keyLength = key.length();

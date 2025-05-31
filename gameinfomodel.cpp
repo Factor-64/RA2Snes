@@ -2,11 +2,6 @@
 
 GameInfoModel::GameInfoModel(QObject *parent) : QObject(parent) {}
 
-void GameInfoModel::setGameInfo(const GameInfo &gameInfo) {
-    m_gameInfo = gameInfo;
-    emit dataChanged();
-}
-
 QString GameInfoModel::title() const {
     return m_gameInfo.title;
 }

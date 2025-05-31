@@ -20,9 +20,6 @@ int main(int argc, char *argv[]) {
     else
     {
         updater.showError("Error: No URL provided. Please provide a URL as a command-line argument.");
-        QTimer::singleShot(2000, &app, [=]() {
-            QCoreApplication::quit();
-        });
     }
 
     return app.exec();

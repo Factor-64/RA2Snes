@@ -27,7 +27,6 @@ public:
         return &instance;
     }
 
-    void setGameInfo(const GameInfo &gameInfo);
     void updateCompletionCount();
     void updatePointCount(unsigned int points);
     void updateMissableCount();
