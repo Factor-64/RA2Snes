@@ -36,7 +36,6 @@ public:
         return &instance;
     }
 
-    bool isRemembered();
     QString xorEncryptDecrypt(const QString &token, const QString &key);
     QString console() const;
     void setConsole(const QString &console);
