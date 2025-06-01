@@ -7,24 +7,12 @@ ra2snes::ra2snes(QObject *parent)
     usb2snes = new Usb2Snes(false);
     raclient = RAClient::instance();
     reader = new MemoryReader(this);
-    m_currentGame = "";
-    loggedin = false;
-    gameLoaded = false;
-    loadingGame = false;
-    isGB = false;
     reset = false;
-    doThisTaskNext = None;
     m_console = "SNES";
-    remember_me = false;
-    framesPassed = 0;
-    updateAddresses = false;
     m_theme = "Dark";
     m_latestVersion = "";
     downloadUrl = "";
-
-    raclient->setHardcore(true);
-    raclient->setAutoHardcore(false);
-    saveUISettings(600, 600, false);
+    initVars();
 
     connect(usb2snes, &Usb2Snes::connected, this, [=]() {
         usb2snes->setAppName("ra2snes");
@@ -139,11 +127,6 @@ ra2snes::ra2snes(QObject *parent)
     //    if(!raclient->isQueueRunning())
     //        QThreadPool::globalInstance()->start([=] { raclient->runQueue(); });
     //});
-}
-
-ra2snes::~ra2snes()
-{
-    createSettingsFile();
 }
 
 void ra2snes::signIn(const QString &username, const QString &password, bool remember)
@@ -550,18 +533,30 @@ void ra2snes::loadSettings() {
 
 void ra2snes::signOut()
 {
-    raclient->clearQueue();
-    loggedin = false;
-    gameLoaded = false;
-    remember_me = false;
+    initVars();
     reset = true;
+    loadSettings();
+    onUsb2SnesStateChanged();
+}
+
+void ra2snes::initVars()
+{
+    raclient->clearQueue();
     raclient->clearAchievements();
     raclient->clearUser();
     raclient->clearGame();
+    m_currentGame = "";
+    loggedin = false;
+    gameLoaded = false;
+    loadingGame = false;
+    isGB = false;
+    doThisTaskNext = None;
+    remember_me = false;
+    framesPassed = 0;
+    updateAddresses = false;
     raclient->setHardcore(true);
-    createSettingsFile();
-    loadSettings();
-    onUsb2SnesStateChanged();
+    raclient->setAutoHardcore(false);
+    saveUISettings(600, 600, false);
 }
 
 void ra2snes::changeMode()
@@ -731,11 +726,11 @@ void ra2snes::checkForUpdate() {
 
 void ra2snes::beginUpdate() {
 #ifdef Q_OS_WIN
-    QString program = m_appDirPath + "/updater.exe";
+    QString program = m_appDirPath + QDir::separator() + "updater.exe";
 #elif defined(Q_OS_LINUX)
-    QString program = m_appDirPath + "/updater";
+    QString program = m_appDirPath + QDir::separator() + "updater";
 #elif defined(Q_OS_MACOS)
-    QString program = m_appDirPath + "/updater.app";
+    QString program = m_appDirPath + QDir::separator() + "updater.app";
 #endif
 
     QStringList arguments;
