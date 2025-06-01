@@ -466,6 +466,7 @@ void ra2snes::saveUISettings(int w, int h, bool c)
     user->width(w);
     user->height(h);
     user->compact(c);
+    createSettingsFile();
 }
 
 void ra2snes::createSettingsFile()
@@ -504,7 +505,7 @@ void ra2snes::createSettingsFile()
 void ra2snes::loadSettings() {
     QString appDir = QCoreApplication::applicationDirPath();
 
-    QString settingsFilePath = appDir + "/settings.ini";
+    QString settingsFilePath = appDir + QDir::separator() + "settings.ini";
 
     //qDebug() << appDir;
 
