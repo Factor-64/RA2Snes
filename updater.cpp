@@ -4,6 +4,8 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QTimer>
+#include <QThreadPool>
+#include "miniz/miniz.h"
 
 Updater::Updater(QWidget *parent)
     : QWidget(parent),
@@ -58,53 +60,58 @@ void Updater::updateProgress(qint64 bytesReceived, qint64 bytesTotal) {
     }
 }
 
-void Updater::extractFile(const QString &filePath) {
-    QString outputDir = appdir;
+void Updater::extractFile(const QString &filePath)
+{
+    QThreadPool::globalInstance()->start([this, filePath]() {
+        const QString outputDir = appdir;
+        mz_zip_archive zip_archive;
+        memset(&zip_archive, 0, sizeof(zip_archive));
+        statusBox->append(QString("Extracting to: %1").arg(outputDir));
 
-    statusBox->append("Extracting Update...");
-#ifdef Q_OS_WIN
-    QString powershellScript = QString(
-                                   "Expand-Archive -LiteralPath '%1' -DestinationPath '%2' -Force"
-                                   ).arg(QDir::toNativeSeparators(filePath), QDir::toNativeSeparators(outputDir));
-
-    QProcess *process = new QProcess(this);
-    process->start("powershell", QStringList() << "-Command" << powershellScript);
-
-    connect(process, &QProcess::finished, this, [this, process](int exitCode) {
-        if (exitCode == 0) {
-            statusBox->append("Extraction completed successfully!");
-            statusBox->append("Launching RA2SNES...");
-            QFile::remove(appdir + "latest_release.zip");
-            QProcess::startDetached(appdir + "/ra2snes.exe", QStringList());
-            QTimer::singleShot(2000, this, [=]() {
-                 emit finished();
-            });
-        } else {
-            statusBox->append("Error: Extraction failed!");
-            statusBox->append("Extract latest_release.zip Manually.");
+        // Initialize the ZIP reader
+        if (!mz_zip_reader_init_file(&zip_archive, filePath.toStdString().c_str(), 0))
+        {
+            statusBox->append("Error: Failed to open ZIP file!");
+            return;
         }
-        process->deleteLater();
-    });
 
-#elif defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
-    QProcess *process = new QProcess(this);
-    process->start("unzip", QStringList() << "-o" << filePath << "-d" << outputDir);
+        // Get the number of files in the archive
+        int fileCount = mz_zip_reader_get_num_files(&zip_archive);
+        for (int i = 0; i < fileCount; i++)
+        {
+            mz_zip_archive_file_stat file_stat;
+            if (!mz_zip_reader_file_stat(&zip_archive, i, &file_stat))
+            {
+                statusBox->append("Error: Failed to get file info!");
+                continue;
+            }
+            QString outputFilePath = outputDir + "/" + file_stat.m_filename;
 
-    connect(process, &QProcess::finished, this, [this, process](int exitCode) {
-        if (exitCode == 0) {
-            statusBox->append("Extraction completed successfully!");
-            QFile::remove(appdir + "latest_release.zip");
-            QProcess::startDetached(appdir + "/ra2snes", QStringList());
-        } else {
-            statusBox->append("Error: Extraction failed!");
-            statusBox->append("Extract latest_release.zip Manually.");
+            // Ensure the directory exists before extracting
+            QFileInfo fileInfo(outputFilePath);
+            QDir().mkpath(fileInfo.path());  // Create missing directories
+
+            // Ensure files are overwritten
+            QFile::remove(outputFilePath);
+            if(file_stat.m_filename[strlen(file_stat.m_filename) - 1] != '/')
+            {
+                if (!mz_zip_reader_extract_to_file(&zip_archive, i, outputFilePath.toStdString().c_str(), 0))
+                    statusBox->append(QString("Error: Failed to extract file: %1").arg(file_stat.m_filename));
+                else
+                    statusBox->append(QString("Extracted: %1").arg(file_stat.m_filename));
+            }
         }
-        process->deleteLater();
-    });
 
-#else
-    statusBox->append("Error: Extraction is not supported on this platform.");
-#endif
+        // Cleanup and Restart
+        mz_zip_reader_end(&zip_archive);
+        statusBox->append("Extraction completed successfully!");
+        statusBox->append("Launching RA2SNES...");
+        QFile::remove(appdir + "/latest_release.zip");
+        QProcess::startDetached(appdir + "/ra2snes.exe", QStringList());
+        QTimer::singleShot(2000, this, [=]() {
+            emit finished();
+        });
+    });
 }
 
 void Updater::setAppDir(const QString &dir)
