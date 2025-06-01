@@ -515,7 +515,7 @@ Rectangle {
                         radius: 50
                         border.width: 1
                         border.color: themeLoader.item.popoutBorderColor
-                        color: themeLoader.item.mainWindowBackgroundColor
+                        color: themeLoader.item.popoutBackgroundColor
 
                         Image {
                             id: missableImage
