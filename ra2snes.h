@@ -10,7 +10,7 @@ class ra2snes : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString console READ console WRITE setConsole NOTIFY consoleChanged)
-    Q_PROPERTY(QString appDirPath READ appDirPath WRITE setAppDirPath NOTIFY appDirPathChanged)
+    Q_PROPERTY(QString appDirPath READ appDirPath CONSTANT)
     Q_PROPERTY(QString theme READ theme WRITE setTheme NOTIFY themeChanged)
     Q_PROPERTY(QString version READ version CONSTANT)
     Q_PROPERTY(QString latestVersion READ latestVersion NOTIFY newUpdate)
@@ -64,7 +64,6 @@ signals:
     void clearedAchievements();
     void displayMessage(QString error, bool iserror);
     void consoleChanged();
-    void appDirPathChanged();
     void themeChanged();
     void disableModeSwitching();
     void enableModeSwitching();

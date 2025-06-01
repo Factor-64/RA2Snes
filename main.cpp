@@ -25,12 +25,12 @@ int main(int argc, char *argv[]) {
 
     QQmlApplicationEngine engine;
 
+    ra2snes::instance()->setAppDirPath(QCoreApplication::applicationDirPath());
     qmlRegisterType<AchievementSortFilterProxyModel>("CustomModels", 1, 0, "AchievementSortFilterProxyModel");
     qmlRegisterSingletonInstance("CustomModels", 1, 0, "Ra2snes", ra2snes::instance());
     qmlRegisterSingletonInstance("CustomModels", 1, 0, "AchievementModel", AchievementModel::instance());
     qmlRegisterSingletonInstance("CustomModels", 1, 0, "GameInfoModel", GameInfoModel::instance());
     qmlRegisterSingletonInstance("CustomModels", 1, 0, "UserInfoModel", UserInfoModel::instance());
-    ra2snes::instance()->setAppDirPath(QCoreApplication::applicationDirPath());
 
     QObject::connect(ra2snes::instance(), &ra2snes::loginSuccess, &engine, [&engine]() {
         //qDebug() << "Loggedin";

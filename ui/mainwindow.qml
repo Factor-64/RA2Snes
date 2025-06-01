@@ -232,6 +232,9 @@ ApplicationWindow {
                     setupTheme();
                     themeListTimer.restart();
                 }
+                onSourceChanged: {
+                    mainWindow.modeFailed = "";
+                }
             }
         }
         ScrollBar.vertical: ScrollBar {
