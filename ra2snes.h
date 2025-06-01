@@ -71,7 +71,6 @@ signals:
 
 private:
     explicit ra2snes(QObject *parent = nullptr);
-    ~ra2snes();
     ra2snes(const ra2snes&) = delete;
     ra2snes& operator=(const ra2snes&) = delete;
 
@@ -110,6 +109,7 @@ private:
     void onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos);
     void setCurrentConsole();
     void checkForUpdate();
+    void initVars();
 };
 
 #endif // RA2SNES_H
