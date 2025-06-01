@@ -75,6 +75,7 @@ See [COMPILING.md](COMPILING.md)
 * [Skarsnik](https://github.com/Skarsnik) for QUsb2Snes, usb2snes client, and helping with various implementations used in RA2Snes
 * [rcheevos](https://github.com/RetroAchievements/rcheevos) and its [contributors](https://github.com/RetroAchievements/rcheevos/graphs/contributors)
 * Many users in the RetroAchievements [Discord](https://discord.gg/dq2E4hE)'s coding channel for helping answer any questions I had.
+* [miniz](https://github.com/richgel999/miniz) and its [contributors](https://github.com/richgel999/miniz/graphs/contributors) (License and information can be found on the miniz GitHub or in the miniz folder in this repo)
 
 ### Icons
 
