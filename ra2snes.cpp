@@ -139,9 +139,6 @@ ra2snes::ra2snes(QObject *parent)
     //    if(!raclient->isQueueRunning())
     //        QThreadPool::globalInstance()->start([=] { raclient->runQueue(); });
     //});
-
-    checkForUpdate();
-    loadSettings();
 }
 
 ra2snes::~ra2snes()
@@ -507,7 +504,9 @@ void ra2snes::createSettingsFile()
 void ra2snes::loadSettings() {
     QString appDir = QCoreApplication::applicationDirPath();
 
-    QString settingsFilePath = appDir + QDir::separator() + "settings.ini";
+    QString settingsFilePath = appDir + "/settings.ini";
+
+    //qDebug() << appDir;
 
     if (QFile::exists(settingsFilePath)) {
         QSettings settings(settingsFilePath, QSettings::IniFormat);
@@ -558,6 +557,7 @@ void ra2snes::signOut()
     raclient->clearAchievements();
     raclient->clearUser();
     raclient->clearGame();
+    raclient->setHardcore(true);
     createSettingsFile();
     loadSettings();
     onUsb2SnesStateChanged();
@@ -643,10 +643,9 @@ void ra2snes::setConsole(const QString &console)
 
 void ra2snes::setAppDirPath(const QString &appDirPath)
 {
-    if (m_appDirPath != appDirPath) {
-        m_appDirPath = appDirPath;
-        emit appDirPathChanged();
-    }
+    m_appDirPath = appDirPath;
+    checkForUpdate();
+    loadSettings();
 }
 
 QString ra2snes::appDirPath() const
