@@ -26,6 +26,10 @@ jobs:
       run: make ARCH=x64 BUILD=c89 HAVE_HASH=0 CFLAGS='-Wno-unused-but-set-variable -DRC_DISABLE_LUA' test
       working-directory: rcheevos/test
 
+    - name: Build miniz
+      run: gcc -c miniz.c -o miniz.o
+      working-directory: miniz
+
     - name: Configure CMake
       run: cmake -S . -B build -DCMAKE_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt6
 
@@ -56,6 +60,10 @@ jobs:
     - name: Build rcheevos
       run: make ARCH=x64 BUILD=c89 HAVE_HASH=0 CFLAGS='-Wno-unused-but-set-variable -DRC_DISABLE_LUA' test
       working-directory: rcheevos/test
+
+    - name: Build miniz
+      run: gcc -c miniz.c -o miniz.o
+      working-directory: miniz
 
     - name: Configure CMake
       run: |
