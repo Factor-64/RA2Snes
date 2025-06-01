@@ -56,12 +56,17 @@ set(PROJECT_SOURCES
         version.h
 )
 
+set(MINIZ_OBJ_PATH ${CMAKE_SOURCE_DIR}/miniz/miniz.o)
+
 add_executable(updater
   updater_main.cpp
   updater.cpp
   updater.h
+  miniz/miniz.c
+  miniz/miniz.h
 )
 
+target_link_libraries(updater PRIVATE ${MINIZ_OBJ_PATH})
 target_link_libraries(updater PRIVATE Qt${QT_VERSION_MAJOR}::Core)
 target_link_libraries(updater PRIVATE Qt${QT_VERSION_MAJOR}::Network)
 target_link_libraries(updater PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
@@ -74,7 +79,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 
 qt_add_executable(ra2snes
         MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
+        ${PROJECT_SOURCES}   
     )
     qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 else()
