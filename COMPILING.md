@@ -5,13 +5,18 @@
     ```
     git clone https://github.com/Factor-64/ra2snes.git --recursive
     ```
-4) Compile rcheevos using MingW64 (either the one built into Qt or using your installation)
+3) Compile rcheevos using MingW64 (either the one built into Qt or using your installation)
     ```
     cd RA2Snes/rcheevos/test
     make ARCH=x64 BUILD=c89 CC=gcc HAVE_HASH=0 test
     ```
-6) Open the CMakeFile as a project in Qt Creator.
-7) Build and Run
+4) Compile miniz using MingW64 (either the one built into Qt or using your installation)
+   ```
+   cd RA2Snes/miniz
+   gcc -c miniz.c -o miniz.o
+   ```
+5) Open the CMakeFile as a project in Qt Creator.
+6) Build and Run
 
 ## Linux
 
@@ -43,17 +48,21 @@
     cd RA2Snes/rcheevos/test
     make ARCH=x64 BUILD=c89 CC=gcc HAVE_HASH=0 test
     ```
-5) Setup with CMake
+5) Compile miniz
+    ```
+    cd RA2Snes/miniz
+    gcc -c miniz.c -o miniz.o
+    ```
+6) Setup with CMake
     ```
     cd RA2Snes
     cmake -S . -B build -DCMake_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt6
     ```
-
 6) Build
     ```
     cmake --build build --config Release
     ```
-7) Run
+8) Run
    ```
    cd build
    chmod +x ra2snes
