@@ -4,9 +4,9 @@
 #include <QString>
 
 // Define version components
-#define RA2SNES_VERSION_MAJOR 0
-#define RA2SNES_VERSION_MINOR 0
-#define RA2SNES_VERSION_PATCH 0
+#define RA2SNES_VERSION_MAJOR 1
+#define RA2SNES_VERSION_MINOR 1
+#define RA2SNES_VERSION_PATCH 1
 
 // Combine components into a string
 #define RA2SNES_VERSION_STRING QString("%1.%2.%3").arg(RA2SNES_VERSION_MAJOR).arg(RA2SNES_VERSION_MINOR).arg(RA2SNES_VERSION_PATCH)
