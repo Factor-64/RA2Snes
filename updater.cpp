@@ -40,7 +40,7 @@ void Updater::startDownload(const QUrl &url) {
                 file.write(reply->readAll());
                 file.close();
                 statusBox->append("Download completed!");
-                extractFile(appdir + "/latest_release.zip");
+                extractFile(appdir + QDir::separator() +"latest_release.zip");
             }
         } else {
             statusBox->append("Error: " + reply->errorString());
@@ -85,7 +85,7 @@ void Updater::extractFile(const QString &filePath)
                 statusBox->append("Error: Failed to get file info!");
                 continue;
             }
-            QString outputFilePath = outputDir + "/" + file_stat.m_filename;
+            QString outputFilePath = outputDir + QDir::separator() + file_stat.m_filename;
 
             // Ensure the directory exists before extracting
             QFileInfo fileInfo(outputFilePath);
@@ -106,8 +106,8 @@ void Updater::extractFile(const QString &filePath)
         mz_zip_reader_end(&zip_archive);
         statusBox->append("Extraction completed successfully!");
         statusBox->append("Launching RA2SNES...");
-        QFile::remove(appdir + "/latest_release.zip");
-        QProcess::startDetached(appdir + "/ra2snes.exe", QStringList());
+        QFile::remove(appdir + QDir::separator() + "latest_release.zip");
+        QProcess::startDetached(appdir + QDir::separator() + "ra2snes.exe", QStringList());
         QTimer::singleShot(2000, this, [=]() {
             emit finished();
         });
