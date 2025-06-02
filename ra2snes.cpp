@@ -12,6 +12,7 @@ ra2snes::ra2snes(QObject *parent)
     m_theme = "Dark";
     m_latestVersion = "";
     downloadUrl = "";
+    m_appDirPath = "";
     initVars();
 
     connect(usb2snes, &Usb2Snes::connected, this, [=]() {
@@ -454,35 +455,39 @@ void ra2snes::saveUISettings(int w, int h, bool c)
 
 void ra2snes::createSettingsFile()
 {
-    QString settingsFilePath = m_appDirPath + QDir::separator() + "settings.ini";
-
-    QSettings settings(settingsFilePath, QSettings::IniFormat);
-
-    UserInfoModel* user = raclient->getUserInfoModel();
-
-    settings.setValue("Hardcore", user->hardcore());
-    settings.setValue("Console", m_console);
-    settings.setValue("Width", user->width());
-    settings.setValue("Height", user->height());
-    settings.setValue("Auto", user->autohardcore());
-    settings.setValue("Compact", user->compact());
-    settings.setValue("Theme", m_theme);
-
-    if(remember_me)
+    if(m_appDirPath != "")
     {
-        QString time = QString::number(QDateTime::currentSecsSinceEpoch());
-        settings.setValue("Username", user->username());
-        settings.setValue("Token", xorEncryptDecrypt(user->token(), time));
-        settings.setValue("Time", time);
-    }
-    else
-    {
-        settings.setValue("Username", "");
-        settings.setValue("Token", "");
-        settings.setValue("Time", "");
-    }
+        QString settingsFilePath = m_appDirPath + QDir::separator() + "settings.ini";
 
-    settings.sync();
+        //qDebug() << settingsFilePath;
+        QSettings settings(settingsFilePath, QSettings::IniFormat);
+
+        UserInfoModel* user = raclient->getUserInfoModel();
+
+        settings.setValue("Hardcore", user->hardcore());
+        settings.setValue("Console", m_console);
+        settings.setValue("Width", user->width());
+        settings.setValue("Height", user->height());
+        settings.setValue("Auto", user->autohardcore());
+        settings.setValue("Compact", user->compact());
+        settings.setValue("Theme", m_theme);
+
+        if(remember_me)
+        {
+            QString time = QString::number(QDateTime::currentSecsSinceEpoch());
+            settings.setValue("Username", user->username());
+            settings.setValue("Token", xorEncryptDecrypt(user->token(), time));
+            settings.setValue("Time", time);
+        }
+        else
+        {
+            settings.setValue("Username", "");
+            settings.setValue("Token", "");
+            settings.setValue("Time", "");
+        }
+
+        settings.sync();
+    }
 }
 
 void ra2snes::loadSettings() {
