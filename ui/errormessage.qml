@@ -4,7 +4,6 @@ import CustomModels 1.0
 Item {
     Text {
         id: errorMessage
-        text: mainWindow.modeFailed
         font.family: "Verdana"
         font.pixelSize: 13
         color: themeLoader.item.errorMessageTextColor
@@ -23,15 +22,16 @@ Item {
             repeat: false
             onTriggered: {
                 errorMessage.opacity = 0.0
+                errorMessage.text = "";
             }
         }
 
         function showErrorMessage(error, iserror) {
-            mainWindow.modeFailed = error;
             if(iserror)
                 errorMessage.color = themeLoader.item.errorMessageTextColor;
             else
                 errorMessage.color = themeLoader.item.nonErrorMessageTextColor;
+            errorMessage.text = error;
             errorMessage.opacity = 1;
             fadeOutTimer.restart();
         }
@@ -41,11 +41,6 @@ Item {
             function onDisplayMessage(error, iserror) {
                 errorMessage.showErrorMessage(error, iserror);
             }
-        }
-
-        Component.onCompleted: {
-            if(!fadeOutTimer.running)
-                mainWindow.modeFailed = "";
         }
     }
 }
