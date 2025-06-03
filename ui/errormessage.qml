@@ -28,20 +28,10 @@ Item {
 
         function showErrorMessage(error, iserror) {
             mainWindow.modeFailed = error;
-            if(themeLoader.item)
-            {
-                if(iserror)
-                    errorMessage.color = themeLoader.item.errorMessageTextColor;
-                else
-                    errorMessage.color = themeLoader.item.nonErrorMessageTextColor;
-            }
+            if(iserror)
+                errorMessage.color = themeLoader.item.errorMessageTextColor;
             else
-            {
-                if(iserror)
-                    errorMessage.color = "#ff0000";
-                else
-                    errorMessage.color = "#00ff00";
-            }
+                errorMessage.color = themeLoader.item.nonErrorMessageTextColor;
             errorMessage.opacity = 1;
             fadeOutTimer.restart();
         }
@@ -51,6 +41,11 @@ Item {
             function onDisplayMessage(error, iserror) {
                 errorMessage.showErrorMessage(error, iserror);
             }
+        }
+
+        Component.onCompleted: {
+            if(!fadeOutTimer.running)
+                mainWindow.modeFailed = "";
         }
     }
 }

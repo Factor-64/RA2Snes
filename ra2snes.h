@@ -46,23 +46,23 @@ public:
     QString latestVersion() const;
 
 public slots:
-    void signIn(const QString &username, const QString &password, bool remember);
+    void signIn(const QString &username, const QString &password, const bool& remember);
     void signOut();
-    void saveUISettings(int w, int h, bool c);
+    void saveUISettings(const int& w, const int& h, const bool& c);
     void changeMode();
-    void autoChange(bool ac);
+    void autoChange(const bool& ac);
     void refreshRAData();
-    void setTheme(const QString &theme);
+    void setTheme(const QString& theme);
     void beginUpdate();
 
 signals:
     void loginSuccess();
-    void loginFailed(QString error);
-    void changeModeFailed(QString reason);
+    void loginFailed(const QString& error);
+    void changeModeFailed(const QString& reason);
     void achievementModelReady();
     void signedOut();
     void clearedAchievements();
-    void displayMessage(QString error, bool iserror);
+    void displayMessage(const QString& error, const bool& iserror);
     void consoleChanged();
     void themeChanged();
     void disableModeSwitching();
@@ -99,8 +99,8 @@ private:
     void createSettingsFile();
     void loadSettings();
     void onLoginSuccess();
-    void onRequestFailed(QJsonObject error);
-    void onRequestError(bool net);
+    void onRequestFailed(const QJsonObject& error);
+    void onRequestError(const bool& net);
     void onUsb2SnesStateChanged();
     void onUsb2SnesGetAddressDataReceived();
     void onUsb2SnesGetAddressesDataReceived();

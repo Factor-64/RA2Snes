@@ -5,7 +5,7 @@
 MemoryReader::MemoryReader(QObject *parent) : QObject(parent) {
 }
 
-void MemoryReader::initTriggers(const QList<AchievementInfo> achievements, const QList<LeaderboardInfo> leaderboards, unsigned int ramSize) {
+void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, const QList<LeaderboardInfo>& leaderboards, const unsigned int& ramSize) {
     uniqueMemoryAddresses.clear();
     achievementTriggers.clear();
     leaderboardTriggers.clear();
@@ -136,7 +136,7 @@ void MemoryReader::remapTriggerAddresses()
     //qDebug() << addressMap;
 }
 
-void MemoryReader::addFrameToQueues(QByteArray data, int frames)
+void MemoryReader::addFrameToQueues(const QByteArray& data, const int& frames)
 {
     achievementFrames.enqueue(qMakePair(data, frames));
     //LeaderBoardFramesToCheck.enqueue(qMakePair(data, frames))

@@ -171,10 +171,12 @@ Item {
             exit: Transition {
                 NumberAnimation { property: "opacity"; from: 1.0; to: 0.0; duration: 0}
             }
+
             function updateComboBox()
             {
                 themesList.model = mainWindow.themes;
                 height = (mainWindow.themes.length * 24) + 8;
+                mainWindow.loadedThemes = true;
             }
             Component.onCompleted: {
                 mainWindow.themesUpdated.connect(updateComboBox);
@@ -206,7 +208,10 @@ Item {
                         {
                             mainWindow.setupFinished = false;
                             changeCheckBox.enabled = false;
-                            mode.color = themeLoader.item.popupItemDisabled;
+                            autoHardcore.color = themeLoader.item.popupItemDisabled;
+                            modeMouse.enabled = false;
+                            menuPopup.changeModeColor();
+
                         }
                     }
 
@@ -216,6 +221,8 @@ Item {
                         {
                             mainWindow.setupFinished = true;
                             changeCheckBox.enabled = true;
+                            autoHardcore.color = themeLoader.item.selectedLink;
+                            modeMouse.enabled = !changeCheckBox.checked;
                             menuPopup.changeModeColor();
                         }
                     }
@@ -229,13 +236,7 @@ Item {
                             width: 14
                             height: 14
                             radius: 2
-                            color: {
-                                if(changeCheckBox.enabled)
-                                    autoHardcore.color = themeLoader.item.selectedLink;
-                                else
-                                    autoHardcore.color = themeLoader.item.popupItemDisabled;
-                                changeCheckBox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedColor;
-                            }
+                            color: changeCheckBox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedColor;
                             border.color: changeCheckBox.checked ? themeLoader.item.checkBoxCheckedBorderColor : themeLoader.item.checkBoxCheckedBorderColor
 
                             Text {
@@ -247,8 +248,8 @@ Item {
                         }
 
                         onCheckedChanged: {
-                            if(themeLoader.item)
-                                menuPopup.changeModeColor();
+                            menuPopup.changeModeColor();
+                            modeMouse.enabled = !changeCheckBox.checked;
                             Ra2snes.autoChange(changeCheckBox.checked);
                         }
                         Component.onCompleted: {
@@ -268,27 +269,21 @@ Item {
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
+                    enabled: changeCheckBox.enabled
                     onClicked: {
-                        if(changeCheckBox.enabled)
-                            changeCheckBox.checked = !changeCheckBox.checked
+                        changeCheckBox.checked = !changeCheckBox.checked
                     }
                     onEntered: {
-                        if(changeCheckBox.enabled)
-                        {
-                            changeRect.color = themeLoader.item.popupHighlightColor;
-                            autoHardcore.color = themeLoader.item.linkColor;
-                        }
+                        changeRect.color = themeLoader.item.popupHighlightColor;
+                        autoHardcore.color = themeLoader.item.linkColor;
                         themeRect.color = themeLoader.item.popupBackgroundColor;
                         theme.color = themeLoader.item.selectedLink;
                         themePopup.close();
                     }
 
                     onExited: {
-                        if(changeCheckBox.enabled)
-                        {
-                            changeRect.color = themeLoader.item.popupBackgroundColor;
-                            autoHardcore.color = themeLoader.item.selectedLink;
-                        }
+                        changeRect.color = themeLoader.item.popupBackgroundColor;
+                        autoHardcore.color = themeLoader.item.selectedLink;
                     }
                 }
             }
@@ -318,20 +313,18 @@ Item {
                     verticalAlignment: Text.AlignVCenter
                 }
                 MouseArea {
+                    id: modeMouse
                     anchors.fill: parent
                     hoverEnabled: true
+                    enabled: true
                     onClicked: {
-                        if(changeCheckBox.enabled)
-                            Ra2snes.changeMode();
+                        Ra2snes.changeMode();
                     }
                     onEntered: {
-                        if(changeCheckBox.enabled)
-                        {
-                            modeRect.color = themeLoader.item.popupHighlightColor;
-                            themeRect.color = themeLoader.item.popupBackgroundColor;
-                            theme.color = themeLoader.item.selectedLink;
-                            themePopup.close();
-                        }
+                        modeRect.color = themeLoader.item.popupHighlightColor;
+                        themeRect.color = themeLoader.item.popupBackgroundColor;
+                        theme.color = themeLoader.item.selectedLink;
+                        themePopup.close();
                     }
 
                     onExited: {
@@ -387,13 +380,14 @@ Item {
                         id: compactCheckBox
                         width: 14
                         height: 14
+                        enabled: mainWindow.loadedThemes
 
                         indicator: Rectangle {
                             width: 14
                             height: 14
                             radius: 2
-                            border.color: compactCheckBox.checked ? themeLoader.item.checkBoxCheckedBorderColor : themeLoader.item.checkBoxCheckedBorderColor
                             color: compactCheckBox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedColor;
+                            border.color: compactCheckBox.checked ? themeLoader.item.checkBoxCheckedBorderColor : themeLoader.item.checkBoxCheckedBorderColor
                             Text {
                                 anchors.centerIn: parent
                                 text: compactCheckBox.checked ? "\u2713" : ""
@@ -415,13 +409,15 @@ Item {
                         text: qsTr("Compact Mode")
                         font.family: "Verdana"
                         font.pixelSize: 13
-                        color: themeLoader.item.selectedLink
+                        color: compactCheckBox.enabled ? themeLoader.item.selectedLink : themeLoader.item.popupItemDisabled
                         verticalAlignment: Text.AlignVCenter
                     }
                 }
                 MouseArea {
+                    id: compactMouseArea
                     anchors.fill: parent
                     hoverEnabled: true
+                    enabled: compactCheckBox.enabled
                     onClicked: {
                         compactCheckBox.checked = !compactCheckBox.checked
                     }
@@ -436,6 +432,8 @@ Item {
                     onExited: {
                         compactRect.color = themeLoader.item.popupBackgroundColor;
                         compactMode.color = themeLoader.item.selectedLink;
+
+                        compactMouseArea.enabled = true;
                     }
                 }
             }

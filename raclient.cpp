@@ -50,7 +50,7 @@ void RAClient::loadGame(const QString& md5hash)
     sendRequest("gameid", post_content);
 }
 
-void RAClient::getAchievements(unsigned int gameid)
+void RAClient::getAchievements(const unsigned int& gameid)
 {
     QJsonObject post_content;
     post_content["u"] = userinfo_model->username();
@@ -84,7 +84,7 @@ void RAClient::startSession()
     sendRequest("startsession", post_content);
 }
 
-void RAClient::awardAchievement(unsigned int id, bool hardcore, QDateTime achieved)
+void RAClient::awardAchievement(const unsigned int& id, const bool& hardcore, const QDateTime& achieved)
 {
     QByteArray md5hash;
     md5hash.append(QString::number(id).toLocal8Bit());
@@ -121,7 +121,7 @@ void RAClient::awardAchievement(unsigned int id, bool hardcore, QDateTime achiev
     else index = 0;
 }*/
 
-void RAClient::queueAchievementRequest(unsigned int id, QDateTime achieved) {
+void RAClient::queueAchievementRequest(const unsigned int& id, const QDateTime& achieved) {
     RequestData data = {AchievementRequest, id, userinfo_model->hardcore(), achieved, 0};
     queue.enqueue(data);
     if(queue.size() == 1)
@@ -162,32 +162,32 @@ void RAClient::clearQueue()
     queue.clear();
 }
 
-void RAClient::setPatched(bool p)
+void RAClient::setPatched(const bool& p)
 {
     userinfo_model->patched(p);
 }
 
-void RAClient::setSaveStates(bool s)
+void RAClient::setSaveStates(const bool& s)
 {
     userinfo_model->savestates(s);
 }
 
-void RAClient::setCheats(bool c)
+void RAClient::setCheats(const bool& c)
 {
     userinfo_model->cheats(c);
 }
 
-void RAClient::setHardcore(bool h)
+void RAClient::setHardcore(const bool& h)
 {
     userinfo_model->hardcore(h);
 }
 
-void RAClient::setAutoHardcore(bool ac)
+void RAClient::setAutoHardcore(const bool& ac)
 {
     userinfo_model->autohardcore(ac);
 }
 
-void RAClient::setInGameHooks(bool n)
+void RAClient::setInGameHooks(const bool& n)
 {
     userinfo_model->ingamehooks(n);
 }
@@ -203,11 +203,16 @@ void RAClient::setTitleToHash(const QString& currentGame)
     gameinfo_model->md5hash(currentGame);
 }
 
-void RAClient::setTitle(QString t, QString i, QString l)
+void RAClient::setTitle(const QString& t, const QString& i, const QString& l)
 {
     gameinfo_model->title(t);
     gameinfo_model->image_icon_url(QUrl(i));
     gameinfo_model->game_link(QUrl(l));
+}
+
+void RAClient::setHash(const QString& h)
+{
+    gameinfo_model->md5hash(h);
 }
 
 bool RAClient::getHardcore()
@@ -251,7 +256,7 @@ AchievementModel* RAClient::getAchievementModel()
     return achievement_model;
 }
 
-void RAClient::setAchievementInfo(unsigned int id, AchievementInfoType infotype, int value)
+void RAClient::setAchievementInfo(const unsigned int& id, const AchievementInfoType& infotype, const int& value)
 {
     switch(infotype)
     {

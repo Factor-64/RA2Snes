@@ -529,9 +529,7 @@ Rectangle {
         if(mainWindow.setupFinished)
         {
             sorting.active = true;
-            mainWindow.setupFinished = true;
             listview.active = true;
-            mainWindow.modeFailed = "";
             gameInfo.visible = true;
         }
     }

@@ -30,6 +30,7 @@ ApplicationWindow {
     property int windowHeight: height
     property string modeFailed: ""
     property bool setupFinished: false
+    property bool loadedThemes: false
     property bool compact: UserInfoModel.compact
     property string baseDir: {
         if(Ra2snes.appDirPath[0] === "/")
@@ -84,6 +85,7 @@ ApplicationWindow {
             {
                 themeLoader.source = "./themes/Dark.qml";
                 Ra2snes.setTheme("Dark");
+                themeListTimer.restart();
             }
         }
         active: true
@@ -229,8 +231,7 @@ ApplicationWindow {
                 source: mainWindow.compact ? "./compact.qml" : "./noncompact.qml"
                 active: false
                 Component.onCompleted: {
-                    setupTheme();
-                    themeListTimer.restart();
+                    mainWindow.setupTheme();
                 }
                 onSourceChanged: {
                     mainWindow.modeFailed = "";
@@ -248,10 +249,6 @@ ApplicationWindow {
             var component = Qt.createComponent("./updatedialog.qml")
             var popup = component.createObject(mainWindow)
         }
-    }
-
-    onCompactChanged: {
-        themeListTimer.stop();
     }
 
     onClosing: {

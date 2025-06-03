@@ -22,8 +22,8 @@ public:
         return &instance;
     }
 
-    void updateHardcoreScore(int score);
-    void updateSoftcoreScore(int score);
+    void updateHardcoreScore(const int& score);
+    void updateSoftcoreScore(const int& score);
 
     QString username() const;
     QString token() const;
@@ -42,21 +42,21 @@ public:
     bool compact() const;
     bool ingamehooks() const;
 
-    void username(QString u);
-    void token(QString t);
-    void softcore_score(int s);
-    void hardcore_score(int hs);
-    void pfp(QUrl p);
-    void hardcore(bool h);
-    void link(QUrl l);
-    void savestates(bool s);
-    void cheats(bool c);
-    void patched(bool p);
-    void autohardcore(bool a);
-    void width(int w);
-    void height(int h);
-    void compact(bool c);
-    void ingamehooks(bool n);
+    void username(const QString& u);
+    void token(const QString& t);
+    void softcore_score(const int& s);
+    void hardcore_score(const int& hs);
+    void pfp(const QUrl& p);
+    void hardcore(const bool& h);
+    void link(const QUrl& l);
+    void savestates(const bool& s);
+    void cheats(const bool& c);
+    void patched(const bool& p);
+    void autohardcore(const bool& a);
+    void width(const int& w);
+    void height(const int& h);
+    void compact(const bool& c);
+    void ingamehooks(const bool& n);
 
 signals:
     void dataChanged();

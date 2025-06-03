@@ -88,8 +88,8 @@ QHash<int, QByteArray> AchievementModel::roleNames() const {
     return roles;
 }
 
-void AchievementModel::setUnlockedState(unsigned int id, bool unlocked, QDateTime time) {
-    for (int i = 0; i < m_achievements.size(); ++i) {
+void AchievementModel::setUnlockedState(const unsigned int& id, const bool& unlocked, const QDateTime& time) {
+    for (int i = 0; i < m_achievements.size(); i++) {
         if (m_achievements[i].id == id) {
             m_achievements[i].unlocked = unlocked;
             m_achievements[i].time_unlocked = time;
@@ -102,7 +102,7 @@ void AchievementModel::setUnlockedState(unsigned int id, bool unlocked, QDateTim
     }
 }
 
-void AchievementModel::primeAchievement(unsigned int id, bool p) {
+void AchievementModel::primeAchievement(const unsigned int& id, const bool& p) {
     for (int i = 0; i < m_achievements.size(); ++i) {
         if (m_achievements[i].id == id) {
             m_achievements[i].primed = p;
@@ -113,8 +113,8 @@ void AchievementModel::primeAchievement(unsigned int id, bool p) {
     }
 }
 
-void AchievementModel::updateAchievementValue(unsigned int id, int value) {
-    for (int i = 0; i < m_achievements.size(); ++i) {
+void AchievementModel::updateAchievementValue(const unsigned int& id, const int& value) {
+    for (int i = 0; i < m_achievements.size(); i++) {
         if (m_achievements[i].id == id) {
             m_achievements[i].value = value;
             QModelIndex index = createIndex(i, 0);
@@ -124,8 +124,8 @@ void AchievementModel::updateAchievementValue(unsigned int id, int value) {
     }
 }
 
-void AchievementModel::updateAchievementPercent(unsigned int id, int percent) {
-    for (int i = 0; i < m_achievements.size(); ++i) {
+void AchievementModel::updateAchievementPercent(const unsigned int& id, const int& percent) {
+    for (int i = 0; i < m_achievements.size(); i++) {
         if (m_achievements[i].id == id) {
             m_achievements[i].percent = percent;
             QModelIndex index = createIndex(i, 0);
@@ -135,8 +135,8 @@ void AchievementModel::updateAchievementPercent(unsigned int id, int percent) {
     }
 }
 
-void AchievementModel::updateAchievementTarget(unsigned int id, int target) {
-    for (int i = 0; i < m_achievements.size(); ++i) {
+void AchievementModel::updateAchievementTarget(const unsigned int& id, const int& target) {
+    for (int i = 0; i < m_achievements.size(); i++) {
         if (m_achievements[i].id == id) {
             m_achievements[i].target = target;
             QModelIndex index = createIndex(i, 0);
