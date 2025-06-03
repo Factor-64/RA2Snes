@@ -7,8 +7,6 @@
         <file>ui/images/win_condition.svg</file>
         <file>ui/images/icon64x64.png</file>
         <file>ui/images/logo.png</file>
-        <file>ui/images/ra-icon.png</file>
-        <file>ui/images/Super_Famicom_logo.png</file>
         <file>ui/images/primed.svg</file>
         <file>ui/images/refresh.svg</file>
         <file>ui/themes/Black.qml</file>
@@ -26,5 +24,7 @@
         <file>ui/listview.qml</file>
         <file>ui/sorting.qml</file>
         <file>ui/updatedialog.qml</file>
+        <file>ui/images/ra-icon.svg</file>
+        <file>ui/images/sfc.svg</file>
     </qresource>
 </RCC>
