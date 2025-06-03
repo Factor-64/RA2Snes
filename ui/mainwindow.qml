@@ -232,9 +232,6 @@ ApplicationWindow {
                 Component.onCompleted: {
                     mainWindow.setupTheme();
                 }
-                onSourceChanged: {
-                    mainWindow.modeFailed = "";
-                }
             }
         }
         ScrollBar.vertical: ScrollBar {
