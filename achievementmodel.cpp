@@ -103,7 +103,7 @@ void AchievementModel::setUnlockedState(const unsigned int& id, const bool& unlo
 }
 
 void AchievementModel::primeAchievement(const unsigned int& id, const bool& p) {
-    for (int i = 0; i < m_achievements.size(); ++i) {
+    for (int i = 0; i < m_achievements.size(); i++) {
         if (m_achievements[i].id == id) {
             m_achievements[i].primed = p;
             QModelIndex index = createIndex(i, 0);
