@@ -73,7 +73,7 @@ ra2snes::ra2snes(QObject *parent)
     connect(raclient, &RAClient::loginSuccess, this, &ra2snes::onLoginSuccess);
     connect(raclient, &RAClient::requestFailed, this, &ra2snes::onRequestFailed);
     connect(raclient, &RAClient::requestError, this, &ra2snes::onRequestError);
-    connect(raclient, &RAClient::gotGameID, this, [=] (int id){
+    connect(raclient, &RAClient::gotGameID, this, [=] (const int& id){
         gameLoaded = true;
         loadingGame = false;
         emit displayMessage("Game Loaded", false);
@@ -110,11 +110,11 @@ ra2snes::ra2snes(QObject *parent)
         usb2snes->infos();
     });
 
-    connect(reader, &MemoryReader::achievementUnlocked, this, [=](unsigned int id, QDateTime time) {
+    connect(reader, &MemoryReader::achievementUnlocked, this, [=](const unsigned int& id, const QDateTime& time) {
         raclient->queueAchievementRequest(id, time);
     });
 
-    connect(reader, &MemoryReader::updateAchievementInfo, this, [=](unsigned int id, AchievementInfoType infotype, int value) {
+    connect(reader, &MemoryReader::updateAchievementInfo, this, [=](const unsigned int& id, const AchievementInfoType& infotype, const int& value) {
         raclient->setAchievementInfo(id, infotype, value);
     });
 
@@ -130,7 +130,7 @@ ra2snes::ra2snes(QObject *parent)
     //});
 }
 
-void ra2snes::signIn(const QString &username, const QString &password, bool remember)
+void ra2snes::signIn(const QString &username, const QString &password, const bool& remember)
 {
     remember_me = remember;
     raclient->loginPassword(username, password);
@@ -265,7 +265,7 @@ void ra2snes::onLoginSuccess()
     onUsb2SnesStateChanged();
 }
 
-void ra2snes::onRequestFailed(QJsonObject error)
+void ra2snes::onRequestFailed(const QJsonObject& error)
 {
     QString errorMessage = error["Error"].toString();
     //qDebug() << "Code:" << error["Code"].toString() << "Error:" << errorMessage;
@@ -280,7 +280,7 @@ void ra2snes::onRequestFailed(QJsonObject error)
     }
 }
 
-void ra2snes::onRequestError(bool net)
+void ra2snes::onRequestError(const bool& net)
 {
     if(net)
     {
@@ -413,7 +413,8 @@ void ra2snes::setCurrentConsole()
         }
         if(m_console == "SNES")
         {
-            raclient->setTitle("SD2SNES Menu", "", "");
+            raclient->setTitle("SD2SNES Menu", "https://avatars.githubusercontent.com/u/238664?v=4", "https://sd2snes.de/blog/");
+            raclient->setHash("https://github.com/mrehkopf/sd2snes");
             if(isGB)
             {
                 icon += "gb.png";
@@ -444,7 +445,7 @@ QString ra2snes::xorEncryptDecrypt(const QString &token, const QString &key) {
     return result;
 }
 
-void ra2snes::saveUISettings(int w, int h, bool c)
+void ra2snes::saveUISettings(const int& w, const int& h, const bool& c)
 {
     UserInfoModel* user = raclient->getUserInfoModel();
     user->width(w);
@@ -622,7 +623,7 @@ void ra2snes::changeMode()
     }
 }
 
-void ra2snes::autoChange(bool ac)
+void ra2snes::autoChange(const bool& ac)
 {
     raclient->setAutoHardcore(ac);
     if(raclient->getAutoHardcore() && !raclient->getHardcore())

@@ -48,21 +48,21 @@ public:
     int point_count() const;
     int achievement_count() const;
 
-    void title(QString t);
-    void md5hash(QString md5);
-    void id(unsigned int i);
-    void image_icon(QString ii);
-    void image_icon_url(QUrl iu);
-    void game_link(QUrl gl);
-    void console(QString c);
-    void console_icon(QUrl ci);
-    void completion_count(unsigned int cc);
-    void beaten(bool b);
-    void mastered(bool m);
-    void point_total(int pt);
-    void missable_count(unsigned int mc);
-    void point_count(int pc);
-    void achievement_count(int ac);
+    void title(const QString& t);
+    void md5hash(const QString& md5);
+    void id(const unsigned int& i);
+    void image_icon(const QString& ii);
+    void image_icon_url(const QUrl& iu);
+    void game_link(const QUrl& gl);
+    void console(const QString& c);
+    void console_icon(const QUrl& ci);
+    void completion_count(const unsigned int& cc);
+    void beaten(const bool& b);
+    void mastered(const bool& m);
+    void point_total(const int& pt);
+    void missable_count(const unsigned int& mc);
+    void point_count(const int& pc);
+    void achievement_count(const int& ac);
 
 signals:
     void dataChanged();

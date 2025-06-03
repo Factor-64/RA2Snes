@@ -13,22 +13,22 @@ class MemoryReader : public QObject {
 public:
     explicit MemoryReader(QObject *parent = nullptr);
 
-    void initTriggers(const QList<AchievementInfo> achievements, const QList<LeaderboardInfo> leaderboards, unsigned int ramSize);
+    void initTriggers(const QList<AchievementInfo>& achievements, const QList<LeaderboardInfo>& leaderboards, const unsigned int& ramSize);
     void remapTriggerAddresses();
     QList<QPair<int, int>> getUniqueMemoryAddresses();
     void checkAchievements();
     //void checkLeaderboards();
-    void addFrameToQueues(QByteArray data, int frames);
+    void addFrameToQueues(const QByteArray& data, const int& frames);
     int achievementQueueSize();
     void clearQueue();
 
 signals:
     void finishedMemorySetup();
     void achievementsChecked();
-    void achievementUnlocked(unsigned int id, QDateTime time);
+    void achievementUnlocked(const unsigned int& id, const QDateTime& time);
     void leaderboardsChecked();
-    void leaderboardCompleted(unsigned int id, QDateTime time);
-    void updateAchievementInfo(unsigned int id, AchievementInfoType infotype, int value);
+    void leaderboardCompleted(const unsigned int& id, const QDateTime& time);
+    void updateAchievementInfo(const unsigned int& id, const AchievementInfoType& infotype, const int& value);
     void modifiedAddresses();
 
 private:

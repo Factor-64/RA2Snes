@@ -4,13 +4,13 @@ UserInfoModel::UserInfoModel(QObject *parent)
     : QObject(parent) {
 }
 
-void UserInfoModel::updateHardcoreScore(int score)
+void UserInfoModel::updateHardcoreScore(const int& score)
 {
     m_userInfo.hardcore_score += score;
     emit dataChanged();
 }
 
-void UserInfoModel::updateSoftcoreScore(int score)
+void UserInfoModel::updateSoftcoreScore(const int& score)
 {
     m_userInfo.softcore_score += score;
     emit dataChanged();
@@ -77,85 +77,85 @@ bool UserInfoModel::ingamehooks() const
     return m_userInfo.ingamehooks;
 }
 
-void UserInfoModel::username(QString u)
+void UserInfoModel::username(const QString& u)
 {
     m_userInfo.username = u;
     emit dataChanged();
 }
 
-void UserInfoModel::token(QString t)
+void UserInfoModel::token(const QString& t)
 {
     m_userInfo.token = t;
     emit dataChanged();
 }
 
-void UserInfoModel::softcore_score(int s)
+void UserInfoModel::softcore_score(const int& s)
 {
     m_userInfo.softcore_score = s;
     emit dataChanged();
 }
 
-void UserInfoModel::hardcore_score(int hs)
+void UserInfoModel::hardcore_score(const int& hs)
 {
     m_userInfo.hardcore_score = hs;
     emit dataChanged();
 }
 
-void UserInfoModel::pfp(QUrl p)
+void UserInfoModel::pfp(const QUrl& p)
 {
     m_userInfo.pfp = p;
     emit dataChanged();
 }
 
-void UserInfoModel::hardcore(bool h)
+void UserInfoModel::hardcore(const bool& h)
 {
     m_userInfo.hardcore = h;
     emit dataChanged();
 }
 
-void UserInfoModel::link(QUrl l)
+void UserInfoModel::link(const QUrl& l)
 {
     m_userInfo.link = l;
     emit dataChanged();
 }
 
-void UserInfoModel::width(int w)
+void UserInfoModel::width(const int& w)
 {
     m_userInfo.width = w;
 }
 
-void UserInfoModel::height(int h)
+void UserInfoModel::height(const int& h)
 {
     m_userInfo.height = h;
 }
 
-void UserInfoModel::savestates(bool s)
+void UserInfoModel::savestates(const bool& s)
 {
     m_userInfo.savestates = s;
 }
 
-void UserInfoModel::cheats(bool c)
+void UserInfoModel::cheats(const bool& c)
 {
     m_userInfo.cheats = c;
 }
 
-void UserInfoModel::patched(bool p)
+void UserInfoModel::patched(const bool& p)
 {
     m_userInfo.patched = p;
 }
 
-void UserInfoModel::autohardcore(bool a)
+void UserInfoModel::autohardcore(const bool& a)
 {
     m_userInfo.autohardcore = a;
     emit dataChanged();
 }
 
-void UserInfoModel::compact(bool c)
+void UserInfoModel::compact(const bool& c)
 {
     m_userInfo.compact = c;
 }
 
-void UserInfoModel::ingamehooks(bool n)
+void UserInfoModel::ingamehooks(const bool& n)
 {
     m_userInfo.ingamehooks = n;
 }

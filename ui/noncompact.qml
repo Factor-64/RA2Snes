@@ -610,9 +610,7 @@ Rectangle {
             listview.active = true;
             completionHeader.visible = true;
             completionIcon.visible = true;
-            mainWindow.setupFinished = true;
             sorting.active = true;
-            mainWindow.modeFailed = "";
         }
     }
 }

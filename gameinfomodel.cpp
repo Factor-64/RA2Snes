@@ -72,60 +72,60 @@ void GameInfoModel::updatePointCount(unsigned int points) {
     emit dataChanged();
 }
 
-void GameInfoModel::title(QString t)
+void GameInfoModel::title(const QString& t)
 {
     m_gameInfo.title = t;
     emit dataChanged();
 }
-void GameInfoModel::md5hash(QString md5)
+void GameInfoModel::md5hash(const QString& md5)
 {
     m_gameInfo.md5hash = md5;
     emit dataChanged();
 }
 
-void GameInfoModel::id(unsigned int i)
+void GameInfoModel::id(const unsigned int& i)
 {
     m_gameInfo.id = i;
     emit dataChanged();
 }
 
-void GameInfoModel::image_icon(QString ii)
+void GameInfoModel::image_icon(const QString& ii)
 {
     m_gameInfo.image_icon = ii;
     emit dataChanged();
 }
 
-void GameInfoModel::image_icon_url(QUrl iu)
+void GameInfoModel::image_icon_url(const QUrl& iu)
 {
     m_gameInfo.image_icon_url = iu;
     emit dataChanged();
 }
 
-void GameInfoModel::game_link(QUrl gl)
+void GameInfoModel::game_link(const QUrl& gl)
 {
     m_gameInfo.game_link = gl;
     emit dataChanged();
 }
 
-void GameInfoModel::console(QString c)
+void GameInfoModel::console(const QString& c)
 {
     m_gameInfo.console = c;
     emit dataChanged();
 }
 
-void GameInfoModel::console_icon(QUrl ci)
+void GameInfoModel::console_icon(const QUrl& ci)
 {
     m_gameInfo.console_icon = ci;
     emit dataChanged();
 }
 
-void GameInfoModel::completion_count(unsigned int cc)
+void GameInfoModel::completion_count(const unsigned int& cc)
 {
     m_gameInfo.completion_count = cc;
     emit dataChanged();
 }
 
-void GameInfoModel::beaten(bool b)
+void GameInfoModel::beaten(const bool& b)
 {
     m_gameInfo.beaten = b;
     if(b)
@@ -133,7 +133,7 @@ void GameInfoModel::beaten(bool b)
     emit dataChanged();
 }
 
-void GameInfoModel::mastered(bool m)
+void GameInfoModel::mastered(const bool& m)
 {
     m_gameInfo.mastered = m;
     if(m)
@@ -141,25 +141,25 @@ void GameInfoModel::mastered(bool m)
     emit dataChanged();
 }
 
-void GameInfoModel::point_total(int pt)
+void GameInfoModel::point_total(const int& pt)
 {
     m_gameInfo.point_total = pt;
     emit dataChanged();
 }
 
-void GameInfoModel::missable_count(unsigned int mc)
+void GameInfoModel::missable_count(const unsigned int& mc)
 {
     m_gameInfo.missable_count = mc;
     emit dataChanged();
 }
 
-void GameInfoModel::point_count(int pc)
+void GameInfoModel::point_count(const int& pc)
 {
     m_gameInfo.point_count = pc;
     emit dataChanged();
 }
 
-void GameInfoModel::achievement_count(int ac)
+void GameInfoModel::achievement_count(const int& ac)
 {
     m_gameInfo.achievement_count = ac;
     emit dataChanged();
