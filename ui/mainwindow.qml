@@ -28,7 +28,6 @@ ApplicationWindow {
 
     property int windowWidth: width
     property int windowHeight: height
-    property string modeFailed: ""
     property bool setupFinished: false
     property bool loadedThemes: false
     property bool compact: UserInfoModel.compact
