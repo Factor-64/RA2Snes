@@ -22,6 +22,7 @@ Item {
                 colorization: 1.0
                 colorizationColor: themeLoader.item.hamburgerIconColor
             }
+            asynchronous: true
         }
 
         MouseArea {
