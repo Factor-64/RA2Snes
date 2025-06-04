@@ -211,9 +211,12 @@ Item {
                             changeCheckBox.enabled = false;
                             signoutArea.enabled = false;
                             compactCheckBox.enabled = false;
+                            compactMouseArea.enabled = false;
+                            compactMode.color = themeLoader.item.popupItemDisabled;
                             autoHardcore.color = themeLoader.item.popupItemDisabled;
                             signout.color = themeLoader.item.popupItemDisabled;
                             modeMouse.enabled = false;
+                            autoArea.enabled = false;
                             menuPopup.changeModeColor();
 
                         }
@@ -225,10 +228,14 @@ Item {
                         {
                             mainWindow.setupFinished = true;
                             changeCheckBox.enabled = true;
+
                             signoutArea.enabled = true;
                             signout.color = themeLoader.item.selectedLink;
                             compactCheckBox.enabled = true;
+                            compactMouseArea.enabled = true;
+                            compactMode.color = themeLoader.item.selectedLink;
                             autoHardcore.color = themeLoader.item.selectedLink;
+                            autoArea.enabled = true;
                             modeMouse.enabled = !changeCheckBox.checked;
                             menuPopup.changeModeColor();
                         }
@@ -274,9 +281,9 @@ Item {
                     }
                 }
                 MouseArea {
+                    id: autoArea
                     anchors.fill: parent
                     hoverEnabled: true
-                    enabled: changeCheckBox.enabled
                     onClicked: {
                         changeCheckBox.checked = !changeCheckBox.checked
                     }
@@ -416,7 +423,7 @@ Item {
                         text: qsTr("Compact Mode")
                         font.family: "Verdana"
                         font.pixelSize: 13
-                        color: compactCheckBox.enabled ? themeLoader.item.selectedLink : themeLoader.item.popupItemDisabled
+                        color: themeLoader.item.selectedLink
                         verticalAlignment: Text.AlignVCenter
                     }
                 }
@@ -424,7 +431,6 @@ Item {
                     id: compactMouseArea
                     anchors.fill: parent
                     hoverEnabled: true
-                    enabled: compactCheckBox.enabled
                     onClicked: {
                         compactCheckBox.checked = !compactCheckBox.checked
                     }
