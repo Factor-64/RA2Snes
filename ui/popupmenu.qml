@@ -203,6 +203,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
 
                     Connections {
+                        id: disableSwitch
                         target: Ra2snes
                         function onDisableModeSwitching()
                         {
@@ -559,6 +560,12 @@ Item {
             hamburgerRectangle.color = themeLoader.item.mainWindowDarkAccentColor;
             themePopup.close();
             menuPopup.close();
+        }
+    }
+    Component.onCompleted: {
+        if(!mainWindow.setupFinished)
+        {
+            disableSwitch.onDisableModeSwitching();
         }
     }
 }
