@@ -212,6 +212,7 @@ Item {
                             signoutArea.enabled = false;
                             compactCheckBox.enabled = false;
                             autoHardcore.color = themeLoader.item.popupItemDisabled;
+                            signout.color = themeLoader.item.popupItemDisabled;
                             modeMouse.enabled = false;
                             menuPopup.changeModeColor();
 
@@ -225,6 +226,7 @@ Item {
                             mainWindow.setupFinished = true;
                             changeCheckBox.enabled = true;
                             signoutArea.enabled = true;
+                            signout.color = themeLoader.item.selectedLink;
                             compactCheckBox.enabled = true;
                             autoHardcore.color = themeLoader.item.selectedLink;
                             modeMouse.enabled = !changeCheckBox.checked;
@@ -523,7 +525,7 @@ Item {
                     text: qsTr("Sign Out")
                     font.family: "Verdana"
                     font.pixelSize: 13
-                    color: signoutArea.enabled ? themeLoader.item.selectedLink : themeLoader.item.popupItemDisabled
+                    color: themeLoader.item.selectedLink
                     verticalAlignment: Text.AlignVCenter
                 }
                 MouseArea {
