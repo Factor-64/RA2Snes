@@ -80,8 +80,8 @@ private:
     QString m_currentGame;
     const QString m_version = RA2SNES_VERSION_STRING;
     bool loggedin;
-    bool gameLoaded;
-    bool loadingGame;
+    bool m_gameLoaded;
+    bool m_loadingGame;
     bool remember_me;
     bool isGB;
     bool reset;
