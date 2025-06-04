@@ -95,7 +95,7 @@ private:
     QString m_theme;
     QString m_latestVersion;
     QString downloadUrl;
-
+    QTimer* crashTimer;
     void createSettingsFile();
     void loadSettings();
     void onLoginSuccess();

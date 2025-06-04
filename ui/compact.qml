@@ -46,6 +46,8 @@ Rectangle {
                                 source: UserInfoModel.pfp
                                 width: 32
                                 height: 32
+                                cache: true
+                                asynchronous: true
                             }
                             Text {
                                 id: user
@@ -190,6 +192,8 @@ Rectangle {
                         Row {
                             spacing: 10
                             Image {
+                                cache: true
+                                asynchronous: true
                                 source: GameInfoModel.image_icon_url
                                 width: 32
                                 height: 32
@@ -299,6 +303,8 @@ Rectangle {
                                         source: GameInfoModel.console_icon
                                         width: 18
                                         height: 18
+                                        cache: true
+                                        asynchronous: true
                                     }
                                     Text {
                                         text: GameInfoModel.console

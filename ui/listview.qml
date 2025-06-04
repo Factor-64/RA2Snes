@@ -48,6 +48,8 @@ ListView {
 				width: 64
 				height: 64
 				Layout.alignment: Qt.AlignVCenter
+				cache: true
+				asynchronous: true
 			}
 
 			ColumnLayout {

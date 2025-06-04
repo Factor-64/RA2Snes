@@ -56,6 +56,8 @@ Rectangle {
                     source: UserInfoModel.pfp
                     width: 128
                     height: 128
+                    cache: true
+                    asynchronous: true
                 }
                 Column {
                     spacing: 6
@@ -218,6 +220,8 @@ Rectangle {
                     source: GameInfoModel.image_icon_url
                     width: 36
                     height: 36
+                    cache: true
+                    asynchronous: true
                     MouseArea {
                         id: mouseAreaGameIcon
                         anchors.fill: parent
@@ -323,6 +327,8 @@ Rectangle {
                             source: GameInfoModel.console_icon
                             width: 18
                             height: 18
+                            cache: true
+                            asynchronous: true
                         }
                         Text {
                             text: GameInfoModel.console
