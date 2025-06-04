@@ -130,11 +130,13 @@ ApplicationWindow {
                             source: "./images/ra-icon.svg"
                             width: 114
                             height: 55
+                            asynchronous: true
                         }
                         Image {
                             source: "./images/logo.png"
                             width: 55
                             height: 55
+                            asynchronous: true
                         }
                         Image {
                             source: {
@@ -144,6 +146,7 @@ ApplicationWindow {
                             }
                             width: 76
                             height: 55
+                            asynchronous: true
                         }
                     }
                     Text {
