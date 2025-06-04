@@ -14,6 +14,13 @@ ra2snes::ra2snes(QObject *parent)
     downloadUrl = "";
     m_appDirPath = "";
     initVars();
+    crashTimer = new QTimer(this);
+    crashTimer->setSingleShot(true);
+
+    connect(crashTimer, &QTimer::timeout, this, [this]() {
+        emit displayMessage("SD2Snes Firmware is unresponsive. Please power cycle the console.", true);
+        crashTimer->start(5000);
+    });
 
     connect(usb2snes, &Usb2Snes::connected, this, [=]() {
         usb2snes->setAppName("ra2snes");
@@ -24,6 +31,8 @@ ra2snes::ra2snes(QObject *parent)
     });
 
     connect(usb2snes, &Usb2Snes::disconnected, this, [=]() {
+        if(crashTimer->isActive())
+            crashTimer->stop();
         //qDebug() << "Disconnected, trying to reconnect in 1 sec";
         emit displayMessage("QUsb2Snes Not Connected", true);
         raclient->clearAchievements();
@@ -45,6 +54,8 @@ ra2snes::ra2snes(QObject *parent)
         }
         else
         {
+            if(crashTimer->isActive())
+                crashTimer->stop();
             m_currentGame = "";
             raclient->clearAchievements();
             emit clearedAchievements();
@@ -304,6 +315,9 @@ void ra2snes::onUsb2SnesStateChanged()
     //qDebug() << "Tasks Finished: " << doThisTaskNext;
     //qDebug() << "State: " << usb2snes->state();
     //qDebug() << "Reset? " << reset;
+    if(crashTimer->isActive())
+        crashTimer->stop();
+    crashTimer->start(7000);
     if(usb2snes->state() == Usb2Snes::Ready)
     {
         if(reset)
