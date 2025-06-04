@@ -256,6 +256,7 @@ ListView {
 					colorization: 1.0
 					colorizationColor: themeLoader.item.primedIconColor
 				}
+				asynchronous: true
 			}
 
 			MouseArea {
@@ -388,6 +389,7 @@ ListView {
 					colorization: 1.0
 					colorizationColor: svgImage.type
 				}
+				asynchronous: true
 			}
 
 			MouseArea {

@@ -534,6 +534,7 @@ Rectangle {
                                 colorization: 1.0
                                 colorizationColor: themeLoader.item.missableIconColor
                             }
+                            asynchronous: true
                         }
                     }
                     Row {

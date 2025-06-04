@@ -57,6 +57,7 @@ Item {
                 colorization: 1.0
                 colorizationColor: themeLoader.item.refreshIconColor
             }
+            asynchronous: true
         }
 
         MouseArea {
