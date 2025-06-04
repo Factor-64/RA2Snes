@@ -74,8 +74,8 @@ ra2snes::ra2snes(QObject *parent)
     connect(raclient, &RAClient::requestFailed, this, &ra2snes::onRequestFailed);
     connect(raclient, &RAClient::requestError, this, &ra2snes::onRequestError);
     connect(raclient, &RAClient::gotGameID, this, [=] (const int& id){
-        gameLoaded = true;
-        loadingGame = false;
+        m_gameLoaded = true;
+        m_loadingGame = false;
         emit displayMessage("Game Loaded", false);
         raclient->getAchievements(id);
     });
@@ -151,7 +151,7 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
             }
             doThisTaskNext = GetConsoleConfig;
             reset = false;
-            gameLoaded = false;
+            m_gameLoaded = false;
             reader->clearQueue();
             raclient->setPatched(false);
             raclient->clearAchievements();
@@ -160,13 +160,13 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
             setCurrentConsole();
             //qDebug() << "Menu";
         }
-        else if (!gameLoaded && loggedin && !loadingGame)
+        else if (!m_gameLoaded && loggedin && !m_loadingGame)
         {
             doThisTaskNext = GetRomType;
             emit disableModeSwitching();
             if(raclient->getAutoHardcore() && !raclient->getHardcore())
                 changeMode();
-            loadingGame = true;
+            m_loadingGame = true;
             setCurrentConsole();
             emit displayMessage("Loading... Do Not Turn Off Console!", false);
         }
@@ -312,7 +312,7 @@ void ra2snes::onUsb2SnesStateChanged()
         {
             case GetConsoleInfo:
                 //qDebug() << "infos";
-                if(loadingGame || gameLoaded)
+                if(m_loadingGame || m_gameLoaded)
                     doThisTaskNext = CheckPatched;
                 else
                     doThisTaskNext = GetConsoleConfig;
@@ -326,7 +326,7 @@ void ra2snes::onUsb2SnesStateChanged()
                     usb2snes->isPatchedROM();
                     break;
                 }
-                else if(!gameLoaded)
+                else if(!m_gameLoaded)
                     break;
             case GetConsoleAddresses:
                 //qDebug() << "get addresses";
@@ -357,7 +357,7 @@ void ra2snes::onUsb2SnesStateChanged()
                 break;
             case GetConsoleConfig:
                 //qDebug() << "console config";
-                if(loadingGame)
+                if(m_loadingGame)
                     doThisTaskNext = GetCurrentGameFile;
                 else
                     doThisTaskNext = GetConsoleInfo;
@@ -386,7 +386,7 @@ void ra2snes::onUsb2SnesStateChanged()
     else if(usb2snes->state() == Usb2Snes::None)
     {
         doThisTaskNext = None;
-        gameLoaded = false;
+        m_gameLoaded = false;
         m_currentGame = "";
         setCurrentConsole();
     }
@@ -553,8 +553,8 @@ void ra2snes::initVars()
     raclient->clearGame();
     m_currentGame = "";
     loggedin = false;
-    gameLoaded = false;
-    loadingGame = false;
+    m_gameLoaded = false;
+    m_loadingGame = false;
     isGB = false;
     doThisTaskNext = None;
     remember_me = false;
@@ -608,7 +608,7 @@ void ra2snes::changeMode()
         user->hardcore(false);
         emit displayMessage(reason, true);
     }
-    if(gameLoaded)
+    if(m_gameLoaded)
     {
         if(user->patched())
             doThisTaskNext = NoChecksNeeded;
@@ -616,7 +616,7 @@ void ra2snes::changeMode()
             reset = true;
         onUsb2SnesStateChanged();
     }
-    else if(!gameLoaded)
+    else if(!m_gameLoaded)
     {
         //qDebug() << "Enabling Mode Switching";
         emit enableModeSwitching();

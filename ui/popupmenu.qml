@@ -209,6 +209,8 @@ Item {
                         {
                             mainWindow.setupFinished = false;
                             changeCheckBox.enabled = false;
+                            signoutArea.enabled = false;
+                            compactCheckBox.enabled = false;
                             autoHardcore.color = themeLoader.item.popupItemDisabled;
                             modeMouse.enabled = false;
                             menuPopup.changeModeColor();
@@ -222,6 +224,8 @@ Item {
                         {
                             mainWindow.setupFinished = true;
                             changeCheckBox.enabled = true;
+                            signoutArea.enabled = true;
+                            compactCheckBox.enabled = true;
                             autoHardcore.color = themeLoader.item.selectedLink;
                             modeMouse.enabled = !changeCheckBox.checked;
                             menuPopup.changeModeColor();
@@ -519,10 +523,11 @@ Item {
                     text: qsTr("Sign Out")
                     font.family: "Verdana"
                     font.pixelSize: 13
-                    color: themeLoader.item.selectedLink
+                    color: signoutArea.enabled ? themeLoader.item.selectedLink : themeLoader.item.popupItemDisabled
                     verticalAlignment: Text.AlignVCenter
                 }
                 MouseArea {
+                    id: signoutArea
                     anchors.fill: parent
                     hoverEnabled: true
                     onClicked: {
@@ -560,12 +565,6 @@ Item {
             hamburgerRectangle.color = themeLoader.item.mainWindowDarkAccentColor;
             themePopup.close();
             menuPopup.close();
-        }
-    }
-    Component.onCompleted: {
-        if(!mainWindow.setupFinished)
-        {
-            disableSwitch.onDisableModeSwitching();
         }
     }
 }
