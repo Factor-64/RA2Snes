@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 import CustomModels 1.0
-import QtQuick.Effects
+import Qt5Compat.GraphicalEffects
 
 ListView {
 	implicitHeight: contentHeight
@@ -251,12 +251,13 @@ ListView {
 				width: 18
 				height: 18
 				source: "./images/primed"
-				layer.enabled: true
-				layer.effect: MultiEffect {
-					colorization: 1.0
-					colorizationColor: themeLoader.item.primedIconColor
-				}
 				asynchronous: true
+			}
+
+			ColorOverlay {
+				anchors.fill: svgPrimed
+				source: svgPrimed
+				color: themeLoader.item.themeLoader.item.primedIconColor
 			}
 
 			MouseArea {
@@ -369,27 +370,29 @@ ListView {
 				source: {
 					if(model.type === "win_condition")
 					{
-						svgImage.type = themeLoader.item.winConditionIconColor;
+						svgOverlay.color = themeLoader.item.winConditionIconColor;
 						"./images/win_condition.svg";
 					}
 					else if(model.type === "missable")
 					{
-						svgImage.type = themeLoader.item.missableIconColor;
+						svgOverlay.color = themeLoader.item.missableIconColor;
 						"./images/missable.svg";
 					}
 					else if(model.type === "progression")
 					{
-						svgImage.type = themeLoader.item.progressionIconColor;
+						svgOverlay.color = themeLoader.item.progressionIconColor;
 						"./images/progression.svg";
 					}
 					else ""
 				}
-				layer.enabled: true
-				layer.effect: MultiEffect {
-					colorization: 1.0
-					colorizationColor: svgImage.type
-				}
 				asynchronous: true
+			}
+
+			ColorOverlay {
+				id: svgOverlay
+				anchors.fill: svgImage
+				source: svgImage
+				color: ""
 			}
 
 			MouseArea {

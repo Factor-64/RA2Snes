@@ -1,6 +1,6 @@
 import QtQuick
 import CustomModels 1.0
-import QtQuick.Effects
+import Qt5Compat.GraphicalEffects
 
 Item {
     Rectangle {
@@ -52,12 +52,13 @@ Item {
             width: 20
             height: 20
             source: "./images/refresh.svg"
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                colorization: 1.0
-                colorizationColor: themeLoader.item.refreshIconColor
-            }
             asynchronous: true
+        }
+
+        ColorOverlay {
+            anchors.fill: refreshImage
+            source: refreshImage
+            color: themeLoader.item.missableIconColor
         }
 
         MouseArea {

@@ -571,13 +571,13 @@ bool RAClient::isGameBeaten()
     //qDebug() << winMap;
     if(progressionMap.empty() || achievement_model->rowCount() < 1)
         return false;
-    for(auto it = progressionMap.constBegin(); it != progressionMap.constEnd(); ++it) {
+    for(auto it = progressionMap.constBegin(); it != progressionMap.constEnd(); it++) {
         if(!it.value()) {
             gameinfo_model->beaten(false);
             return false;
         }
     }
-    for(auto it = winMap.constBegin(); it != winMap.constEnd(); ++it) {
+    for(auto it = winMap.constBegin(); it != winMap.constEnd(); it++) {
         if(it.value()) {
             gameinfo_model->beaten(true);
             return true;
@@ -596,9 +596,6 @@ bool RAClient::isGameMastered()
         gameinfo_model->mastered(true);
         return true;
     }
-    else
-    {
-        gameinfo_model->mastered(false);
-        return false;
-    }
+    gameinfo_model->mastered(false);
+    return false;
 }
