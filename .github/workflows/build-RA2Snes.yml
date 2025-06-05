@@ -11,16 +11,14 @@ jobs:
       with:
         submodules: true
 
-    - name: Add Ubuntu 24.10 Repository and Install dependencies
+    - name: Install dependencies
       run: |
-        echo "deb http://archive.ubuntu.com/ubuntu/ oracular main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
-        sudo apt-get update
+        sudo apt-get update && sudo apt-get upgrade
         sudo apt-get install -y build-essential cmake qt6-tools-dev qt6-websockets-dev \
         qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts \
         qml6-module-qtquick-templates qml6-module-qtquick-window qt6-declarative-dev \
         qml6-module-qtqml-workerscript qml6-module-qtmultimedia qml6-module-qt-labs-folderlistmodel \
-        libqt6svg6 libva-dev libva-glx2 libva-drm2 libgstreamer1.0-dev libgl1-mesa-dev
-        sudo sed -i '/oracular/d' /etc/apt/sources.list
+        qml6-module-qt5compat-graphicaleffects libqt6svg6 libva-dev libva-glx2 libva-drm2 libgstreamer1.0-dev libgl1-mesa-dev
 
     - name: Build rcheevos
       run: make ARCH=x64 BUILD=c89 HAVE_HASH=0 CFLAGS='-Wno-unused-but-set-variable -DRC_DISABLE_LUA' test
