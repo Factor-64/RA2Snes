@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls.Material
 import CustomModels 1.0
-import QtQuick.Effects
+import Qt5Compat.GraphicalEffects
 
 Item {
     Rectangle {
@@ -17,12 +17,13 @@ Item {
             width: 32
             height: 32
             source: "./images/hamburger.svg"
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                colorization: 1.0
-                colorizationColor: themeLoader.item.hamburgerIconColor
-            }
             asynchronous: true
+        }
+
+        ColorOverlay {
+            anchors.fill: hamburger
+            source: hamburger
+            color: themeLoader.item.hamburgerIconColor
         }
 
         MouseArea {

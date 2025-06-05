@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 import CustomModels 1.0
-import QtQuick.Effects
+import Qt5Compat.GraphicalEffects
 
 Rectangle {
     id: contentForm
@@ -335,11 +335,12 @@ Rectangle {
                                         width: 14
                                         height: 14
                                         source: "./images/missable.svg"
-                                        layer.enabled: true
-                                        layer.effect: MultiEffect {
-                                            colorization: 1.0
-                                            colorizationColor: themeLoader.item.missableIconColor
-                                        }
+                                    }
+
+                                    ColorOverlay {
+                                        anchors.fill: missableImage
+                                        source: missableImage
+                                        color: themeLoader.item.missableIconColor
                                     }
                                 }
                                 Row {
