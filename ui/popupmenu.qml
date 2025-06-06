@@ -52,10 +52,10 @@ Item {
             color: themeLoader.item.popupBackgroundColor
         }
         onOpened: {
-            popupContainer.visible = true;
-            popupContainer.x = x - 200;
+            popupContainer.x = x - 300;
             popupContainer.y = y - 60;
             popupContainer.height = mainWindow.height;
+            popupContainer.enabled = true;
         }
 
         function changeModeColor() {
@@ -564,12 +564,12 @@ Item {
         id: popupContainer
         x: 0
         y: 0
-        width: 500
-        height: 500
+        width: 800
+        height: 0
         z: 19
-        visible: false
+        enabled: false
         onEntered: {
-            visible = false;
+            enabled = false;
             themeRect.color = themeLoader.item.popupBackgroundColor;
             theme.color = themeLoader.item.selectedLink;
             hamburgerRectangle.color = themeLoader.item.mainWindowDarkAccentColor;
