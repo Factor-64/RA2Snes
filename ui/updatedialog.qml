@@ -71,187 +71,229 @@ ApplicationWindow {
             font.pixelSize: 13
         }
 
-        Row {
-            spacing: 20
+        Column {
             anchors.horizontalCenter: parent.horizontalCenter
 
-            Button {
-                id: update
-                text: qsTr("Update")
-                width: 80
-                background: Rectangle {
-                    id: updateBG
-                    color: themeLoader.item.buttonBackgroundColor
-                    border.color: themeLoader.item.buttonBorderColor
-                    radius: 2
-                    border.width: 1
+            Row {
+                id: checkbox_row
+                spacing: 8
+                anchors.horizontalCenter: parent.horizontalCenter
+                CheckBox {
+                    id: remember_checkbox
+                    width: 14
+                    height: 14
+
+                    indicator: Rectangle {
+                        width: 14
+                        height: 14
+                        radius: 2
+                        color: remember_checkbox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedColor
+                        border.color: remember_checkbox.checked ? themeLoader.item.checkBoxCheckedBorderColor : themeLoader.item.checkBoxUnCheckedBorderColor
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: remember_checkbox.checked ? "\u2713" : ""
+                            color: themeLoader.item.checkBoxCheckColor
+                            font.pixelSize: 12
+                        }
+                    }
+                    onCheckedChanged: {
+                        Ra2snes.ignoreUpdates(remember_checkbox.checked);
+                    }
                 }
-                contentItem: Text {
-                    id: updateText
+
+                Text {
+                    text: qsTr("Ignore Updates")
+                    font.family: "Verdana"
+                    font.pixelSize: 13
+                    color: themeLoader.item.basicTextColor
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
+
+            Row {
+                spacing: 20
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                Button {
+                    id: update
                     text: qsTr("Update")
-                    color: themeLoader.item.selectedLink
-                    font.bold: true
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-                MouseArea {
-                    id: updateArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: {
-                        Ra2snes.beginUpdate();
-                        updateDialog.close();
+                    width: 80
+                    background: Rectangle {
+                        id: updateBG
+                        color: themeLoader.item.buttonBackgroundColor
+                        border.color: themeLoader.item.buttonBorderColor
+                        radius: 2
+                        border.width: 1
                     }
-                    onEntered: update.state = "hovered"
-                    onExited: update.state = ""
+                    contentItem: Text {
+                        id: updateText
+                        text: qsTr("Update")
+                        color: themeLoader.item.selectedLink
+                        font.bold: true
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    MouseArea {
+                        id: updateArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onClicked: {
+                            Ra2snes.beginUpdate();
+                            updateDialog.close();
+                        }
+                        onEntered: update.state = "hovered"
+                        onExited: update.state = ""
+                    }
+
+                    states: [
+                        State {
+                            name: "hovered"
+                            PropertyChanges {
+                                target: updateBG
+                                color: themeLoader.item.highlightedButtonBackgroundColor
+                                border.color: themeLoader.item.highlightedButtonBorderColor
+                            }
+                            PropertyChanges {
+                                target: updateText
+                                color: themeLoader.item.highlightedButtonTextColor
+                            }
+                        }
+                    ]
+
+                    transitions: [
+                        Transition {
+                            from: ""
+                            to: "hovered"
+                            ColorAnimation {
+                                target: updateBG
+                                property: "color"
+                                duration: 200
+                            }
+                            ColorAnimation {
+                                target: updateBG
+                                property: "border.color"
+                                duration: 200
+                            }
+                            ColorAnimation {
+                                target: updateText
+                                property: "color"
+                                duration: 200
+                            }
+                        },
+                        Transition {
+                            from: "hovered"
+                            to: ""
+                            ColorAnimation {
+                                target: updateBG
+                                property: "color"
+                                duration: 200
+                            }
+                            ColorAnimation {
+                                target: updateBG
+                                property: "border.color"
+                                duration: 200
+                            }
+                            ColorAnimation {
+                                target: updateText
+                                property: "color"
+                                duration: 200
+                            }
+                        }
+                    ]
                 }
 
-                states: [
-                    State {
-                        name: "hovered"
-                        PropertyChanges {
-                            target: updateBG
-                            color: themeLoader.item.highlightedButtonBackgroundColor
-                            border.color: themeLoader.item.highlightedButtonBorderColor
-                        }
-                        PropertyChanges {
-                            target: updateText
-                            color: themeLoader.item.highlightedButtonTextColor
-                        }
-                    }
-                ]
-
-                transitions: [
-                    Transition {
-                        from: ""
-                        to: "hovered"
-                        ColorAnimation {
-                            target: updateBG
-                            property: "color"
-                            duration: 200
-                        }
-                        ColorAnimation {
-                            target: updateBG
-                            property: "border.color"
-                            duration: 200
-                        }
-                        ColorAnimation {
-                            target: updateText
-                            property: "color"
-                            duration: 200
-                        }
-                    },
-                    Transition {
-                        from: "hovered"
-                        to: ""
-                        ColorAnimation {
-                            target: updateBG
-                            property: "color"
-                            duration: 200
-                        }
-                        ColorAnimation {
-                            target: updateBG
-                            property: "border.color"
-                            duration: 200
-                        }
-                        ColorAnimation {
-                            target: updateText
-                            property: "color"
-                            duration: 200
-                        }
-                    }
-                ]
-            }
-
-            Button {
-                id: skip
-                text: qsTr("Skip")
-                width: 80
-                background: Rectangle {
-                    id: skipBG
-                    color: themeLoader.item.buttonBackgroundColor
-                    border.color: themeLoader.item.buttonBorderColor
-                    radius: 2
-                    border.width: 1
-                }
-                onClicked: {
-                    updateDialog.close()
-                }
-                contentItem: Text {
-                    id: skipText
+                Button {
+                    id: skip
                     text: qsTr("Skip")
-                    color: themeLoader.item.selectedLink
-                    font.bold: true
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-                MouseArea {
-                    id: skipArea
-                    anchors.fill: parent
-                    hoverEnabled: true
+                    width: 80
+                    background: Rectangle {
+                        id: skipBG
+                        color: themeLoader.item.buttonBackgroundColor
+                        border.color: themeLoader.item.buttonBorderColor
+                        radius: 2
+                        border.width: 1
+                    }
                     onClicked: {
-                        updateDialog.close();
+                        updateDialog.close()
                     }
-                    onEntered: skip.state = "hovered"
-                    onExited: skip.state = ""
+                    contentItem: Text {
+                        id: skipText
+                        text: qsTr("Skip")
+                        color: themeLoader.item.selectedLink
+                        font.bold: true
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    MouseArea {
+                        id: skipArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onClicked: {
+                            updateDialog.close();
+                        }
+                        onEntered: skip.state = "hovered"
+                        onExited: skip.state = ""
+                    }
+
+                    states: [
+                        State {
+                            name: "hovered"
+                            PropertyChanges {
+                                target: skipBG
+                                color: themeLoader.item.highlightedButtonBackgroundColor
+                                border.color: themeLoader.item.highlightedButtonBorderColor
+                            }
+                            PropertyChanges {
+                                target: skipText
+                                color: themeLoader.item.highlightedButtonTextColor
+                            }
+                        }
+                    ]
+
+                    transitions: [
+                        Transition {
+                            from: ""
+                            to: "hovered"
+                            ColorAnimation {
+                                target: skipBG
+                                property: "color"
+                                duration: 200
+                            }
+                            ColorAnimation {
+                                target: skipBG
+                                property: "border.color"
+                                duration: 200
+                            }
+                            ColorAnimation {
+                                target: skipText
+                                property: "color"
+                                duration: 200
+                            }
+                        },
+                        Transition {
+                            from: "hovered"
+                            to: ""
+                            ColorAnimation {
+                                target: skipBG
+                                property: "color"
+                                duration: 200
+                            }
+                            ColorAnimation {
+                                target: skipBG
+                                property: "border.color"
+                                duration: 200
+                            }
+                            ColorAnimation {
+                                target: skipText
+                                property: "color"
+                                duration: 200
+                            }
+                        }
+                    ]
                 }
-
-                states: [
-                    State {
-                        name: "hovered"
-                        PropertyChanges {
-                            target: skipBG
-                            color: themeLoader.item.highlightedButtonBackgroundColor
-                            border.color: themeLoader.item.highlightedButtonBorderColor
-                        }
-                        PropertyChanges {
-                            target: skipText
-                            color: themeLoader.item.highlightedButtonTextColor
-                        }
-                    }
-                ]
-
-                transitions: [
-                    Transition {
-                        from: ""
-                        to: "hovered"
-                        ColorAnimation {
-                            target: skipBG
-                            property: "color"
-                            duration: 200
-                        }
-                        ColorAnimation {
-                            target: skipBG
-                            property: "border.color"
-                            duration: 200
-                        }
-                        ColorAnimation {
-                            target: skipText
-                            property: "color"
-                            duration: 200
-                        }
-                    },
-                    Transition {
-                        from: "hovered"
-                        to: ""
-                        ColorAnimation {
-                            target: skipBG
-                            property: "color"
-                            duration: 200
-                        }
-                        ColorAnimation {
-                            target: skipBG
-                            property: "border.color"
-                            duration: 200
-                        }
-                        ColorAnimation {
-                            target: skipText
-                            property: "color"
-                            duration: 200
-                        }
-                    }
-                ]
             }
+
         }
     }
 }
