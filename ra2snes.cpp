@@ -485,6 +485,7 @@ void ra2snes::createSettingsFile()
         settings.setValue("Auto", user->autohardcore());
         settings.setValue("Compact", user->compact());
         settings.setValue("Theme", m_theme);
+        settings.setValue("IgnoreUpdates", m_ignore);
 
         if(remember_me)
         {
@@ -523,6 +524,7 @@ void ra2snes::loadSettings() {
         int height = settings.value("Height").toInt();
         bool autoh = settings.value("Auto").toBool();
         bool comp = settings.value("Compact").toBool();
+        bool igno = settings.value("IgnoreUpdates").toBool();
         QString theme = settings.value("Theme").toString();
 
         UserInfoModel* user = raclient->getUserInfoModel();
@@ -533,6 +535,8 @@ void ra2snes::loadSettings() {
         user->compact(comp);
         setConsole(console_v);
         setTheme(theme);
+
+        m_ignore = igno;
 
         if(username != "" && token != "" && time != "")
         {
@@ -571,6 +575,7 @@ void ra2snes::initVars()
     isGB = false;
     doThisTaskNext = None;
     remember_me = false;
+    m_ignore = false;
     framesPassed = 0;
     updateAddresses = false;
     raclient->setHardcore(true);
@@ -659,8 +664,9 @@ void ra2snes::setConsole(const QString &console)
 void ra2snes::setAppDirPath(const QString &appDirPath)
 {
     m_appDirPath = appDirPath;
-    checkForUpdate();
     loadSettings();
+    if(!m_ignore)
+        checkForUpdate();
 }
 
 QString ra2snes::appDirPath() const
@@ -689,6 +695,11 @@ QString ra2snes::version() const
 QString ra2snes::latestVersion() const
 {
     return m_latestVersion;
+}
+
+bool ra2snes::ignore() const
+{
+    return m_ignore;
 }
 
 void ra2snes::refreshRAData()
@@ -761,5 +772,11 @@ void ra2snes::beginUpdate() {
     else {
         qDebug() << "Failed to start updater process.";
     }
+}
+
+void ra2snes::ignoreUpdates(bool i)
+{
+    m_ignore = i;
+    emit ignoreChanged();
 }
 

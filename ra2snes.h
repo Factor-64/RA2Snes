@@ -14,6 +14,7 @@ class ra2snes : public QObject
     Q_PROPERTY(QString theme READ theme WRITE setTheme NOTIFY themeChanged)
     Q_PROPERTY(QString version READ version CONSTANT)
     Q_PROPERTY(QString latestVersion READ latestVersion NOTIFY newUpdate)
+    Q_PROPERTY(bool ignore READ ignore WRITE ignoreUpdates NOTIFY ignoreChanged)
 
 public:
     enum Task {
@@ -44,6 +45,7 @@ public:
     QString theme() const;
     QString version() const;
     QString latestVersion() const;
+    bool ignore() const;
 
 public slots:
     void signIn(const QString &username, const QString &password, const bool& remember);
@@ -54,6 +56,7 @@ public slots:
     void refreshRAData();
     void setTheme(const QString& theme);
     void beginUpdate();
+    void ignoreUpdates(bool i);
 
 signals:
     void loginSuccess();
@@ -68,6 +71,7 @@ signals:
     void disableModeSwitching();
     void enableModeSwitching();
     void newUpdate();
+    void ignoreChanged();
 
 private:
     explicit ra2snes(QObject *parent = nullptr);
@@ -83,6 +87,7 @@ private:
     bool m_gameLoaded;
     bool m_loadingGame;
     bool remember_me;
+    bool m_ignore;
     bool isGB;
     bool reset;
     QAtomicInt updateAddresses;

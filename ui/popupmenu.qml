@@ -520,6 +520,85 @@ Item {
             }
 
             Rectangle {
+                id: ignoreRect
+                width: menuPopup.width
+                anchors.left: parent.left
+                anchors.leftMargin: -12
+                height: 24
+                color: themeLoader.item.popupBackgroundColor
+                Row {
+                    spacing: 4
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    CheckBox {
+                        id: ignoreCheckBox
+                        width: 14
+                        height: 14
+                        enabled: mainWindow.loadedThemes
+
+                        indicator: Rectangle {
+                            width: 14
+                            height: 14
+                            radius: 2
+                            color: ignoreCheckBox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedColor;
+                            border.color: ignoreCheckBox.checked ? themeLoader.item.checkBoxCheckedBorderColor : themeLoader.item.checkBoxCheckedBorderColor
+                            Text {
+                                anchors.centerIn: parent
+                                text: ignoreCheckBox.checked ? "\u2713" : ""
+                                color: themeLoader.item.checkBoxCheckColor
+                                font.pixelSize: 12
+                            }
+                        }
+
+                        onCheckedChanged: {
+                            Ra2snes.ignoreUpdates(ignoreCheckBox.checked);
+                        }
+                        Component.onCompleted: {
+                            ignoreCheckBox.checked = Ra2snes.ignore;
+                        }
+                        Connections {
+                            target: Ra2snes
+                            function onIgnoreChanged() { ignoreCheckBox.checked = Ra2snes.ignore; }
+                        }
+
+                    }
+
+                    Text {
+                        id: ignore
+                        text: qsTr("Ignore Updates")
+                        font.family: "Verdana"
+                        font.pixelSize: 13
+                        color: themeLoader.item.selectedLink
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
+                MouseArea {
+                    id: ignoreMouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        ignoreCheckBox.checked = !ignoreCheckBox.checked
+                    }
+                    onEntered: {
+                        ignoreRect.color = themeLoader.item.popupHighlightColor;
+                        ignore.color = themeLoader.item.linkColor;
+                        themeRect.color = themeLoader.item.popupBackgroundColor;
+                        theme.color = themeLoader.item.selectedLink;
+                        themePopup.close();
+                    }
+
+                    onExited: {
+                        ignoreRect.color = themeLoader.item.popupBackgroundColor;
+                        ignore.color = themeLoader.item.selectedLink;
+
+                        ignoreMouseArea.enabled = true;
+                    }
+                }
+            }
+
+            Rectangle {
                 id: signoutRect
                 width: menuPopup.width
                 anchors.left: parent.left
