@@ -233,7 +233,7 @@ ApplicationWindow {
                                 Text {
                                     anchors.centerIn: parent
                                     text: remember_checkbox.checked ? "\u2713" : ""
-                                    color: "#ffffff"
+                                    color: themeLoader.item.checkBoxCheckColor
                                     font.pixelSize: 12
                                 }
                             }

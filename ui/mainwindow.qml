@@ -242,8 +242,18 @@ ApplicationWindow {
     Connections {
         target: Ra2snes
         function onNewUpdate() {
-            var component = Qt.createComponent("./updatedialog.qml")
-            var popup = component.createObject(mainWindow)
+            var component = Qt.createComponent("./updatedialog.qml");
+            function createPopup() {
+                if (component.status === Component.Ready)
+                    var popup = component.createObject(mainWindow);
+            }
+
+            if (component.status === Component.Loading)
+                component.statusChanged.connect(function() {
+                    createPopup();
+                });
+            else
+                createPopup();
         }
     }
 
