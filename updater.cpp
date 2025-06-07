@@ -124,7 +124,14 @@ void Updater::extractFile(const QString &filePath) {
         }, Qt::QueuedConnection);
         QFile::remove(appdir + QDir::separator() + "latest_release.zip");
 
-        QProcess::startDetached(appdir + QDir::separator() + "ra2snes.exe", QStringList());
+#ifdef Q_OS_WIN
+        QString program = appdir + QDir::separator() + "ra2snes.exe";
+#elif defined(Q_OS_LINUX)
+        QString program = appdir + QDir::separator() + "ra2snes";
+#elif defined(Q_OS_MACOS)
+        QString program = appdir + QDir::separator() + "ra2snes.app";
+#endif
+        QProcess::startDetached(program, QStringList());
         QTimer::singleShot(2000, this, [=]() {
             emit finished();
         });
