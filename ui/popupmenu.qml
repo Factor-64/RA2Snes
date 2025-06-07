@@ -18,12 +18,10 @@ Item {
             height: 32
             source: "./images/hamburger.svg"
             asynchronous: true
-        }
-
-        ColorOverlay {
-            anchors.fill: hamburger
-            source: hamburger
-            color: themeLoader.item.hamburgerIconColor
+            layer.enabled: true
+            layer.effect: ColorOverlay {
+                color: themeLoader.item.hamburgerIconColor
+            }
         }
 
         MouseArea {

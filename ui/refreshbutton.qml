@@ -53,12 +53,10 @@ Item {
             height: 20
             source: "./images/refresh.svg"
             asynchronous: true
-        }
-
-        ColorOverlay {
-            anchors.fill: refreshImage
-            source: refreshImage
-            color: themeLoader.item.missableIconColor
+            layer.enabled: true
+            layer.effect: ColorOverlay {
+                color: themeLoader.item.refreshIconColor
+            }
         }
 
         MouseArea {

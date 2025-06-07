@@ -80,7 +80,6 @@ ra2snes::ra2snes(QObject *parent)
 
     QTimer::singleShot(0, this, [=] { usb2snes->connect(); });
 
-    connect(raclient, &RAClient::continueQueue, this, [=] { raclient->runQueue(); });
     connect(raclient, &RAClient::loginSuccess, this, &ra2snes::onLoginSuccess);
     connect(raclient, &RAClient::requestFailed, this, &ra2snes::onRequestFailed);
     connect(raclient, &RAClient::requestError, this, &ra2snes::onRequestError);

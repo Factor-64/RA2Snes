@@ -8,7 +8,7 @@ Item {
         font.pixelSize: 13
         color: themeLoader.item.errorMessageTextColor
         width: parent.width
-        opacity: 1
+        opacity: 0
         Behavior on opacity {
             NumberAnimation {
                 duration: 500
