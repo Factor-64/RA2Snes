@@ -252,12 +252,10 @@ ListView {
 				height: 18
 				source: "./images/primed"
 				asynchronous: true
-			}
-
-			ColorOverlay {
-				anchors.fill: svgPrimed
-				source: svgPrimed
-				color: themeLoader.item.themeLoader.item.primedIconColor
+				layer.enabled: true
+				layer.effect: ColorOverlay {
+					color: themeLoader.item.primedIconColor
+				}
 			}
 
 			MouseArea {
@@ -359,7 +357,6 @@ ListView {
 			}
 
 			Image {
-				property color type: "#ffffff"
 				z: 4
 				id: svgImage
 				anchors.right: parent.right
@@ -369,30 +366,25 @@ ListView {
 				height: 18
 				source: {
 					if(model.type === "win_condition")
-					{
-						svgOverlay.color = themeLoader.item.winConditionIconColor;
 						"./images/win_condition.svg";
-					}
 					else if(model.type === "missable")
-					{
-						svgOverlay.color = themeLoader.item.missableIconColor;
 						"./images/missable.svg";
-					}
 					else if(model.type === "progression")
-					{
-						svgOverlay.color = themeLoader.item.progressionIconColor;
 						"./images/progression.svg";
-					}
 					else ""
 				}
 				asynchronous: true
-			}
-
-			ColorOverlay {
-				id: svgOverlay
-				anchors.fill: svgImage
-				source: svgImage
-				color: ""
+				layer.enabled: true
+				layer.effect: ColorOverlay {
+					color: {
+						if (model.type === "win_condition")
+							return themeLoader.item.winConditionIconColor;
+						else if (model.type === "progression")
+							return themeLoader.item.progressionIconColor;
+						else
+							return themeLoader.item.missableIconColor;
+					}
+				}
 			}
 
 			MouseArea {

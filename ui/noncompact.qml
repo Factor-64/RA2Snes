@@ -530,12 +530,10 @@ Rectangle {
                             height: 14
                             source: "./images/missable.svg"
                             asynchronous: true
-                        }
-
-                        ColorOverlay {
-                            anchors.fill: missableImage
-                            source: missableImage
-                            color: themeLoader.item.missableIconColor
+                            layer.enabled: true
+                            layer.effect: ColorOverlay {
+                                color: themeLoader.item.missableIconColor
+                            }
                         }
                     }
                     Row {

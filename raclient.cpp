@@ -18,6 +18,7 @@ RAClient::RAClient(QObject *parent)
     gameinfo_model = GameInfoModel::instance();
     achievement_model = AchievementModel::instance();
     connect(networkManager, &QNetworkAccessManager::finished, this, &RAClient::handleNetworkReply);
+    connect(this, &RAClient::continueQueue, this, [this] { runQueue(); });
     queue.clear();
     warning = false;
     //qDebug() << userAgent;
