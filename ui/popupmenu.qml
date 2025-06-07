@@ -128,14 +128,17 @@ Item {
                             signout.color = themeLoader.item.selectedLink;
                             compactMode.color = themeLoader.item.selectedLink;
                             hamburgerRectangle.color = themeLoader.item.popupBackgroundColor;
-                            for(let i = 0; i < themesList.contentItem.children.length; i++) {
+                            for (let i = 0; i < themesList.contentItem.children.length; i++) {
                                 let item = themesList.contentItem.children[i];
                                 item.color = themeLoader.item.popupBackgroundColor;
-                                item.children.forEach(child => {
-                                    if(child.color !== undefined)
+                                for (let j = 0; j < item.children.length; j++) {
+                                    let child = item.children[j];
+                                    if (child.color !== undefined) {
                                         child.color = themeLoader.item.selectedLink;
-                                });
+                                    }
+                                }
                             }
+
                             themeDel.color = themeLoader.item.popupHighlightColor;
                             themeName.color = themeLoader.item.linkColor;
                         }
