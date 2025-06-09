@@ -51,7 +51,6 @@ public:
     void setPatched(const bool& p);
     void setInGameHooks(const bool& n);
     void setTitle(const QString& t, const QString& i, const QString& l);
-    void runQueue();
     void clearQueue();
     void handleNetworkReply(QNetworkReply *reply);
     bool isGameBeaten();
@@ -93,6 +92,7 @@ private:
     void handlePatchResponse(const QJsonObject& jsonObject);
     void handleUnlocksResponse(const QJsonObject& jsonObject);
     void handleStartSessionResponse(const QJsonObject& jsonObject);
+    void runQueue();
     QString latestRequest;
     bool warning;
     QNetworkAccessManager* networkManager;
