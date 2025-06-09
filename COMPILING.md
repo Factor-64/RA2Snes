@@ -7,13 +7,13 @@
     ```
 3) Compile rcheevos using MingW64 (either the one built into Qt or using your installation)
     ```
-    cd ra2Snes/rcheevos/test
+    cd RA2Snes/rcheevos/test
     make ARCH=x64 BUILD=c89 CC=gcc HAVE_HASH=0 test
     cd ../..
     ```
 4) Compile miniz using MingW64 (either the one built into Qt or using your installation)
    ```
-   cd ra2Snes/miniz
+   cd RA2Snes/miniz
    gcc -c miniz.c -o miniz.o
    ```
 5) Open the CMakeFile as a project in Qt Creator.
@@ -35,17 +35,17 @@
     ```
 4) Compile rcheevos
     ```
-    cd ra2snes/rcheevos/test
+    cd RA2Snes/rcheevos/test
     make ARCH=x64 BUILD=c89 CC=gcc HAVE_HASH=0 test
     ```
 5) Compile miniz
     ```
-    cd ra2snes/miniz
+    cd RA2Snes/miniz
     gcc -c miniz.c -o miniz.o
     ```
 6) Setup with CMake
     ```
-    cd ra2Snes
+    cd RA2Snes
     cmake -S . -B build -DCMake_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt6
     ```
 6) Build
