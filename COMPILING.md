@@ -1,6 +1,6 @@
 ## Windows
 
-1) Install Qt 6.9.0 and Qt Creator using the [qt-online-installer](https://www.qt.io/download-qt-installer)
+1) Install Qt 6.9.1 and Qt Creator using the [qt-online-installer](https://www.qt.io/download-qt-installer)
 2) Clone the repo
     ```
     git clone https://github.com/Factor-64/RA2Snes.git --recursive
