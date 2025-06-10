@@ -121,6 +121,7 @@ ra2snes::ra2snes(QObject *parent)
     });
 
     connect(reader, &MemoryReader::achievementUnlocked, this, [=](const unsigned int& id, const QDateTime& time) {
+        //qDebug() << id << time;
         raclient->queueAchievementRequest(id, time);
     });
 

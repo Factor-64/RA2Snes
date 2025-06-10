@@ -127,8 +127,6 @@ void RAClient::queueAchievementRequest(const unsigned int& id, const QDateTime& 
     queue.enqueue(data);
     if(queue.size() == 1)
         runQueue();
-    else
-        emit continueQueue();
 }
 
 /*void RAClient::queueLeaderboardRequest(unsigned int id, QDateTime achieved, unsigned int score) {
@@ -140,9 +138,10 @@ void RAClient::queueAchievementRequest(const unsigned int& id, const QDateTime& 
 
 void RAClient::runQueue() {
     //qDebug() << "Queue Size: " << queue.size();
-    if(!queue.isEmpty() && !userinfo_model->token().isEmpty())
+    if(queue.size() > 0 && !userinfo_model->token().isEmpty())
     {
         RequestData data = queue.first();
+        //qDebug() << data.id << data.unlock_time;
         switch (data.type) {
             case AchievementRequest:
                 awardAchievement(data.id, data.hardcore, data.unlock_time);
@@ -155,7 +154,7 @@ void RAClient::runQueue() {
         }
     }
     else if(userinfo_model->token().isEmpty())
-        clearQueue();
+        queue.clear();
 }
 
 void RAClient::clearQueue()
@@ -391,6 +390,7 @@ void RAClient::handleSuccessResponse(const QJsonObject& jsonObject)
 
 void RAClient::handleAwardAchievementResponse(const QJsonObject& jsonObject)
 {
+    //qDebug() << queue.size();
     for(auto& achievement : achievement_model->getAchievements())
     {
         if(achievement.id == jsonObject["AchievementID"].toInt())
@@ -413,7 +413,7 @@ void RAClient::handleAwardAchievementResponse(const QJsonObject& jsonObject)
         }
     }
     isGameMastered();
-    queue.removeFirst();
+    queue.dequeue();
     emit continueQueue();
 }
 
