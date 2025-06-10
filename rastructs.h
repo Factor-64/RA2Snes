@@ -11,6 +11,12 @@ enum AchievementInfoType {
     Target
 };
 
+typedef struct {
+    uint8_t* ram;
+    uint32_t size;
+}
+memory_t;
+
 struct AchievementInfo {
     QUrl badge_locked_url;
     QString badge_name;
