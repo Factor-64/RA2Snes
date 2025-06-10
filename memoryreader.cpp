@@ -11,6 +11,7 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
     leaderboardTriggers.clear();
     achievementFrames.clear();
     modified = false;
+    mem.size = 0;
     QMap<int, int> uniqueAddresses;
     for(const AchievementInfo& achievement : achievements)
     {
@@ -75,7 +76,7 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
     for(auto it = uniqueAddresses.begin(); it != uniqueAddresses.end(); ++it)
         uniqueMemoryAddresses.append(qMakePair(it.key(), it.value()));
 
-    //qDebug() << uniqueMemoryAddressesCounts;
+    //qDebug() << uniqueMemoryAddresses;
 
     remapTriggerAddresses();
 }
@@ -93,10 +94,15 @@ void MemoryReader::remapTriggerAddresses()
             for(auto it = uniqueMemoryAddresses.cbegin(); it != uniqueMemoryAddresses.cend(); ++it)
             {
                 int addr = modified ? addressMap[nextref->address] : nextref->address;
+                //qDebug() << addr;
                 if(it->first == addr)
                 {
+                    //qDebug() << "Unique Address: " << it->first;
+                    //qDebug() << "Trigger Address:" << nextref->address;
                     temp[memoryOffset] = it->first;
                     nextref->address = memoryOffset;
+                    //qDebug() << "Memory Offset: " << memoryOffset;
+                    //qDebug() << "New Trigger Address: " << nextref->address;
                     break;
                 }
                 memoryOffset += it->second;
@@ -157,20 +163,25 @@ QList<QPair<int, int>> MemoryReader::getUniqueMemoryAddresses()
     return uniqueMemoryAddresses;
 }
 
-static uint32_t peek(uint32_t address, uint32_t num_bytes, void* ud) //Modified from a test for runtime in rcheevos
-{
-    uint8_t* memory = (uint8_t*)ud;
+static uint32_t peekb(uint32_t address, memory_t* memory) {
+    return address < memory->size ? memory->ram[address] : 0;
+}
+
+static uint32_t peek(uint32_t address, uint32_t num_bytes, void* ud) {
+    memory_t* memory = (memory_t*)ud;
+    //qDebug() << "A, N" << address << num_bytes;
+    //qDebug() << "R, S" << memory->ram << memory->size;
 
     switch (num_bytes) {
-    case 1: return memory[address];
+    case 1: return peekb(address, memory);
 
-    case 2: return memory[address] |
-               memory[address + 1] << 8;
+    case 2: return peekb(address, memory) |
+               peekb(address + 1, memory) << 8;
 
-    case 4: return memory[address] |
-               memory[address + 1] << 8 |
-               memory[address + 2] << 16 |
-               memory[address + 3] << 24;
+    case 4: return peekb(address, memory) |
+               peekb(address + 1, memory) << 8 |
+               peekb(address + 2, memory) << 16 |
+               peekb(address + 3, memory) << 24;
     }
 
     return 0;
@@ -209,9 +220,15 @@ void MemoryReader::decrementAddressCounts(rc_memref_t* nextref)
 
 void MemoryReader::checkAchievements() // Modified version of runtime.c from rcheevos
 {
-    //qDebug() << achievementFrames.first();
+    //qDebug() << "AchievementFrames size:" << achievementFrames.first().first.size();
+    //qDebug() << "AchievementFrames data ptr:" << (void*)achievementFrames.first().first.data();
     while(achievementFrames.size() > 0)
     {
+        uint32_t new_size = achievementFrames.first().first.size();
+        if(new_size < mem.size)
+            remapTriggerAddresses(); // IF ACHIEVEMENTS ARE ACTIVATING ON ACCIDENT TAKE A LOOK AT THIS AGAIN YOUR LOGIC MIGHT BE THE ISSUE AS ADDRESSES GET SHIFTED
+        mem.ram = reinterpret_cast<uint8_t*>(achievementFrames.first().first.data());
+        mem.size = new_size;
         for(int frame = 0; frame < achievementFrames.first().second; frame++)
         {
             QList<int> ids;
@@ -226,7 +243,7 @@ void MemoryReader::checkAchievements() // Modified version of runtime.c from rch
 
                 old_measured_value = trigger->measured_value;
                 old_state = trigger->state;
-                rc_test_trigger(trigger, peek, achievementFrames.first().first.data(), nullptr);
+                rc_test_trigger(trigger, peek, &mem, nullptr);
                 new_state = trigger->state;
 
                 if (trigger->measured_value != old_measured_value &&
@@ -272,8 +289,6 @@ void MemoryReader::checkAchievements() // Modified version of runtime.c from rch
             }
             for(const auto& id : ids)
                 achievementTriggers.remove(id);
-            if(modified)
-                remapTriggerAddresses();
         }
         achievementFrames.dequeue();
     }

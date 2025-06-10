@@ -11,6 +11,7 @@ class MemoryReader : public QObject {
     Q_OBJECT
 
 public:
+
     explicit MemoryReader(QObject *parent = nullptr);
 
     void initTriggers(const QList<AchievementInfo>& achievements, const QList<LeaderboardInfo>& leaderboards, const unsigned int& ramSize);
@@ -40,6 +41,7 @@ private:
     QMap<int, int> uniqueMemoryAddressesCounts;
     QMap<int, int> addressMap;
     bool modified;
+    memory_t mem;
     //QQueue<QPair<QByteArray, int>> leaderboardFrames;
 };
 
