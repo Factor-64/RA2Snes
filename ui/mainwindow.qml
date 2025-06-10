@@ -24,7 +24,7 @@ ApplicationWindow {
     }
     minimumWidth: 600
     minimumHeight: 600
-    title: "ra2snes - v" + Ra2snes.version
+    title: "RA2Snes - v" + Ra2snes.version
 
     property int windowWidth: width
     property int windowHeight: height

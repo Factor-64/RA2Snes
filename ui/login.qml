@@ -11,7 +11,7 @@ ApplicationWindow {
     minimumWidth: 600
     minimumHeight: 600
     visible: true
-    title: qsTr("ra2snes - login")
+    title: "RA2Snes - v" + Ra2snes.version
     property var themes: ["Dark", "Black", "Light"]
     property string baseDir: {
         if(Ra2snes.appDirPath[0] === "/")
