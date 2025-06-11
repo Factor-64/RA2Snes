@@ -163,6 +163,7 @@ QList<QPair<int, int>> MemoryReader::getUniqueMemoryAddresses()
     return uniqueMemoryAddresses;
 }
 
+// peekb and peek are taken from rcheevos/mock_memory.h
 static uint32_t peekb(uint32_t address, memory_t* memory) {
     return address < memory->size ? memory->ram[address] : 0;
 }
