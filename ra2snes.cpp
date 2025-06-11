@@ -723,7 +723,9 @@ void ra2snes::checkForUpdate() {
         if (reply->error() == QNetworkReply::NoError) {
             QJsonDocument jsonDoc = QJsonDocument::fromJson(reply->readAll());
             QJsonObject jsonObj = jsonDoc.object();
-            m_latestVersion = jsonObj["tag_name"].toString().mid(1);
+            m_latestVersion = jsonObj["tag_name"].toString();
+            //qDebug() << m_latestVersion;
+            //qDebug() << m_version;
             if (QVersionNumber::fromString(m_latestVersion) > QVersionNumber::fromString(m_version)) {
                 QJsonArray assets = jsonObj["assets"].toArray();
 
@@ -773,12 +775,12 @@ void ra2snes::beginUpdate() {
     QStringList arguments;
     arguments << downloadUrl;
     if (QProcess::startDetached(program, arguments)) {
-        qDebug() << "Updater process started successfully.";
+        //qDebug() << "Updater process started successfully.";
         QCoreApplication::quit();
     }
-    else {
+    /*else {
         qDebug() << "Failed to start updater process.";
-    }
+    }*/
 }
 
 void ra2snes::ignoreUpdates(bool i)
