@@ -63,9 +63,10 @@ public:
     void setAchievementInfo(const unsigned int& id, const AchievementInfoType& infotype, const int& value);
     void setTitleToHash(const QString& currentGame);
     void setHash(const QString& h);
+    void refresh();
 
 signals:
-    void loginSuccess();
+    void loginSuccess(bool& r);
     void requestFailed(QJsonObject error);
     void requestError(const bool& net);
     void gotGameID(const int& gameid);
@@ -95,6 +96,7 @@ private:
     void runQueue();
     QString latestRequest;
     bool warning;
+    bool m_refresh;
     QNetworkAccessManager* networkManager;
     UserInfoModel* userinfo_model;
     GameInfoModel* gameinfo_model;

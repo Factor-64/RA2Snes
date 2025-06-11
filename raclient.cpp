@@ -21,6 +21,7 @@ RAClient::RAClient(QObject *parent)
     connect(this, &RAClient::continueQueue, this, [this] { runQueue(); });
     queue.clear();
     warning = false;
+    m_refresh = false;
     //qDebug() << userAgent;
 }
 
@@ -38,6 +39,16 @@ void RAClient::loginToken(const QString& username, const QString& token)
     QJsonObject post_content;
     post_content["u"] = username;
     post_content["t"] = token;
+
+    sendRequest("login", post_content);
+}
+
+void RAClient::refresh()
+{
+    m_refresh = true;
+    QJsonObject post_content;
+    post_content["u"] = userinfo_model->username();
+    post_content["t"] = userinfo_model->token();
 
     sendRequest("login", post_content);
 }
@@ -346,6 +357,8 @@ void RAClient::handleNetworkReply(QNetworkReply *reply)
     else if (jsonObject.contains("Error"))
     {
         //qDebug() << "Error:" << jsonObject["Error"].toString();
+        if(jsonObject["Code"].toString() == "invalid_credentials")
+            m_refresh = false;
         emit requestFailed(jsonObject);
     }
     else
@@ -425,7 +438,7 @@ void RAClient::handleLoginResponse(const QJsonObject& jsonObject)
     userinfo_model->hardcore_score(jsonObject["Score"].toInt());
     userinfo_model->pfp((mediaUrl + "UserPic/" + userinfo_model->username() + ".png"));
     userinfo_model->link((baseUrl + "user/" + userinfo_model->username()));
-    emit loginSuccess();
+    emit loginSuccess(m_refresh);
 }
 
 void RAClient::handleGameIDResponse(const QJsonObject& jsonObject)
@@ -540,7 +553,7 @@ void RAClient::handleStartSessionResponse(const QJsonObject& jsonObject)
     else
         unlock_data = jsonObject["Unlocks"].toArray();
     int complete = unlock_data.count();
-    for (int i = 0; i < unlock_data.size(); ++i)
+    for (int i = 0; i < unlock_data.size(); i++)
     {
         QJsonObject unlock = unlock_data[i].toObject();
         if(unlock["ID"].toInt() != 101000001)

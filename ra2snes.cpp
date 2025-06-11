@@ -181,6 +181,9 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
             setCurrentConsole();
             emit displayMessage("Loading... Do Not Turn Off Console!", false);
         }
+        else
+            if(crashTimer->isActive())
+                crashTimer->stop();
     }
 }
 
@@ -262,17 +265,20 @@ void ra2snes::onUsb2SnesGetAddressDataReceived()
     //qDebug() << "Finished Patch Check";
 }
 
-void ra2snes::onLoginSuccess()
+void ra2snes::onLoginSuccess(bool& r)
 {
     loggedin = true;
     createSettingsFile();
     reset = true;
-    //qDebug() << "logged";
-    emit loginSuccess();
-    QTimer::singleShot(1000, this, [=] {
-        if(downloadUrl != "")
-            emit newUpdate();
-    });
+    //qDebug() << "logged" << r;
+    if(!r)
+    {
+        emit loginSuccess();
+        QTimer::singleShot(1000, this, [=] {
+            if(downloadUrl != "")
+                emit newUpdate();
+        });
+    }
     onUsb2SnesStateChanged();
 }
 
@@ -706,8 +712,8 @@ bool ra2snes::ignore() const
 void ra2snes::refreshRAData()
 {
     reset = true;
-    emit disableModeSwitching();
-    onUsb2SnesStateChanged();
+    loggedin = false;
+    raclient->refresh();
 }
 
 void ra2snes::checkForUpdate() {
