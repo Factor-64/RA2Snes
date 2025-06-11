@@ -7,6 +7,7 @@
 #include "gameinfomodel.h"
 #include "userinfomodel.h"
 #include "achievementsortfilterproxymodel.h"
+#include "networkcachemanager.h"
 
 void loadQml(QQmlApplicationEngine &engine, const QString &url) {
     const auto rootObjects = engine.rootObjects();
@@ -25,6 +26,7 @@ int main(int argc, char *argv[]) {
 
     QQmlApplicationEngine engine;
 
+    engine.setNetworkAccessManagerFactory(new NetworkCacheManager(QCoreApplication::applicationDirPath()));
     ra2snes::instance()->setAppDirPath(QCoreApplication::applicationDirPath());
     qmlRegisterType<AchievementSortFilterProxyModel>("CustomModels", 1, 0, "AchievementSortFilterProxyModel");
     qmlRegisterSingletonInstance("CustomModels", 1, 0, "Ra2snes", ra2snes::instance());

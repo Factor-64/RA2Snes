@@ -54,6 +54,8 @@ set(PROJECT_SOURCES
         userinfomodel.cpp
         userinfomodel.h
         version.h
+        networkcachemanager.cpp
+        networkcachemanager.h
 )
 
 set(MINIZ_OBJ_PATH ${CMAKE_SOURCE_DIR}/miniz/miniz.o)
@@ -79,7 +81,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 
 qt_add_executable(ra2snes
         MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}   
+        ${PROJECT_SOURCES}
     )
     qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 else()
