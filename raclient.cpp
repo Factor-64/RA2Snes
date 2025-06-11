@@ -488,16 +488,13 @@ void RAClient::handlePatchResponse(const QJsonObject& jsonObject)
             //info.rarity = data["Rarity"].toInt();
             //info.rarity_hardcore = data["RarityHardcore"].toInt();
             info.title = data["Title"].toString();
-            if(info.title != "Warning: Unknown Emulator" || info.title != "Warning: Outdated Emulator (please update)")
-            {
+            info.id = data["ID"].toInt();
+            if(info.id != 101000001)
                 info.unlocked = false;
-                info.id = data["ID"].toInt();
-            }
             else
             {
                 warning = true;
                 info.unlocked = true;
-                info.id = 0;
             }
             info.type = data["Type"].toString();
             if(info.type == "progression")
