@@ -27,6 +27,7 @@ RAClient::RAClient(QObject *parent)
 
 void RAClient::loginPassword(const QString& username, const QString& password)
 {
+    m_refresh = false;
     QJsonObject post_content;
     post_content["u"] = username;
     post_content["p"] = password;
@@ -36,6 +37,7 @@ void RAClient::loginPassword(const QString& username, const QString& password)
 
 void RAClient::loginToken(const QString& username, const QString& token)
 {
+    m_refresh = false;
     QJsonObject post_content;
     post_content["u"] = username;
     post_content["t"] = token;
@@ -439,6 +441,7 @@ void RAClient::handleLoginResponse(const QJsonObject& jsonObject)
     userinfo_model->pfp((mediaUrl + "UserPic/" + userinfo_model->username() + ".png"));
     userinfo_model->link((baseUrl + "user/" + userinfo_model->username()));
     emit loginSuccess(m_refresh);
+    m_refresh = false;
 }
 
 void RAClient::handleGameIDResponse(const QJsonObject& jsonObject)

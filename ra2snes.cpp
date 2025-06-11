@@ -265,7 +265,7 @@ void ra2snes::onUsb2SnesGetAddressDataReceived()
     //qDebug() << "Finished Patch Check";
 }
 
-void ra2snes::onLoginSuccess(bool& r)
+void ra2snes::onLoginSuccess(bool r)
 {
     loggedin = true;
     createSettingsFile();

@@ -66,7 +66,7 @@ public:
     void refresh();
 
 signals:
-    void loginSuccess(bool& r);
+    void loginSuccess(bool r);
     void requestFailed(QJsonObject error);
     void requestError(const bool& net);
     void gotGameID(const int& gameid);
