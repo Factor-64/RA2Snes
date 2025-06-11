@@ -103,7 +103,7 @@ private:
     QTimer* crashTimer;
     void createSettingsFile();
     void loadSettings();
-    void onLoginSuccess();
+    void onLoginSuccess(bool& r);
     void onRequestFailed(const QJsonObject& error);
     void onRequestError(const bool& net);
     void onUsb2SnesStateChanged();
