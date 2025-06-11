@@ -11,6 +11,7 @@ enum AchievementInfoType {
     Target
 };
 
+// memory_t taken from rcheevos/mock_memory.h
 typedef struct {
     uint8_t* ram;
     uint32_t size;
