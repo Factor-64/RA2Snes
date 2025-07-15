@@ -724,6 +724,7 @@ void ra2snes::checkForUpdate() {
             QJsonDocument jsonDoc = QJsonDocument::fromJson(reply->readAll());
             QJsonObject jsonObj = jsonDoc.object();
             m_latestVersion = jsonObj["tag_name"].toString();
+            m_latestVersion.replace("v", "");
             //qDebug() << m_latestVersion;
             //qDebug() << m_version;
             if (QVersionNumber::fromString(m_latestVersion) > QVersionNumber::fromString(m_version)) {
