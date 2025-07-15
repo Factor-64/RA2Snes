@@ -16,6 +16,10 @@
 
 #include "usb2snes.h"
 #include <QUrl>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QFile>
 //#include <QDebug>
 
 //Q_LOGGING_CATEGORY(log_Usb2snes, "USB2SNES")

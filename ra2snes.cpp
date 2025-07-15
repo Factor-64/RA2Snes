@@ -1,4 +1,14 @@
 #include "ra2snes.h"
+#include <QThreadPool>
+#include <QSettings>
+#include <QApplication>
+#include <QFile>
+#include <QDir>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QProcess>
 //#include <QDebug>
 
 ra2snes::ra2snes(QObject *parent)
@@ -245,8 +255,8 @@ void ra2snes::onUsb2SnesGetAddressDataReceived()
     bool patched = false;
     //qDebug() << "Checking for patched rom";
     //qDebug() << data;
-    if(data[0] != '\x00')
-        qDebug() << "RESET";
+    //if(data[0] != '\x00')
+    //    qDebug() << "RESET";
     if (usb2snes->firmwareVersion() > QVersionNumber(7))
     {
         if(data[1] != '\x00' && data[3] != '\x00')
@@ -752,7 +762,7 @@ void ra2snes::checkForUpdate() {
                 }
             }
         } else {
-            qDebug() << "Network error:" << reply->errorString();
+            //qDebug() << "Network error:" << reply->errorString();
         }
 
         reply->deleteLater();

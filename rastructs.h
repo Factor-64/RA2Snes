@@ -33,7 +33,7 @@ struct AchievementInfo {
     //unsigned int rarity_hardcore;
     QString title;
     QString type;
-    QString author;
+    //QString author;
     QString time_unlocked_string;
     QDateTime time_unlocked;
     bool unlocked;
