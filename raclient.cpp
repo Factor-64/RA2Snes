@@ -501,7 +501,7 @@ void RAClient::handlePatchResponse(const QJsonObject& jsonObject)
                 progressionMap[info.id] = info.unlocked;
             else if(info.type == "win_condition")
                 winMap[info.id] = info.unlocked;
-            info.author = data["Author"].toString();
+            //info.author = data["Author"].toString();
             info.time_unlocked_string = "";
             info.time_unlocked = QDateTime(QDate(1990, 11, 21), QTime(0, 0, 0));
             info.achievement_link = QUrl(baseUrl + "achievement/" + QString::number(info.id));
