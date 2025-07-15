@@ -33,7 +33,7 @@ ra2snes::ra2snes(QObject *parent)
     });
 
     connect(usb2snes, &Usb2Snes::connected, this, [=]() {
-        usb2snes->setAppName("ra2snes");
+        usb2snes->setAppName("RA2Snes");
         //qDebug() << "Connected to usb2snes server, trying to find a suitable device";
         raclient->clearAchievements();
         usb2snes->deviceList();

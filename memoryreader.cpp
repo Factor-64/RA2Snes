@@ -76,17 +76,20 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
         uniqueMemoryAddresses.append(qMakePair(it.key(), it.value()));
 
     //qDebug() << uniqueAddresses;
-
+    unsigned int overshoot = 255;
     for (int i = 0; i < uniqueMemoryAddresses.size() - 1; ++i)
     {
         const auto& pair = uniqueMemoryAddresses.at(i);
         const auto& next = uniqueMemoryAddresses.at(i + 1);
-
-        if (pair.first + pair.second >= next.first - 1)
+        for(int x = 0; x < overshoot; x++)
         {
-            uniqueMemoryAddresses[i].second += next.second + 1;
-            uniqueMemoryAddresses.remove(i + 1);
-            i--;
+            if (pair.first + pair.second >= next.first - x && pair.second + next.second + x < 255)
+            {
+                uniqueMemoryAddresses[i].second += next.second + x;
+                uniqueMemoryAddresses.remove(i + 1);
+                i--;
+                break;
+            }
         }
     }
 
