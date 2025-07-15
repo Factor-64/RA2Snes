@@ -20,6 +20,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QFile>
+#include <QEventLoop>
 //#include <QDebug>
 
 //Q_LOGGING_CATEGORY(log_Usb2snes, "USB2SNES")
