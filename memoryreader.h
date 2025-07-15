@@ -16,7 +16,7 @@ public:
 
     void initTriggers(const QList<AchievementInfo>& achievements, const QList<LeaderboardInfo>& leaderboards, const unsigned int& ramSize);
     void remapTriggerAddresses();
-    QList<QPair<int, int>> getUniqueMemoryAddresses();
+    QList<QPair<unsigned int, unsigned int>> getUniqueMemoryAddresses();
     void checkAchievements();
     //void checkLeaderboards();
     void addFrameToQueues(const QByteArray& data, const int& frames);
@@ -34,12 +34,12 @@ signals:
 
 private:
     void decrementAddressCounts(rc_memref_t* nextref);
-    QList<QPair<int, int>> uniqueMemoryAddresses;
+    QList<QPair<unsigned int, unsigned int>> uniqueMemoryAddresses;
     QMap<unsigned int, rc_trigger_t*> achievementTriggers;
     QMap<unsigned int, rc_lboard_t*> leaderboardTriggers;
     QQueue<QPair<QByteArray, int>> achievementFrames;
-    QMap<int, int> uniqueMemoryAddressesCounts;
-    QMap<int, int> addressMap;
+    QMap<unsigned int, unsigned int> uniqueMemoryAddressesCounts;
+    QMap<unsigned int, unsigned int> addressMap;
     bool modified;
     memory_t mem;
     //QQueue<QPair<QByteArray, int>> leaderboardFrames;
