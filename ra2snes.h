@@ -95,7 +95,7 @@ private:
     unsigned int framesPassed;
     QDateTime millisecPassed;
     Task doThisTaskNext;
-    QList<QPair<int, int>> uniqueMemoryAddresses;
+    QList<QPair<unsigned int, unsigned int>> uniqueMemoryAddresses;
     QString m_appDirPath;
     QString m_theme;
     QString m_latestVersion;
