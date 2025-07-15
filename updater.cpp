@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QTimer>
 #include <QThreadPool>
+#include <QPointer>
 #include "miniz/miniz.h"
 
 Updater::Updater(QWidget *parent)
@@ -71,14 +72,16 @@ void Updater::extractFile(const QString &filePath) {
         mz_zip_archive zip_archive;
         memset(&zip_archive, 0, sizeof(zip_archive));
 
-        QMetaObject::invokeMethod(statusBox, [this, outputDir]() {
-            statusBox->append(QString("Extracting to: %1").arg(outputDir));
-        }, Qt::QueuedConnection);
+        QPointer<QTextEdit> safeStatusBox = statusBox;
+        QPointer<QProgressBar> safeProgressBar = progressBar;
+        QTimer::singleShot(0, this, [safeStatusBox, outputDir]() {
+            safeStatusBox->append(QString("Extracting to: %1").arg(outputDir));
+        });
 
         if (!mz_zip_reader_init_file(&zip_archive, filePath.toStdString().c_str(), 0)) {
-            QMetaObject::invokeMethod(statusBox, [this]() {
-                statusBox->append("Error: Failed to open ZIP file!");
-            }, Qt::QueuedConnection);
+            QTimer::singleShot(0, this, [safeStatusBox]() {
+                safeStatusBox->append("Error: Failed to open ZIP file!");
+            });
             return;
         }
 
@@ -86,9 +89,9 @@ void Updater::extractFile(const QString &filePath) {
         for (int i = 0; i < fileCount; i++) {
             mz_zip_archive_file_stat file_stat;
             if (!mz_zip_reader_file_stat(&zip_archive, i, &file_stat)) {
-                QMetaObject::invokeMethod(statusBox, [this]() {
-                    statusBox->append("Error: Failed to get file info!");
-                }, Qt::QueuedConnection);
+                QTimer::singleShot(0, this, [safeStatusBox]() {
+                    safeStatusBox->append("Error: Failed to get file info!");
+                });
                 continue;
             }
             QString outputFilePath = outputDir + QDir::separator() + file_stat.m_filename;
@@ -100,28 +103,28 @@ void Updater::extractFile(const QString &filePath) {
             if(file_stat.m_filename[strlen(file_stat.m_filename) - 1] != '/')
             {
                 if (!mz_zip_reader_extract_to_file(&zip_archive, i, outputFilePath.toStdString().c_str(), 0)) {
-                    QMetaObject::invokeMethod(statusBox, [this, &file_stat]() {
-                        statusBox->append(QString("Error: Failed to extract file: %1").arg(file_stat.m_filename));
-                    }, Qt::QueuedConnection);
+                    QTimer::singleShot(0, this, [safeStatusBox, &file_stat]() {
+                        safeStatusBox->append(QString("Error: Failed to extract file: %1").arg(file_stat.m_filename));
+                    });
                 } else {
-                    QMetaObject::invokeMethod(statusBox, [this, &file_stat]() {
-                        statusBox->append(QString("Extracted: %1").arg(file_stat.m_filename));
-                    }, Qt::QueuedConnection);
+                    QTimer::singleShot(0, this, [safeStatusBox, &file_stat]() {
+                        safeStatusBox->append(QString("Extracted: %1").arg(file_stat.m_filename));
+                    });
                 }
             }
 
             const int extractionProgress = ((i + 1) * 100) / fileCount;
-            QMetaObject::invokeMethod(progressBar, [this, extractionProgress]() {
-                progressBar->setValue(extractionProgress);
-                progressBar->setFormat("Extracting... %p%");
-            }, Qt::QueuedConnection);
+            QTimer::singleShot(0, this, [safeProgressBar, extractionProgress]() {
+                safeProgressBar->setValue(extractionProgress);
+                safeProgressBar->setFormat("Extracting... %p%");
+            });
         }
 
         mz_zip_reader_end(&zip_archive);
-        QMetaObject::invokeMethod(statusBox, [this]() {
-            statusBox->append("Extraction completed successfully!");
-            statusBox->append("Launching RA2SNES...");
-        }, Qt::QueuedConnection);
+        QTimer::singleShot(0, this, [safeStatusBox]() {
+            safeStatusBox->append("Extraction completed successfully!");
+            safeStatusBox->append("Launching RA2SNES...");
+        });
         QFile::remove(appdir + QDir::separator() + "latest_release.zip");
 
 #ifdef Q_OS_WIN
