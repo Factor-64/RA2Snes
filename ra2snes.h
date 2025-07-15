@@ -1,6 +1,8 @@
 #ifndef RA2SNES_H
 #define RA2SNES_H
 
+#include <QTimer>
+#include <QJsonObject>
 #include "usb2snes.h"
 #include "raclient.h"
 #include "memoryreader.h"

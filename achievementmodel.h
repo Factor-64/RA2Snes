@@ -21,7 +21,7 @@ public:
         //RarityHardcoreRole,
         TitleRole,
         TypeRole,
-        AuthorRole,
+        //AuthorRole,
         TimeUnlockedRole,
         TimeUnlockedStringRole,
         UnlockedRole,

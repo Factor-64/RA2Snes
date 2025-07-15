@@ -39,8 +39,8 @@ QVariant AchievementModel::data(const QModelIndex &index, int role) const {
         return achievement.title;
     case TypeRole:
         return achievement.type;
-    case AuthorRole:
-        return achievement.author;
+    //case AuthorRole:
+    //    return achievement.author;
     case TimeUnlockedRole:
         return achievement.time_unlocked;
     case TimeUnlockedStringRole:
@@ -76,7 +76,7 @@ QHash<int, QByteArray> AchievementModel::roleNames() const {
     //roles[RarityHardcoreRole] = "rarityHardcore";
     roles[TitleRole] = "title";
     roles[TypeRole] = "type";
-    roles[AuthorRole] = "author";
+    //roles[AuthorRole] = "author";
     roles[TimeUnlockedRole] = "timeUnlocked";
     roles[TimeUnlockedStringRole] = "timeUnlockedString";
     roles[UnlockedRole] = "unlocked";
