@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QList>
 #include <QQueue>
-#include "rc_runtime_types.h"
+#include "rc_internal.h"
 #include "rastructs.h"
 
 class MemoryReader : public QObject {
@@ -33,9 +33,9 @@ signals:
     void modifiedAddresses();
 
 private:
-    void decrementAddressCounts(rc_memref_t* nextref);
+    void decrementAddressCounts(rc_memrefs_t& memrefs);
     QList<QPair<unsigned int, unsigned int>> uniqueMemoryAddresses;
-    QMap<unsigned int, rc_trigger_t*> achievementTriggers;
+    QMap<unsigned int, rc_trigger_with_memrefs_t*> achievementTriggers;
     QMap<unsigned int, rc_lboard_t*> leaderboardTriggers;
     QQueue<QPair<QByteArray, int>> achievementFrames;
     QMap<unsigned int, unsigned int> uniqueMemoryAddressesCounts;
