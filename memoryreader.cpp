@@ -76,25 +76,23 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
         uniqueMemoryAddresses.append(qMakePair(it.key(), it.value()));
 
     //qDebug() << uniqueAddresses;
-    unsigned int overshoot = 255;
-    for (int i = 0; i < uniqueMemoryAddresses.size() - 1; ++i)
+    for (int i = 0; i < uniqueMemoryAddresses.size() - 1; i++)
     {
-        const auto& pair = uniqueMemoryAddresses.at(i);
-        const auto& next = uniqueMemoryAddresses.at(i + 1);
-        for(int x = 0; x < overshoot; x++)
+        auto& current = uniqueMemoryAddresses[i];
+        auto& next = uniqueMemoryAddresses[i + 1];
+
+        int gap = next.first - (current.first + current.second);
+        if (gap < 0)
+            gap = 0;
+
+        int total_size = current.second + next.second + gap;
+        if (total_size <= 255)
         {
-            if (pair.first + pair.second >= next.first - x && pair.second + next.second + x < 255)
-            {
-                uniqueMemoryAddresses[i].second += next.second + x;
-                uniqueMemoryAddresses.remove(i + 1);
-                i--;
-                break;
-            }
+            current.second = total_size;
+            uniqueMemoryAddresses.remove(i + 1);
+            i--;
         }
     }
-
-    for(auto it = uniqueMemoryAddresses.cbegin(); it != uniqueMemoryAddresses.cend(); ++it)
-        uniqueMemoryAddressesCounts[it->first] = it->second;
 
     //qDebug() << uniqueMemoryAddresses;
     //qDebug() << uniqueAddresses.size() << uniqueMemoryAddresses.size();
@@ -105,6 +103,7 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
 void MemoryReader::remapTriggerAddresses()
 {
     //qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size();
+    uniqueMemoryAddressesCounts.clear();
     QMap<unsigned int, unsigned int> temp;
     bool b = false;
     for(auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it)
@@ -116,7 +115,7 @@ void MemoryReader::remapTriggerAddresses()
             for(auto it = uniqueMemoryAddresses.cbegin(); it != uniqueMemoryAddresses.cend(); ++it)
             {
                 unsigned int addr = modified ? addressMap[nextref->address] : nextref->address;
-                //qDebug() << addr << it->first + it->second;
+
                 if(it->first + it->second >= addr)
                 {
                     for(int i = 0; i < it->second; i++)
@@ -126,6 +125,7 @@ void MemoryReader::remapTriggerAddresses()
                             //qDebug() << "Unique Address: " << it->first;
                             //qDebug() << "Trigger Address:" << nextref->address;
                             temp[memoryOffset] = it->first;
+                            uniqueMemoryAddressesCounts[it->first]++;
                             nextref->address = memoryOffset;
                             //qDebug() << "Memory Offset: " << memoryOffset;
                             //qDebug() << "New Trigger Address: " << nextref->address;
@@ -232,7 +232,6 @@ void MemoryReader::decrementAddressCounts(rc_memref_t* nextref)
         //qDebug() << "Address Count:" << uniqueMemoryAddressesCounts[addressMap[nextref->address]];
         if(--uniqueMemoryAddressesCounts[addressMap[nextref->address]] < 1)
         {
-            uniqueMemoryAddressesCounts.remove(addressMap[nextref->address]);
             for(int i = 0; i < uniqueMemoryAddresses.size(); i++)
             {
                 //qDebug() << "Unique:" << uniqueMemoryAddresses[i].first;
