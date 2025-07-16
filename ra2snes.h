@@ -94,7 +94,6 @@ private:
     bool reset;
     QAtomicInt updateAddresses;
     QString m_console;
-    unsigned int framesPassed;
     QDateTime millisecPassed;
     Task doThisTaskNext;
     QList<QPair<unsigned int, unsigned int>> uniqueMemoryAddresses;

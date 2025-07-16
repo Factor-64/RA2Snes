@@ -19,7 +19,7 @@ public:
     QList<QPair<unsigned int, unsigned int>> getUniqueMemoryAddresses();
     void checkAchievements();
     //void checkLeaderboards();
-    void addFrameToQueues(const QByteArray& data, const int& frames);
+    void addFrameToQueues(const QByteArray& data, const unsigned int& frames);
     int achievementQueueSize();
     void clearQueue();
 

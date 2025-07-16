@@ -181,7 +181,7 @@ void MemoryReader::remapTriggerAddresses()
     //qDebug() << addressMap;
 }
 
-void MemoryReader::addFrameToQueues(const QByteArray& data, const int& frames)
+void MemoryReader::addFrameToQueues(const QByteArray& data, const unsigned int& frames)
 {
     achievementFrames.enqueue(qMakePair(data, frames));
     //LeaderBoardFramesToCheck.enqueue(qMakePair(data, frames))
@@ -288,7 +288,7 @@ void MemoryReader::checkAchievements() // Modified version of runtime.c from rch
 
                 old_measured_value = trigger->measured_value;
                 old_state = trigger->state;
-                new_state = rc_test_trigger(trigger, peek, &mem, nullptr);;
+                new_state = rc_test_trigger(trigger, peek, &mem, nullptr);
 
                 if (trigger->measured_value != old_measured_value &&
                     old_measured_value != RC_MEASURED_UNKNOWN &&

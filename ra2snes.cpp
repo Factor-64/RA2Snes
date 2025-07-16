@@ -237,9 +237,19 @@ void ra2snes::onUsb2SnesGetConfigDataReceived()
 
 void ra2snes::onUsb2SnesGetAddressesDataReceived()
 {
-    doThisTaskNext = GetConsoleInfo;
+    doThisTaskNext = None;
     //qDebug() << "Current Time:" << QDateTime::currentDateTime();
-    framesPassed = std::round(std::abs(millisecPassed.msecsTo(QDateTime::currentDateTime())) * 0.0600988138974405);
+    qint64 elapsedMs = millisecPassed.msecsTo(QDateTime::currentDateTime());
+    unsigned int framesPassed = std::round(std::abs(elapsedMs * 0.0600988138974405));
+    if(framesPassed < 1)
+    {
+        //qDebug() << "Redo";
+        doThisTaskNext = GetConsoleAddresses;
+        onUsb2SnesStateChanged();
+        return;
+    }
+    else
+        doThisTaskNext = GetConsoleInfo;
     //qDebug() << "Frames: " << framesPassed;
     //qDebug() << usb2snes->getBinaryData();
     millisecPassed = QDateTime::currentDateTime();
@@ -247,6 +257,7 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
     //qDebug() << "Queue Size: " << reader->achievementQueueSize();
     if(reader->achievementQueueSize() == 1)
         QThreadPool::globalInstance()->start([=] { reader->checkAchievements(); });
+    onUsb2SnesStateChanged();
 }
 
 void ra2snes::onUsb2SnesGetAddressDataReceived()
@@ -593,7 +604,6 @@ void ra2snes::initVars()
     doThisTaskNext = None;
     remember_me = false;
     m_ignore = false;
-    framesPassed = 0;
     updateAddresses = false;
     raclient->setHardcore(true);
     raclient->setAutoHardcore(false);
