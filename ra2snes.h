@@ -106,6 +106,7 @@ private:
     QString downloadUrl;
     QString rich_text;
     QTimer* crashTimer;
+    QTimer* richTimer;
     void createSettingsFile();
     void loadSettings();
     void onLoginSuccess(bool r);
