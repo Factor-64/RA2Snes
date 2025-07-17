@@ -91,6 +91,7 @@ struct GameInfo {
     unsigned int missable_count;
     int point_count;
     int achievement_count;
+    QString rich_presence;
 };
 
 #endif // RASTRUCTS_H

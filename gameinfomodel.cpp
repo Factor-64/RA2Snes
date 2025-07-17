@@ -62,6 +62,10 @@ int GameInfoModel::point_count() const {
     return m_gameInfo.point_count;
 }
 
+QString GameInfoModel::rich_presence() const {
+    return m_gameInfo.rich_presence;
+}
+
 void GameInfoModel::updateCompletionCount() {
     m_gameInfo.completion_count++;
     emit dataChanged();
@@ -163,6 +167,10 @@ void GameInfoModel::achievement_count(const int& ac)
 {
     m_gameInfo.achievement_count = ac;
     emit dataChanged();
+}
+
+void GameInfoModel::rich_presence(const QString& rp) {
+    m_gameInfo.rich_presence = rp;
 }
 
 void GameInfoModel::clearGame() {

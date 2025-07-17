@@ -64,6 +64,8 @@ public:
     void setTitleToHash(const QString& currentGame);
     void setHash(const QString& h);
     void refresh();
+    QString getRichPresence();
+    void ping(const QString& rp);
 
 signals:
     void loginSuccess(bool r);
@@ -93,6 +95,7 @@ private:
     void handlePatchResponse(const QJsonObject& jsonObject);
     void handleUnlocksResponse(const QJsonObject& jsonObject);
     void handleStartSessionResponse(const QJsonObject& jsonObject);
+    void handlePingResponse(const QJsonObject& jsonObject);
     void runQueue();
     QString latestRequest;
     bool warning;

@@ -14,7 +14,7 @@ public:
 
     explicit MemoryReader(QObject *parent = nullptr);
 
-    void initTriggers(const QList<AchievementInfo>& achievements, const QList<LeaderboardInfo>& leaderboards, const unsigned int& ramSize);
+    void initTriggers(const QList<AchievementInfo>& achievements, const QList<LeaderboardInfo>& leaderboards, const QString& richPresence, const unsigned int& ramSize);
     void remapTriggerAddresses();
     QList<QPair<unsigned int, unsigned int>> getUniqueMemoryAddresses();
     void checkAchievements();
@@ -31,6 +31,7 @@ signals:
     void leaderboardCompleted(const unsigned int& id, const QDateTime& time);
     void updateAchievementInfo(const unsigned int& id, const AchievementInfoType& infotype, const int& value);
     void modifiedAddresses();
+    void updateRichPresence(const QString& status);
 
 private:
     void decrementAddressCounts(rc_memrefs_t& memrefs);
@@ -40,7 +41,9 @@ private:
     QQueue<QPair<QByteArray, int>> achievementFrames;
     QMap<unsigned int, unsigned int> uniqueMemoryAddressesCounts;
     QMap<unsigned int, unsigned int> addressMap;
+    rc_richpresence_with_memrefs_t* mem_richpresence;
     bool modified;
+    int rp_state;
     memory_t mem;
     //QQueue<QPair<QByteArray, int>> leaderboardFrames;
 };
