@@ -23,6 +23,7 @@ ra2snes::ra2snes(QObject *parent)
     m_latestVersion = "";
     downloadUrl = "";
     m_appDirPath = "";
+    rich_text = "";
     initVars();
     crashTimer = new QTimer(this);
     crashTimer->setSingleShot(true);
@@ -110,7 +111,7 @@ ra2snes::ra2snes(QObject *parent)
     connect(raclient, &RAClient::sessionStarted, this, [=] {
         emit achievementModelReady();
         emit enableModeSwitching();
-        reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getLeaderboards(), usb2snes->getRamSizeData());
+        reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getLeaderboards(), raclient->getRichPresence(), usb2snes->getRamSizeData());
     });
 
     connect(reader, &MemoryReader::finishedMemorySetup, this, [=] {
@@ -141,6 +142,14 @@ ra2snes::ra2snes(QObject *parent)
 
     connect(reader, &MemoryReader::modifiedAddresses, this, [=] {
         updateAddresses = true;
+        //qDebug() << "Time to update";
+    });
+
+    connect(reader, &MemoryReader::updateRichPresence, this, [=](const QString& status) {
+        if(rich_text.isEmpty())
+            raclient->ping(status);
+        rich_text = status;
+        emit updatedRichText();
         //qDebug() << "Time to update";
     });
 
@@ -250,7 +259,7 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
     }
     else
         doThisTaskNext = GetConsoleInfo;
-    //qDebug() << "Frames: " << framesPassed;
+    qDebug() << "Frames: " << framesPassed;
     //qDebug() << usb2snes->getBinaryData();
     millisecPassed = QDateTime::currentDateTime();
     reader->addFrameToQueues(usb2snes->getBinaryData(), framesPassed);
@@ -701,6 +710,11 @@ QString ra2snes::appDirPath() const
     return m_appDirPath;
 }
 
+QString ra2snes::richPresence() const
+{
+    return rich_text;
+}
+
 void ra2snes::setTheme(const QString &theme)
 {
     if (m_theme != theme) {
@@ -809,4 +823,3 @@ void ra2snes::ignoreUpdates(bool i)
     m_ignore = i;
     emit ignoreChanged();
 }
-
