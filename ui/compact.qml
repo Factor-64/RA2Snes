@@ -19,9 +19,10 @@ Rectangle {
         anchors.fill: parent
         spacing: 6
         Rectangle {
+            id: playRect
             color: themeLoader.item.mainWindowDarkAccentColor
             Layout.fillWidth: true
-            implicitHeight: 108
+            implicitHeight: 116 + errorLoader.errorHeight
 
             Row {
                 spacing: 0
@@ -425,16 +426,19 @@ Rectangle {
             }
 
             Loader {
-                Layout.preferredHeight: 13
+                property int errorHeight: 0
+                id: errorLoader
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.fill: parent
-                anchors.topMargin: 80
+                anchors.topMargin: 100
                 anchors.leftMargin: 20
                 source: "./errormessage.qml"
             }
 
             Loader {
+                id: progressLoader
+                anchors.topMargin: 20
                 anchors.left: parent.left
                 anchors.leftMargin: 1
                 anchors.bottom: parent.bottom
@@ -449,7 +453,7 @@ Rectangle {
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
                 anchors.rightMargin: 20
-                anchors.bottomMargin: 18
+                anchors.bottomMargin: errorLoader.height
                 text: {
                     if(GameInfoModel.mastered)
                         qsTr("Mastered");

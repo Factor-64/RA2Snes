@@ -98,14 +98,15 @@ void RAClient::startSession()
     sendRequest("startsession", post_content);
 }
 
+
 void RAClient::ping(const QString& rp)
 {
-    qDebug() << rp;
+    //qDebug() << rp;
     QJsonObject post_content;
     post_content["u"] = userinfo_model->username();
     post_content["t"] = userinfo_model->token();
     post_content["g"] = QString::number(gameinfo_model->id());
-    post_content["m"] = rp;
+    post_content["m"] = QString::fromUtf8(QUrl::toPercentEncoding(rp));
     post_content["h"] = userinfo_model->hardcore();
     post_content["x"] = gameinfo_model->md5hash();
 
@@ -316,10 +317,9 @@ void RAClient::sendRequest(const QString& request_type, const QJsonObject& post_
     QUrlQuery query;
     query.addQueryItem("r", request_type);
     for (auto it = post_content.begin(); it != post_content.end(); ++it)
-        query.addQueryItem(it.key(), QUrl::toPercentEncoding(it.value().toString()));
+        query.addQueryItem(it.key(), it.value().toString());
 
-    QByteArray postData = query.query(QUrl::EncodeUnicode | QUrl::EncodeSpaces).toLocal8Bit();
-    postData.replace("%20", "+");
+    QByteArray postData = query.toString(QUrl::FullyEncoded).toUtf8();
     latestRequest = request_type;
     networkManager->post(request, postData);
 }
@@ -541,7 +541,7 @@ void RAClient::handlePatchResponse(const QJsonObject& jsonObject)
     gameinfo_model->missable_count(missables);
     gameinfo_model->point_total(total);
     gameinfo_model->achievement_count(achievement_model->rowCount() - warning);
-    gameinfo_model->rich_presence(patch_data["RichPresencePatch"].toString());
+    gameinfo_model->rich_presence(patch_data["RichPresencePatch"].toString().toUtf8());
 
     if (userinfo_model->hardcore())
     {

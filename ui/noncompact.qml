@@ -35,7 +35,7 @@ Rectangle {
             }
 
             Loader {
-                Layout.preferredHeight: 13
+                width: parent.width - 190
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 anchors.leftMargin: 168
@@ -178,7 +178,12 @@ Rectangle {
             Layout.bottomMargin: 10
             Layout.rightMargin: 20
             Layout.fillWidth: true
-            implicitHeight: 52
+            implicitHeight:
+            {
+                if(Ra2snes.richPresence != "")
+                     62 + rich.height;
+                else 52;
+            }
             border.width: 2
             border.color: themeLoader.item.mainWindowDarkAccentColor
             radius: 6
@@ -208,73 +213,23 @@ Rectangle {
                 }
                 visible: false
             }
-
-            Row {
-                spacing: 10
+            Column {
+                spacing: 6
                 anchors.leftMargin: 8
                 anchors.rightMargin: 8
                 anchors.topMargin: 8
                 anchors.bottomMargin: 8
                 anchors.fill: parent
-                Image {
-                    source: GameInfoModel.image_icon_url
-                    width: 36
-                    height: 36
-                    cache: true
-                    asynchronous: true
-                    MouseArea {
-                        id: mouseAreaGameIcon
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onClicked: {
-                            Qt.openUrlExternally(GameInfoModel.game_link)
-                        }
-                        onEntered: game.state = "hovered"
-                        onExited: game.state = ""
-                    }
-
-                    states: [
-                        State {
-                            name: "hovered"
-                            PropertyChanges {
-                                target: game
-                                color: themeLoader.item.selectedLink
-                            }
-                        }
-                    ]
-
-                    transitions: [
-                        Transition {
-                            from: ""
-                            to: "hovered"
-                            ColorAnimation {
-                                target: game
-                                property: "color"
-                                duration: 200
-                            }
-                        },
-                        Transition {
-                            from: "hovered"
-                            to: ""
-                            ColorAnimation {
-                                target: game
-                                property: "color"
-                                duration: 200
-                            }
-                        }
-                    ]
-                }
-                Column {
-                    Layout.fillWidth: true
-                    spacing: 4
-                    Text {
-                        id: game
-                        text: GameInfoModel.title
-                        color: themeLoader.item.linkColor
-                        font.family: "Verdana"
-                        font.pixelSize: 13
+                Row {
+                    spacing: 10
+                    Image {
+                        source: GameInfoModel.image_icon_url
+                        width: 36
+                        height: 36
+                        cache: true
+                        asynchronous: true
                         MouseArea {
-                            id: mouseAreaGame
+                            id: mouseAreaGameIcon
                             anchors.fill: parent
                             hoverEnabled: true
                             onClicked: {
@@ -282,11 +237,6 @@ Rectangle {
                             }
                             onEntered: game.state = "hovered"
                             onExited: game.state = ""
-
-                            ToolTip {
-                                visible: mouseAreaGame.containsMouse
-                                text: GameInfoModel.md5hash
-                            }
                         }
 
                         states: [
@@ -320,23 +270,89 @@ Rectangle {
                             }
                         ]
                     }
-                    Row {
+                    Column {
                         Layout.fillWidth: true
                         spacing: 4
-                        Image {
-                            source: GameInfoModel.console_icon
-                            width: 18
-                            height: 18
-                            cache: true
-                            asynchronous: true
-                        }
                         Text {
-                            text: GameInfoModel.console
+                            id: game
+                            text: GameInfoModel.title
+                            color: themeLoader.item.linkColor
                             font.family: "Verdana"
                             font.pixelSize: 13
-                            color: themeLoader.item.basicTextColor
+                            MouseArea {
+                                id: mouseAreaGame
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onClicked: {
+                                    Qt.openUrlExternally(GameInfoModel.game_link)
+                                }
+                                onEntered: game.state = "hovered"
+                                onExited: game.state = ""
+
+                                ToolTip {
+                                    visible: mouseAreaGame.containsMouse
+                                    text: GameInfoModel.md5hash
+                                }
+                            }
+
+                            states: [
+                                State {
+                                    name: "hovered"
+                                    PropertyChanges {
+                                        target: game
+                                        color: themeLoader.item.selectedLink
+                                    }
+                                }
+                            ]
+
+                            transitions: [
+                                Transition {
+                                    from: ""
+                                    to: "hovered"
+                                    ColorAnimation {
+                                        target: game
+                                        property: "color"
+                                        duration: 200
+                                    }
+                                },
+                                Transition {
+                                    from: "hovered"
+                                    to: ""
+                                    ColorAnimation {
+                                        target: game
+                                        property: "color"
+                                        duration: 200
+                                    }
+                                }
+                            ]
+                        }
+                        Row {
+                            Layout.fillWidth: true
+                            spacing: 4
+                            Image {
+                                source: GameInfoModel.console_icon
+                                width: 18
+                                height: 18
+                                cache: true
+                                asynchronous: true
+                            }
+                            Text {
+                                text: GameInfoModel.console
+                                font.family: "Verdana"
+                                font.pixelSize: 13
+                                color: themeLoader.item.basicTextColor
+                            }
                         }
                     }
+                }
+                Text {
+                    id: rich
+                    text: Ra2snes.richPresence
+                    font.family: "Verdana"
+                    font.pixelSize: 11
+                    color: themeLoader.item.basicTextColor
+                    width: parent.width - 56
+                    wrapMode: Text.WordWrap
                 }
             }
         }

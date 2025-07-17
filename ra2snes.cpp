@@ -26,11 +26,20 @@ ra2snes::ra2snes(QObject *parent)
     rich_text = "";
     initVars();
     crashTimer = new QTimer(this);
+    richTimer = new QTimer(this);
     crashTimer->setSingleShot(true);
+    richTimer->setSingleShot(true);
 
     connect(crashTimer, &QTimer::timeout, this, [this]() {
         emit displayMessage("SD2Snes Firmware is unresponsive. Please power cycle the console.", true);
         crashTimer->start(5000);
+    });
+
+    connect(richTimer, &QTimer::timeout, this, [this]() {
+        //qDebug() << "Timeout";
+        if(!rich_text.isEmpty())
+            raclient->ping(rich_text);
+        richTimer->start(120000);
     });
 
     connect(usb2snes, &Usb2Snes::connected, this, [=]() {
@@ -44,6 +53,8 @@ ra2snes::ra2snes(QObject *parent)
     connect(usb2snes, &Usb2Snes::disconnected, this, [=]() {
         if(crashTimer->isActive())
             crashTimer->stop();
+        if(richTimer->isActive())
+            richTimer->stop();
         //qDebug() << "Disconnected, trying to reconnect in 1 sec";
         emit displayMessage("QUsb2Snes Not Connected", true);
         raclient->clearAchievements();
@@ -128,6 +139,8 @@ ra2snes::ra2snes(QObject *parent)
             else
                 doThisTaskNext = GetConsoleAddresses;
         }
+        if(!richTimer->isActive())
+            richTimer->start(30000);
         usb2snes->infos();
     });
 
@@ -146,8 +159,6 @@ ra2snes::ra2snes(QObject *parent)
     });
 
     connect(reader, &MemoryReader::updateRichPresence, this, [=](const QString& status) {
-        if(rich_text.isEmpty())
-            raclient->ping(status);
         rich_text = status;
         emit updatedRichText();
         //qDebug() << "Time to update";
@@ -188,7 +199,11 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
             emit clearedAchievements();
             raclient->clearGame();
             setCurrentConsole();
+            rich_text = "";
+            emit updatedRichText();
             //qDebug() << "Menu";
+            if(richTimer->isActive())
+                richTimer->stop();
         }
         else if (!m_gameLoaded && loggedin && !m_loadingGame)
         {
@@ -259,7 +274,7 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
     }
     else
         doThisTaskNext = GetConsoleInfo;
-    qDebug() << "Frames: " << framesPassed;
+    //qDebug() << "Frames: " << framesPassed;
     //qDebug() << usb2snes->getBinaryData();
     millisecPassed = QDateTime::currentDateTime();
     reader->addFrameToQueues(usb2snes->getBinaryData(), framesPassed);
