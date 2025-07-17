@@ -7,7 +7,7 @@ Item {
         id: errorMessage
         font.family: "Verdana"
         font.pixelSize: 13
-        color: themeLoader.item.errorMessageTextColor
+        color: themeLoader.item.basicTextColor
         width: parent.width
         wrapMode: Text.WordWrap
         opacity: 0
@@ -20,23 +20,24 @@ Item {
             if(mainWindow.compact)
                 outer.parent.errorHeight = height;
         }
-        Component.onCompleted: {
-            if(mainWindow.compact)
+
+        function showRichPresence() {
+            if(errorMessage.color == themeLoader.item.basicTextColor && mainWindow.compact)
             {
-                if(errorMessage.opacity === 0.0)
-                {
-                    errorMessage.color = themeLoader.item.basicTextColor;
-                    errorMessage.font.pixelSize = 11;
-                    errorMessage.text = Ra2snes.richPresence;
-                    errorMessage.opacity = 1.0;
-                }
+                errorMessage.color = themeLoader.item.basicTextColor;
+                errorMessage.font.pixelSize = 11;
+                errorMessage.text = Ra2snes.richPresence;
+                errorMessage.opacity = 1;
             }
             else
             {
                 errorMessage.text = "";
-                errorMessage.opacity = 0.0;
+                errorMessage.opacity = 0;
             }
+        }
 
+        Component.onCompleted: {
+            errorMessage.showRichPresence();
         }
 
         NumberAnimation {
@@ -48,13 +49,7 @@ Item {
             onStopped: {
                 errorMessage.text = "";
                 errorMessage.color = themeLoader.item.basicTextColor;
-                if (Ra2snes.richPresence !== "")
-                {
-                    errorMessage.font.pixelSize = 11;
-                    errorMessage.text = Ra2snes.richPresence;
-                    errorMessage.opacity = 1.0;
-
-                }
+                errorMessage.showRichPresence();
             }
         }
 
@@ -68,21 +63,6 @@ Item {
             }
         }
 
-
-        Connections {
-            target: Ra2snes
-            function onUpdatedRichText()
-            {
-                if(errorMessage.color === themeLoader.item.basicTextColor)
-                {
-                    errorMessage.color = themeLoader.item.basicTextColor;
-                    errorMessage.font.pixelSize = 11;
-                    errorMessage.text = Ra2snes.richPresence;
-                    errorMessage.opacity = 1.0;
-                }
-            }
-        }
-
         function showErrorMessage(error, iserror) {
             errorMessage.font.pixelSize = 13;
             if(iserror)
@@ -92,6 +72,14 @@ Item {
             errorMessage.text = error;
             errorMessage.opacity = 1;
             fadeOutTimer.restart();
+        }
+
+        Connections {
+            target: Ra2snes
+            function onUpdatedRichText()
+            {
+                errorMessage.showRichPresence();
+            }
         }
 
         Connections {
