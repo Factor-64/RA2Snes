@@ -66,7 +66,7 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
     if(!richPresence.isEmpty())
     {
         //qDebug() << "RICH";
-        QByteArray rc = richPresence.toLocal8Bit();
+        QByteArray rc = richPresence.toUtf8();
         const char* script = rc.constData();
         int size = rc_richpresence_size(script);
         if(size > 0)
@@ -356,14 +356,12 @@ void MemoryReader::checkAchievements() // Modified version of runtime.c from rch
         mem.size = new_size;
         if(mem_richpresence != nullptr)
         {
-            char output[1024];
+            char output[256];
             int new_rp_state = rc_evaluate_richpresence(&mem_richpresence->richpresence, output, sizeof(output), peek, &mem, nullptr);
-            //QString str = QString::fromUtf8(output);
-            //qDebug() << str;
             if(new_rp_state != rp_state)
             {
                 rp_state = new_rp_state;
-                //emit updateRichPresence(str);
+                emit updateRichPresence(QByteArray(output));
             }
 
         }

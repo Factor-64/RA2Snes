@@ -2,16 +2,59 @@ import QtQuick
 import CustomModels 1.0
 
 Item {
+    id: outer
     Text {
         id: errorMessage
         font.family: "Verdana"
         font.pixelSize: 13
         color: themeLoader.item.errorMessageTextColor
         width: parent.width
+        wrapMode: Text.WordWrap
         opacity: 0
         Behavior on opacity {
             NumberAnimation {
                 duration: 500
+            }
+        }
+        onHeightChanged: {
+            if(mainWindow.compact)
+                outer.parent.errorHeight = height;
+        }
+        Component.onCompleted: {
+            if(mainWindow.compact)
+            {
+                if(errorMessage.opacity === 0.0)
+                {
+                    errorMessage.color = themeLoader.item.basicTextColor;
+                    errorMessage.font.pixelSize = 11;
+                    errorMessage.text = Ra2snes.richPresence;
+                    errorMessage.opacity = 1.0;
+                }
+            }
+            else
+            {
+                errorMessage.text = "";
+                errorMessage.opacity = 0.0;
+            }
+
+        }
+
+        NumberAnimation {
+            id: fadeAnimation
+            target: errorMessage
+            property: "opacity"
+            to: 0.0
+            duration: 500
+            onStopped: {
+                errorMessage.text = "";
+                errorMessage.color = themeLoader.item.basicTextColor;
+                if (Ra2snes.richPresence !== "")
+                {
+                    errorMessage.font.pixelSize = 11;
+                    errorMessage.text = Ra2snes.richPresence;
+                    errorMessage.opacity = 1.0;
+
+                }
             }
         }
 
@@ -21,12 +64,27 @@ Item {
             running: false
             repeat: false
             onTriggered: {
-                errorMessage.opacity = 0.0
-                errorMessage.text = "";
+                fadeAnimation.start();
+            }
+        }
+
+
+        Connections {
+            target: Ra2snes
+            function onUpdatedRichText()
+            {
+                if(errorMessage.color === themeLoader.item.basicTextColor)
+                {
+                    errorMessage.color = themeLoader.item.basicTextColor;
+                    errorMessage.font.pixelSize = 11;
+                    errorMessage.text = Ra2snes.richPresence;
+                    errorMessage.opacity = 1.0;
+                }
             }
         }
 
         function showErrorMessage(error, iserror) {
+            errorMessage.font.pixelSize = 13;
             if(iserror)
                 errorMessage.color = themeLoader.item.errorMessageTextColor;
             else
