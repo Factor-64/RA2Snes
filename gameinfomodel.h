@@ -47,6 +47,7 @@ public:
     unsigned int missable_count() const;
     int point_count() const;
     int achievement_count() const;
+    QString rich_presence() const;
 
     void title(const QString& t);
     void md5hash(const QString& md5);
@@ -63,6 +64,7 @@ public:
     void missable_count(const unsigned int& mc);
     void point_count(const int& pc);
     void achievement_count(const int& ac);
+    void rich_presence(const QString& rp);
 
 signals:
     void dataChanged();

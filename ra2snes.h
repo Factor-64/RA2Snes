@@ -17,6 +17,7 @@ class ra2snes : public QObject
     Q_PROPERTY(QString version READ version CONSTANT)
     Q_PROPERTY(QString latestVersion READ latestVersion NOTIFY newUpdate)
     Q_PROPERTY(bool ignore READ ignore WRITE ignoreUpdates NOTIFY ignoreChanged)
+    Q_PROPERTY(QString richPresence READ richPresence NOTIFY updatedRichText)
 
 public:
     enum Task {
@@ -47,6 +48,7 @@ public:
     QString theme() const;
     QString version() const;
     QString latestVersion() const;
+    QString richPresence() const;
     bool ignore() const;
 
 public slots:
@@ -74,6 +76,7 @@ signals:
     void enableModeSwitching();
     void newUpdate();
     void ignoreChanged();
+    void updatedRichText();
 
 private:
     explicit ra2snes(QObject *parent = nullptr);
@@ -101,6 +104,7 @@ private:
     QString m_theme;
     QString m_latestVersion;
     QString downloadUrl;
+    QString rich_text;
     QTimer* crashTimer;
     void createSettingsFile();
     void loadSettings();

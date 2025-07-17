@@ -98,6 +98,20 @@ void RAClient::startSession()
     sendRequest("startsession", post_content);
 }
 
+void RAClient::ping(const QString& rp)
+{
+    qDebug() << rp;
+    QJsonObject post_content;
+    post_content["u"] = userinfo_model->username();
+    post_content["t"] = userinfo_model->token();
+    post_content["g"] = QString::number(gameinfo_model->id());
+    post_content["m"] = rp;
+    post_content["h"] = userinfo_model->hardcore();
+    post_content["x"] = gameinfo_model->md5hash();
+
+    sendRequest("ping", post_content);
+}
+
 void RAClient::awardAchievement(const unsigned int& id, const bool& hardcore, const QDateTime& achieved)
 {
     QByteArray md5hash;
@@ -118,7 +132,6 @@ void RAClient::awardAchievement(const unsigned int& id, const bool& hardcore, co
 
     sendRequest("awardachievement", post_content);
 }
-
 
 /*void RAClient::getLBPlacements()
 {
@@ -208,6 +221,11 @@ void RAClient::setInGameHooks(const bool& n)
 bool RAClient::getAutoHardcore()
 {
     return userinfo_model->autohardcore();
+}
+
+QString RAClient::getRichPresence()
+{
+    return gameinfo_model->rich_presence();
 }
 
 void RAClient::setTitleToHash(const QString& currentGame)
@@ -376,6 +394,10 @@ void RAClient::handleSuccessResponse(const QJsonObject& jsonObject)
     {
         handleAwardAchievementResponse(jsonObject);
     }
+    else if (latestRequest == "ping")
+    {
+        return;
+    }
     else if (latestRequest == "login")
     {
         handleLoginResponse(jsonObject);
@@ -398,8 +420,8 @@ void RAClient::handleSuccessResponse(const QJsonObject& jsonObject)
     }
     else
     {
-        //qDebug() << "Unexpected response:" << jsonObject;
         emit requestError(false);
+        //qDebug() << "Unexpected response:" << jsonObject;
     }
 }
 
@@ -453,6 +475,7 @@ void RAClient::handleGameIDResponse(const QJsonObject& jsonObject)
 void RAClient::handlePatchResponse(const QJsonObject& jsonObject)
 {
     QJsonObject patch_data = jsonObject["PatchData"].toObject();
+    //qDebug() << jsonObject;
     gameinfo_model->title(patch_data["Title"].toString());
     gameinfo_model->image_icon(patch_data["ImageIcon"].toString());
     gameinfo_model->image_icon_url(QUrl(patch_data["ImageIconURL"].toString()));
@@ -518,6 +541,7 @@ void RAClient::handlePatchResponse(const QJsonObject& jsonObject)
     gameinfo_model->missable_count(missables);
     gameinfo_model->point_total(total);
     gameinfo_model->achievement_count(achievement_model->rowCount() - warning);
+    gameinfo_model->rich_presence(patch_data["RichPresencePatch"].toString());
 
     if (userinfo_model->hardcore())
     {
