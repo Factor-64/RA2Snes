@@ -41,7 +41,7 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    void setUnlockedState(const unsigned int& id, const bool& unlocked, const QDateTime& time);
+    void setUnlockedState(const unsigned int& i, const bool& unlocked, const QDateTime& time);
     void primeAchievement(const unsigned int& id, const bool& p);
     void updateAchievementValue(const unsigned int& id, const int& value);
     void updateAchievementPercent(const unsigned int& id, const int& percent);
