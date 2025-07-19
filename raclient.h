@@ -6,25 +6,12 @@
 #include "userinfomodel.h"
 #include "gameinfomodel.h"
 #include "achievementmodel.h"
+#include "queueworker.h"
 
 class RAClient : public QObject {
     Q_OBJECT
 
 public:
-    enum RequestType {
-        AchievementRequest,
-        LeaderboardRequest,
-        Nothing
-    };
-
-    struct RequestData {
-        RequestType type;
-        unsigned int id;
-        bool hardcore;
-        QDateTime unlock_time;
-        unsigned int score;
-    };
-
     static RAClient* instance() {
         static RAClient instance;
         return &instance;
@@ -51,7 +38,6 @@ public:
     void setPatched(const bool& p);
     void setInGameHooks(const bool& n);
     void setTitle(const QString& t, const QString& i, const QString& l);
-    void clearQueue();
     void handleNetworkReply(QNetworkReply *reply);
     bool isGameBeaten();
     bool isGameMastered();
@@ -66,23 +52,27 @@ public:
     void refresh();
     QString getRichPresence();
     void ping(const QString& rp);
+    void clearQueue();
+
+public slots:
+    void processRequest(const RequestData& data);
 
 signals:
     void loginSuccess(bool r);
     void requestFailed(QJsonObject error);
-    void requestError(const bool& net);
+    void requestError(const bool& net, const QString& request, const QString& error);
     void gotGameID(const int& gameid);
     void finishedGameSetup();
     void finishedUnlockSetup();
     void awardedAchievement(const unsigned int& id, const QString& time, const unsigned int& points);
     void sessionStarted();
     void requestFinished();
-    void continueQueue();
 
 private:
     RAClient(QObject *parent = nullptr);
     RAClient(const RAClient&) = delete;
     RAClient& operator=(const RAClient&) = delete;
+    ~RAClient();
 
     static const QString baseUrl;
     static const QString userAgent;
@@ -96,7 +86,6 @@ private:
     void handleUnlocksResponse(const QJsonObject& jsonObject);
     void handleStartSessionResponse(const QJsonObject& jsonObject);
     void handlePingResponse(const QJsonObject& jsonObject);
-    void runQueue();
     QString latestRequest;
     bool warning;
     bool m_refresh;
@@ -106,8 +95,9 @@ private:
     AchievementModel* achievement_model;
     QMap<unsigned int, bool> progressionMap;
     QMap<unsigned int, bool> winMap;
-    QQueue<RequestData> queue;
     QList<LeaderboardInfo> leaderboards;
+    QThread *workerThread;
+    QueueWorker *worker;
 };
 
 #endif // RACLIENT_H

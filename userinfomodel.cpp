@@ -4,18 +4,6 @@ UserInfoModel::UserInfoModel(QObject *parent)
     : QObject(parent) {
 }
 
-void UserInfoModel::updateHardcoreScore(const int& score)
-{
-    m_userInfo.hardcore_score += score;
-    emit dataChanged();
-}
-
-void UserInfoModel::updateSoftcoreScore(const int& score)
-{
-    m_userInfo.softcore_score += score;
-    emit dataChanged();
-}
-
 QString UserInfoModel::username() const {
     return m_userInfo.username;
 }

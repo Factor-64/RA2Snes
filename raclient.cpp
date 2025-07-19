@@ -3,8 +3,12 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QThread>
+#include <QTimer>
 #include "rc_version.h"
 #include "version.h"
+
+Q_DECLARE_METATYPE(RequestData)
 
 const QString RAClient::baseUrl = "https://retroachievements.org/";
 const QString RAClient::mediaUrl = "https://media.retroachievements.org/";
@@ -13,16 +17,22 @@ const QString RAClient::userAgent = QString("ra2snes/%1 rcheevos/%2").arg(RA2SNE
 RAClient::RAClient(QObject *parent)
     : QObject(parent)
 {
+    qRegisterMetaType<RequestData>();
     networkManager = new QNetworkAccessManager(this);
     userinfo_model = UserInfoModel::instance();
     gameinfo_model = GameInfoModel::instance();
     achievement_model = AchievementModel::instance();
     connect(networkManager, &QNetworkAccessManager::finished, this, &RAClient::handleNetworkReply);
-    connect(this, &RAClient::continueQueue, this, [this] { runQueue(); });
-    queue.clear();
+    workerThread = new QThread(this);
+    worker = new QueueWorker();
+    worker->moveToThread(workerThread);
+
+    connect(workerThread, &QThread::finished, worker, &QObject::deleteLater);
+    connect(worker, &QueueWorker::processRequest, this, &RAClient::processRequest);
+
+    workerThread->start();
     warning = false;
     m_refresh = false;
-    //qDebug() << userAgent;
 }
 
 void RAClient::loginPassword(const QString& username, const QString& password)
@@ -101,7 +111,6 @@ void RAClient::startSession()
 
 void RAClient::ping(const QString& rp)
 {
-    //qDebug() << rp;
     QJsonObject post_content;
     post_content["u"] = userinfo_model->username();
     post_content["t"] = userinfo_model->token();
@@ -151,9 +160,10 @@ void RAClient::awardAchievement(const unsigned int& id, const bool& hardcore, co
 
 void RAClient::queueAchievementRequest(const unsigned int& id, const QDateTime& achieved) {
     RequestData data = {AchievementRequest, id, userinfo_model->hardcore(), achieved, 0};
-    queue.enqueue(data);
-    if(queue.size() == 1)
-        runQueue();
+    QTimer::singleShot(0, worker, [lworker = worker, data] {
+        lworker->enqueueRequest(data);
+    });
+
 }
 
 /*void RAClient::queueLeaderboardRequest(unsigned int id, QDateTime achieved, unsigned int score) {
@@ -163,30 +173,19 @@ void RAClient::queueAchievementRequest(const unsigned int& id, const QDateTime& 
         startQueue();
 }*/
 
-void RAClient::runQueue() {
-    //qDebug() << "Queue Size: " << queue.size();
-    if(queue.size() > 0 && !userinfo_model->token().isEmpty())
-    {
-        RequestData data = queue.first();
-        //qDebug() << data.id << data.unlock_time;
-        switch (data.type) {
-            case AchievementRequest:
-                awardAchievement(data.id, data.hardcore, data.unlock_time);
-                break;
-            case LeaderboardRequest:
-                //submitLeaderboardEntry(data.id, data.score);
-                break;
-            default:
-                break;
-        }
-    }
-    else if(userinfo_model->token().isEmpty())
-        queue.clear();
-}
+void RAClient::processRequest(const RequestData& data) {
+    if (userinfo_model->token().isEmpty()) return;
 
-void RAClient::clearQueue()
-{
-    queue.clear();
+    switch (data.type) {
+    case AchievementRequest:
+        awardAchievement(data.id, data.hardcore, data.unlock_time);
+        break;
+    case LeaderboardRequest:
+        // submitLeaderboardEntry(data.id, data.score);
+        break;
+    default:
+        break;
+    }
 }
 
 void RAClient::setPatched(const bool& p)
@@ -265,6 +264,13 @@ void RAClient::clearUser()
 void RAClient::clearGame()
 {
     gameinfo_model->clearGame();
+}
+
+void RAClient::clearQueue()
+{
+    QTimer::singleShot(0, worker, [lworker = worker] {
+        lworker->stop();
+    });
 }
 
 QList<LeaderboardInfo> RAClient::getLeaderboards()
@@ -366,13 +372,12 @@ void RAClient::handleNetworkReply(QNetworkReply *reply)
     if (reply->error() != QNetworkReply::NoError)
     {
         if(reply->errorString().contains("server replied"))
-            emit requestError(false);
+            emit requestError(true, latestRequest, reply->errorString());
         else
         {
             //qDebug() << "Network error:" << reply->errorString();
-            emit requestError(true);
+            emit requestError(true, latestRequest, reply->errorString());
         }
-        emit continueQueue();
     }
     else if (jsonObject.contains("Error"))
     {
@@ -420,38 +425,39 @@ void RAClient::handleSuccessResponse(const QJsonObject& jsonObject)
     }
     else
     {
-        emit requestError(false);
+        emit requestError(false, latestRequest, "Unexpected Response");
         //qDebug() << "Unexpected response:" << jsonObject;
     }
 }
 
 void RAClient::handleAwardAchievementResponse(const QJsonObject& jsonObject)
 {
-    //qDebug() << queue.size();
-    for(auto& achievement : achievement_model->getAchievements())
+    //qDebug() << jsonObject;
+    if(!achievement_model->getAchievements().isEmpty())
     {
-        if(achievement.id == jsonObject["AchievementID"].toInt())
+        const auto& ach_list = achievement_model->getAchievements();
+        for(int i = 0; i < ach_list.size(); i++)
         {
-            achievement_model->setUnlockedState(achievement.id, true, queue.first().unlock_time);
-            gameinfo_model->updatePointCount(achievement.points);
-            //qDebug() << "AWARDED" << achievement.id;
-            gameinfo_model->updateCompletionCount();
-            if(userinfo_model->hardcore())
-                userinfo_model->updateHardcoreScore(achievement.points);
-            else
-                userinfo_model->updateSoftcoreScore(achievement.points);
-            if(progressionMap.contains(achievement.id))
+            auto& achievement = ach_list[i];
+            if(achievement.id == jsonObject["AchievementID"].toInt())
             {
-                progressionMap[achievement.id] = true;
-                if(!gameinfo_model->beaten())
-                    isGameBeaten();
+                achievement_model->setUnlockedState(i, true, QDateTime::currentDateTime());
+                gameinfo_model->updatePointCount(achievement.points);
+                //qDebug() << "AWARDED" << achievement.id;
+                gameinfo_model->updateCompletionCount();
+                userinfo_model->hardcore_score(jsonObject["Score"].toInt());
+                userinfo_model->softcore_score(jsonObject["SoftcoreScore"].toInt());
+                if(progressionMap.contains(achievement.id))
+                {
+                    progressionMap[achievement.id] = true;
+                    if(!gameinfo_model->beaten())
+                        isGameBeaten();
+                }
+                break;
             }
-            break;
         }
+        isGameMastered();
     }
-    isGameMastered();
-    queue.dequeue();
-    emit continueQueue();
 }
 
 void RAClient::handleLoginResponse(const QJsonObject& jsonObject)
@@ -582,15 +588,17 @@ void RAClient::handleStartSessionResponse(const QJsonObject& jsonObject)
         QJsonObject unlock = unlock_data[i].toObject();
         if(unlock["ID"].toInt() != 101000001)
         {
-            for(auto& achievement : achievement_model->getAchievements())
+            const auto& ach_list = achievement_model->getAchievements();
+            for(int i = 0; i < ach_list.size(); i++)
             {
+                auto& achievement = ach_list[i];
                 if(achievement.type == "progression")
                     progressionMap[achievement.id] = achievement.unlocked;
                 else if(achievement.type == "win_condition")
                     winMap[achievement.id] = achievement.unlocked;
                 if(unlock["ID"].toInt() == achievement.id)
                 {
-                    achievement_model->setUnlockedState(achievement.id, true, QDateTime::fromSecsSinceEpoch(unlock["When"].toInt()));
+                    achievement_model->setUnlockedState(i, true, QDateTime::fromSecsSinceEpoch(unlock["When"].toInt()));
                     gameinfo_model->updatePointCount(achievement.points);
                 }
             }
@@ -636,4 +644,15 @@ bool RAClient::isGameMastered()
     }
     gameinfo_model->mastered(false);
     return false;
+}
+
+RAClient::~RAClient()
+{
+    if (workerThread && workerThread->isRunning())
+    {
+        workerThread->quit();
+        workerThread->wait();
+    }
+    delete workerThread;
+    workerThread = nullptr;
 }

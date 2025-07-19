@@ -56,6 +56,8 @@ set(PROJECT_SOURCES
         version.h
         networkcachemanager.cpp
         networkcachemanager.h
+        queueworker.cpp
+        queueworker.h
 )
 
 set(MINIZ_OBJ_PATH ${CMAKE_SOURCE_DIR}/miniz/miniz.o)

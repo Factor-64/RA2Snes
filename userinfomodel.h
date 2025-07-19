@@ -22,9 +22,6 @@ public:
         return &instance;
     }
 
-    void updateHardcoreScore(const int& score);
-    void updateSoftcoreScore(const int& score);
-
     QString username() const;
     QString token() const;
     int softcore_score() const;
