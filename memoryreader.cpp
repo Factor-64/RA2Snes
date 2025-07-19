@@ -1,5 +1,6 @@
 #include "memoryreader.h"
 #include "rc_internal.h"
+#include <QTimer>
 //#include <QDebug>
 
 MemoryReader::MemoryReader(QObject *parent) : QObject(parent) {
@@ -9,11 +10,9 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
     uniqueMemoryAddresses.clear();
     achievementTriggers.clear();
     leaderboardTriggers.clear();
-    achievementFrames.clear();
-    modified = false;
-    mem.size = 0;
+    frameQueue.clear();
+    rpState = 0;
     mem_richpresence = nullptr;
-    rp_state = 0;
     QMap<unsigned int, unsigned int> uniqueAddresses;
     for (const AchievementInfo& achievement : achievements)
     {
@@ -146,12 +145,13 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
     //qDebug() << uniqueMemoryAddresses;
     //qDebug() << uniqueAddresses.size() << uniqueMemoryAddresses.size();
 
-    remapTriggerAddresses();
+    remapTriggerAddresses(false);
 }
 
-void MemoryReader::remapTriggerAddresses()
+void MemoryReader::remapTriggerAddresses(bool modified)
 {
     //qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size();
+    QMutexLocker locker(&mutex);
     uniqueMemoryAddressesCounts.clear();
     QMap<unsigned int, unsigned int> temp;
     for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it)
@@ -262,28 +262,26 @@ void MemoryReader::remapTriggerAddresses()
     addressMap = temp;
     if(!modified)
         emit finishedMemorySetup();
-    modified = false;
     //qDebug() << addressMap;
 }
 
 void MemoryReader::addFrameToQueues(const QByteArray& data, const unsigned int& frames)
 {
-    achievementFrames.enqueue(qMakePair(data, frames));
-    //LeaderBoardFramesToCheck.enqueue(qMakePair(data, frames))
+    {
+        QMutexLocker locker(&mutex);
+        frameQueue.enqueue(qMakePair(data, frames));
+    }
+    QTimer::singleShot(0, this, [this] { processFrames(); });
 }
 
 void MemoryReader::clearQueue()
 {
-    achievementFrames.clear();
-}
-
-int MemoryReader::achievementQueueSize()
-{
-    return achievementFrames.size();
+    frameQueue.clear();
 }
 
 QList<QPair<unsigned int, unsigned int>> MemoryReader::getUniqueMemoryAddresses()
 {
+    QMutexLocker locker(&mutex);
     return uniqueMemoryAddresses;
 }
 
@@ -314,8 +312,8 @@ static uint32_t peek(uint32_t address, uint32_t num_bytes, void* ud) {
 
 void MemoryReader::decrementAddressCounts(rc_memrefs_t& memrefs)
 {
-    bool localModified = false;
-
+    QMutexLocker locker(&mutex);
+    int type = 0;
     rc_memref_list_t* memref_list = &memrefs.memrefs;
     for (; memref_list; memref_list = memref_list->next)
     {
@@ -325,70 +323,80 @@ void MemoryReader::decrementAddressCounts(rc_memrefs_t& memrefs)
         for (; memref < memref_end; ++memref)
         {
             const unsigned int& mappedAddress = addressMap[memref->address];
-
             unsigned int& count = uniqueMemoryAddressesCounts[mappedAddress];
-            if (--count < 1)
-            {
-                auto it = std::find_if(uniqueMemoryAddresses.begin(), uniqueMemoryAddresses.end(),
-                                       [mappedAddress](const QPair<unsigned int, unsigned int>& pair) {
-                                           return pair.first == mappedAddress;
-                                       });
 
-                if (it != uniqueMemoryAddresses.end())
-                {
-                    uniqueMemoryAddresses.erase(it);
-                    localModified = true;
-                }
+            auto it = std::find_if(uniqueMemoryAddresses.begin(), uniqueMemoryAddresses.end(),
+                                   [mappedAddress](const QPair<unsigned int, unsigned int>& pair) {
+                                       return pair.first == mappedAddress;
+                                   });
+
+            if(it == uniqueMemoryAddresses.end())
+                continue;
+            if(--count < 1)
+            {
+                uniqueMemoryAddresses.erase(it);
+                type = 1;
+            }
+            else if(mappedAddress + memref->address == it->first + it->second)
+            {
+                it->second -= memref->address;
+                type = 2;
             }
         }
     }
-
-    if (localModified)
+    switch(type)
     {
-        modified = true;
-        emit modifiedAddresses();
+    case 1:
+        remapTriggerAddresses(true);
+    case 2:
+        emit modifiedAddresses(uniqueMemoryAddresses);
+    default:
+        break;
     }
 }
 
-
-void MemoryReader::checkAchievements() // Modified version of runtime.c from rcheevos
+void MemoryReader::processFrames()
 {
-    //qDebug() << "AchievementFrames size:" << achievementFrames.first().first.size();
-    //qDebug() << "AchievementFrames data ptr:" << (void*)achievementFrames.first().first.data();
-    while(achievementFrames.size() > 0)
-    {
-        uint32_t new_size = achievementFrames.first().first.size();
-        if(new_size < mem.size)
-            remapTriggerAddresses(); // IF ACHIEVEMENTS ARE ACTIVATING ON ACCIDENT TAKE A LOOK AT THIS AGAIN YOUR LOGIC MIGHT BE THE ISSUE AS ADDRESSES GET SHIFTED
-        mem.ram = reinterpret_cast<uint8_t*>(achievementFrames.first().first.data());
-        mem.size = new_size;
-        if(mem_richpresence != nullptr)
-        {
-            char output[256];
-            int new_rp_state = rc_evaluate_richpresence(&mem_richpresence->richpresence, output, sizeof(output), peek, &mem, nullptr);
-            if(new_rp_state != rp_state)
-            {
-                rp_state = new_rp_state;
-                emit updateRichPresence(QByteArray(output));
-            }
+    QPair<QByteArray, unsigned> frame;
 
-        }
-        for(int frame = 0; frame < achievementFrames.first().second; frame++)
+    {
+        QMutexLocker locker(&mutex);
+        if (frameQueue.isEmpty()) return;
+        frame = frameQueue.dequeue();
+    }
+
+    memory_t mem;
+    mem.ram = reinterpret_cast<uint8_t*>(const_cast<char*>(frame.first.data()));
+    mem.size = frame.first.size();
+
+    if(mem_richpresence != nullptr)
+    {
+        char output[256];
+        int new_state = rc_evaluate_richpresence(&mem_richpresence->richpresence, output, sizeof(output), peek, &mem, nullptr);
+        int old_state = rpState.loadAcquire();
+        if(new_state != old_state)
         {
-            QList<unsigned int> ids;
+            rpState.storeRelease(new_state);
+            emit updateRichPresence(QByteArray(output));
+        }
+    }
+
+    while(frame.second > 0)
+    {
+        QList<unsigned int> ids;
+
+        {
+            QMutexLocker locker(&mutex);
             for(auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it)
             {
                 rc_trigger_t* trigger = &it.value()->trigger;
-                int old_state, new_state;
-                uint32_t old_measured_value;
+                if (!trigger) continue;
 
-                if (!trigger)
-                    continue;
+                int old_state = trigger->state;
+                uint32_t old_measured_value = trigger->measured_value;
 
-                old_measured_value = trigger->measured_value;
-                old_state = trigger->state;
                 trigger->state = RC_TRIGGER_STATE_ACTIVE;
-                new_state = rc_evaluate_trigger(trigger, peek, &mem, nullptr);
+                int new_state = rc_evaluate_trigger(trigger, peek, &mem, nullptr);
 
                 if (trigger->measured_value != old_measured_value &&
                     old_measured_value != RC_MEASURED_UNKNOWN &&
@@ -398,24 +406,19 @@ void MemoryReader::checkAchievements() // Modified version of runtime.c from rch
                     new_state != RC_TRIGGER_STATE_INACTIVE &&
                     new_state != RC_TRIGGER_STATE_WAITING)
                 {
-                    const int32_t new_percent = (int32_t)(((unsigned long long)trigger->measured_value * 100) / trigger->measured_target);
+                    const int32_t new_percent = (int32_t)(((quint64)trigger->measured_value * 100) / trigger->measured_target);
                     emit updateAchievementInfo(it.key(), Percent, new_percent);
                     emit updateAchievementInfo(it.key(), Value, trigger->measured_value);
                 }
 
-                /* if the state hasn't changed, there won't be any events raised */
-                if(new_state == old_state)
-                    continue;
+                if(new_state == old_state) continue;
 
-                /* raise an UNPRIMED event when changing from PRIMED to anything else */
                 if (old_state == RC_TRIGGER_STATE_PRIMED)
                     emit updateAchievementInfo(it.key(), Primed, false);
 
-                /* raise events for each of the possible new states */
                 switch (new_state)
                 {
                 case RC_TRIGGER_STATE_TRIGGERED:
-                    //qDebug() << "Achievement Unlocked: " << it.key();
                     ids.append(it.key());
                     emit updateAchievementInfo(it.key(), Value, trigger->measured_value);
                     emit updateAchievementInfo(it.key(), Percent, 100);
@@ -431,13 +434,24 @@ void MemoryReader::checkAchievements() // Modified version of runtime.c from rch
                     break;
                 }
             }
+        }
+
+        {
+            QMutexLocker locker(&mutex);
             for(const auto& id : ids)
             {
                 free(achievementTriggers[id]);
                 achievementTriggers.remove(id);
             }
         }
-        achievementFrames.dequeue();
+
+        frame.second--;
+    }
+
+    {
+        QMutexLocker locker(&mutex);
+        if(!frameQueue.isEmpty())
+            QTimer::singleShot(0, this, [this] { processFrames(); });
     }
 }
 

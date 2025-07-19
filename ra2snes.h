@@ -35,6 +35,12 @@ public:
         GetFirmware
     };
 
+    enum UpdateType {
+        NoUpdate,
+        RemapTriggers,
+        RefreshAddresses
+    };
+
     static ra2snes* instance() {
         static ra2snes instance;
         return &instance;
@@ -82,6 +88,7 @@ private:
     explicit ra2snes(QObject *parent = nullptr);
     ra2snes(const ra2snes&) = delete;
     ra2snes& operator=(const ra2snes&) = delete;
+    ~ra2snes();
 
     Usb2Snes *usb2snes;
     RAClient *raclient;
@@ -96,6 +103,7 @@ private:
     bool isGB;
     bool reset;
     QAtomicInt updateAddresses;
+    QThread* readerThread;
     QString m_console;
     QDateTime millisecPassed;
     Task doThisTaskNext;
@@ -104,14 +112,14 @@ private:
     QString m_theme;
     QString m_latestVersion;
     QString downloadUrl;
-    QString rich_text;
+    QString richText;
     QTimer* crashTimer;
     QTimer* richTimer;
     void createSettingsFile();
     void loadSettings();
     void onLoginSuccess(bool r);
     void onRequestFailed(const QJsonObject& error);
-    void onRequestError(const bool& net);
+    void onRequestError(const bool& net, const QString& request, const QString& error);
     void onUsb2SnesStateChanged();
     void onUsb2SnesGetAddressDataReceived();
     void onUsb2SnesGetAddressesDataReceived();
