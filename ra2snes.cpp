@@ -293,7 +293,7 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
     unsigned int framesPassed = std::round(std::abs(elapsedMs * 0.0600988138974405));
     if(framesPassed < 1)
     {
-        if(elapsedMs > 15)
+        if(elapsedMs > 14)
             framesPassed = 1;
         else
         {

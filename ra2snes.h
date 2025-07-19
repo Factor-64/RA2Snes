@@ -35,12 +35,6 @@ public:
         GetFirmware
     };
 
-    enum UpdateType {
-        NoUpdate,
-        RemapTriggers,
-        RefreshAddresses
-    };
-
     static ra2snes* instance() {
         static ra2snes instance;
         return &instance;
