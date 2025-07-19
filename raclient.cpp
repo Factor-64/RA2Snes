@@ -8,8 +8,6 @@
 #include "rc_version.h"
 #include "version.h"
 
-Q_DECLARE_METATYPE(RequestData)
-
 const QString RAClient::baseUrl = "https://retroachievements.org/";
 const QString RAClient::mediaUrl = "https://media.retroachievements.org/";
 const QString RAClient::userAgent = QString("ra2snes/%1 rcheevos/%2").arg(RA2SNES_VERSION_STRING,RCHEEVOS_VERSION_STRING);
@@ -17,7 +15,6 @@ const QString RAClient::userAgent = QString("ra2snes/%1 rcheevos/%2").arg(RA2SNE
 RAClient::RAClient(QObject *parent)
     : QObject(parent)
 {
-    qRegisterMetaType<RequestData>();
     networkManager = new QNetworkAccessManager(this);
     userinfo_model = UserInfoModel::instance();
     gameinfo_model = GameInfoModel::instance();
