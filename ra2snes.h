@@ -97,7 +97,6 @@ private:
     bool isGB;
     bool reset;
     QAtomicInt updateAddresses;
-    QThread* readerThread;
     QString m_console;
     QDateTime millisecPassed;
     Task doThisTaskNext;
