@@ -45,7 +45,9 @@ private:
     QMap<unsigned int, unsigned int> uniqueMemoryAddressesCounts;
     QMap<unsigned int, unsigned int> addressMap;
     rc_richpresence_with_memrefs_t* mem_richpresence;
-    QMutex mutex;
+    QMutex frameQueueMutex;
+    QMutex triggersMutex;
+    QMutex uniqueAddressMutex;
     QAtomicInt rpState;
     //QQueue<QPair<QByteArray, int>> leaderboardFrames;
 };
