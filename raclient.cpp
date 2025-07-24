@@ -3,8 +3,6 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
-#include <QThread>
-#include <QTimer>
 #include "rc_version.h"
 #include "version.h"
 

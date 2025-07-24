@@ -3,6 +3,7 @@
 
 #include <QTimer>
 #include <QJsonObject>
+#include <QElapsedTimer>
 #include "usb2snes.h"
 #include "raclient.h"
 #include "memoryreader.h"

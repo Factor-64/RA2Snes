@@ -8,7 +8,6 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QProcess>
-#include <QThreadPool>
 //#include <QDebug>
 
 ra2snes::ra2snes(QObject *parent)
