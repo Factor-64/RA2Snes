@@ -2,11 +2,11 @@
 #define RACLIENT_H
 
 #include <QNetworkReply>
+#include <QJsonObject>
 #include <QQueue>
 #include "userinfomodel.h"
 #include "gameinfomodel.h"
 #include "achievementmodel.h"
-#include "queueworker.h"
 
 class RAClient : public QObject {
     Q_OBJECT
@@ -23,13 +23,11 @@ public:
     void getAchievements(const unsigned int& gameId);
     void getUnlocks();
     void startSession();
-    void awardAchievement(const unsigned int& id, const bool& hardcore, const QDateTime& achieved);
+    void awardAchievement(const unsigned int& id, const QDateTime& achieved);
     //void getLBPlacements();
     AchievementModel* getAchievementModel();
     UserInfoModel* getUserInfoModel();
     QList<LeaderboardInfo> getLeaderboards();
-    void queueAchievementRequest(const unsigned int& id, const QDateTime& achieved);
-    //void queueLeaderboardRequest(const unsigned int& id, const QDateTime& achieved, const unsigned int& score);
     void setHardcore(const bool& h);
     void setConsole(const QString& c, const QUrl& icon);
     bool getHardcore();
@@ -52,10 +50,7 @@ public:
     void refresh();
     QString getRichPresence();
     void ping(const QString& rp);
-    void clearQueue();
-
-public slots:
-    void processRequest(const RequestData& data);
+    bool sendQueuedRequest();
 
 signals:
     void loginSuccess(bool r);
@@ -95,9 +90,11 @@ private:
     AchievementModel* achievement_model;
     QMap<unsigned int, bool> progressionMap;
     QMap<unsigned int, bool> winMap;
+    QMap<unsigned int, QDateTime> achievedTimes;
     QList<LeaderboardInfo> leaderboards;
-    QThread *workerThread;
-    QueueWorker *worker;
+    QQueue<QPair<QString, QJsonObject>> queue;
+    QJsonObject latestPost;
+    bool running;
 };
 
 #endif // RACLIENT_H

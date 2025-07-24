@@ -11,20 +11,6 @@ enum AchievementInfoType {
     Target
 };
 
-enum RequestType {
-    AchievementRequest,
-    LeaderboardRequest,
-    Nothing
-};
-
-struct RequestData {
-    RequestType type = Nothing;
-    unsigned int id = 0;
-    bool hardcore = false;
-    QDateTime unlock_time;
-    unsigned int score = 0;
-};
-
 // memory_t taken from rcheevos/mock_memory.h
 typedef struct {
     uint8_t* ram;

@@ -34,6 +34,7 @@ public:
         GetRomType,
         GetFirmware
     };
+    Q_ENUM(Task)
 
     static ra2snes* instance() {
         static ra2snes instance;
@@ -96,9 +97,8 @@ private:
     bool m_ignore;
     bool isGB;
     bool reset;
-    QAtomicInt updateAddresses;
+    bool updateAddresses;
     QString m_console;
-    QDateTime millisecPassed;
     Task doThisTaskNext;
     QList<QPair<unsigned int, unsigned int>> uniqueMemoryAddresses;
     QString m_appDirPath;
@@ -122,6 +122,10 @@ private:
     void setCurrentConsole();
     void checkForUpdate();
     void initVars();
+    QTimer* waitTimer;
+    QElapsedTimer* frameTimer;
+    unsigned int programTime;
+    unsigned int vgetTime;
 };
 
 #endif // RA2SNES_H
