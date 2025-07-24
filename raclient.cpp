@@ -20,16 +20,9 @@ RAClient::RAClient(QObject *parent)
     gameinfo_model = GameInfoModel::instance();
     achievement_model = AchievementModel::instance();
     connect(networkManager, &QNetworkAccessManager::finished, this, &RAClient::handleNetworkReply);
-    workerThread = new QThread(this);
-    worker = new QueueWorker();
-    worker->moveToThread(workerThread);
-
-    connect(workerThread, &QThread::finished, worker, &QObject::deleteLater);
-    connect(worker, &QueueWorker::processRequest, this, &RAClient::processRequest);
-
-    workerThread->start();
     warning = false;
     m_refresh = false;
+    running = false;
 }
 
 void RAClient::loginPassword(const QString& username, const QString& password)
@@ -119,8 +112,9 @@ void RAClient::ping(const QString& rp)
     sendRequest("ping", post_content);
 }
 
-void RAClient::awardAchievement(const unsigned int& id, const bool& hardcore, const QDateTime& achieved)
+void RAClient::awardAchievement(const unsigned int& id, const QDateTime& achieved)
 {
+    achievedTimes[id] = achieved;
     QByteArray md5hash;
     md5hash.append(QString::number(id).toLocal8Bit());
     md5hash.append(userinfo_model->username().toLocal8Bit());
@@ -134,7 +128,7 @@ void RAClient::awardAchievement(const unsigned int& id, const bool& hardcore, co
     post_content["u"] = userinfo_model->username();
     post_content["t"] = userinfo_model->token();
     post_content["a"] = QString::number(id);
-    post_content["h"] = QString::number(hardcore);
+    post_content["h"] = QString::number(userinfo_model->hardcore());
     post_content["v"] = QString(md5hash.toHex());
 
     sendRequest("awardachievement", post_content);
@@ -155,35 +149,12 @@ void RAClient::awardAchievement(const unsigned int& id, const bool& hardcore, co
     else index = 0;
 }*/
 
-void RAClient::queueAchievementRequest(const unsigned int& id, const QDateTime& achieved) {
-    RequestData data = {AchievementRequest, id, userinfo_model->hardcore(), achieved, 0};
-    QTimer::singleShot(0, worker, [lworker = worker, data] {
-        lworker->enqueueRequest(data);
-    });
-
-}
-
 /*void RAClient::queueLeaderboardRequest(unsigned int id, QDateTime achieved, unsigned int score) {
     RequestData data = {LeaderboardRequest, id, true, achieved, score};
     queue.enqueue(data);
     if(!running)
         startQueue();
 }*/
-
-void RAClient::processRequest(const RequestData& data) {
-    if (userinfo_model->token().isEmpty()) return;
-
-    switch (data.type) {
-    case AchievementRequest:
-        awardAchievement(data.id, data.hardcore, data.unlock_time);
-        break;
-    case LeaderboardRequest:
-        // submitLeaderboardEntry(data.id, data.score);
-        break;
-    default:
-        break;
-    }
-}
 
 void RAClient::setPatched(const bool& p)
 {
@@ -263,13 +234,6 @@ void RAClient::clearGame()
     gameinfo_model->clearGame();
 }
 
-void RAClient::clearQueue()
-{
-    QTimer::singleShot(0, worker, [lworker = worker] {
-        lworker->stop();
-    });
-}
-
 QList<LeaderboardInfo> RAClient::getLeaderboards()
 {
     return leaderboards;
@@ -324,7 +288,18 @@ void RAClient::sendRequest(const QString& request_type, const QJsonObject& post_
 
     QByteArray postData = query.toString(QUrl::FullyEncoded).toUtf8();
     latestRequest = request_type;
+    latestPost = post_content;
     networkManager->post(request, postData);
+}
+
+bool RAClient::sendQueuedRequest()
+{
+    if(queue.isEmpty() || running)
+        return false;
+    const auto& postRequest = queue.dequeue();
+    running = true;
+    sendRequest(postRequest.first, postRequest.second);
+    return true;
 }
 
 /*void printJsonObject(const QJsonObject &jsonObject, int indent = 0) {
@@ -368,10 +343,13 @@ void RAClient::handleNetworkReply(QNetworkReply *reply)
 
     if (reply->error() != QNetworkReply::NoError)
     {
+        running = false;
         if(reply->errorString().contains("server replied"))
-            emit requestError(true, latestRequest, reply->errorString());
+            emit requestError(false, latestRequest, reply->errorString());
         else
         {
+            if(latestRequest == "awardachievement")
+                queue.enqueue(qMakePair(latestRequest, latestPost));
             //qDebug() << "Network error:" << reply->errorString();
             emit requestError(true, latestRequest, reply->errorString());
         }
@@ -385,6 +363,10 @@ void RAClient::handleNetworkReply(QNetworkReply *reply)
     }
     else
     {
+        if(!queue.isEmpty())
+            queue.dequeue();
+        else
+            running = false;
         handleSuccessResponse(jsonObject);
     }
     reply->deleteLater();
@@ -393,33 +375,19 @@ void RAClient::handleNetworkReply(QNetworkReply *reply)
 void RAClient::handleSuccessResponse(const QJsonObject& jsonObject)
 {
     if (latestRequest == "awardachievement")
-    {
         handleAwardAchievementResponse(jsonObject);
-    }
     else if (latestRequest == "ping")
-    {
         return;
-    }
     else if (latestRequest == "login")
-    {
         handleLoginResponse(jsonObject);
-    }
     else if (latestRequest == "gameid")
-    {
         handleGameIDResponse(jsonObject);
-    }
     else if (latestRequest == "patch")
-    {
         handlePatchResponse(jsonObject);
-    }
     else if (latestRequest == "unlocks")
-    {
         handleUnlocksResponse(jsonObject);
-    }
     else if (latestRequest == "startsession")
-    {
         handleStartSessionResponse(jsonObject);
-    }
     else
     {
         emit requestError(false, latestRequest, "Unexpected Response");
@@ -438,7 +406,8 @@ void RAClient::handleAwardAchievementResponse(const QJsonObject& jsonObject)
             auto& achievement = ach_list[i];
             if(achievement.id == jsonObject["AchievementID"].toInt())
             {
-                achievement_model->setUnlockedState(i, true, QDateTime::currentDateTime());
+                achievement_model->setUnlockedState(i, true, achievedTimes[achievement.id]);
+                achievedTimes.remove(achievement.id);
                 gameinfo_model->updatePointCount(achievement.points);
                 //qDebug() << "AWARDED" << achievement.id;
                 gameinfo_model->updateCompletionCount();
@@ -645,11 +614,4 @@ bool RAClient::isGameMastered()
 
 RAClient::~RAClient()
 {
-    if (workerThread && workerThread->isRunning())
-    {
-        workerThread->quit();
-        workerThread->wait();
-    }
-    delete workerThread;
-    workerThread = nullptr;
 }
