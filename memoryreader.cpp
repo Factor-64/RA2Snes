@@ -1,6 +1,5 @@
 #include "memoryreader.h"
 #include "rc_internal.h"
-#include <QTimer>
 //#include <QDebug>
 
 MemoryReader::MemoryReader(QObject *parent) : QObject(parent) {

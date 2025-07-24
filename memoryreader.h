@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QList>
 #include <QQueue>
-#include <QMutex>
 #include "rc_internal.h"
 #include "rastructs.h"
 
