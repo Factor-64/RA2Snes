@@ -150,7 +150,7 @@ ra2snes::ra2snes(QObject *parent)
         }
         if(!richTimer->isActive())
             richTimer->start(30000);
-        frameTimer->start();
+        frameTimer->restart();
         usb2snes->infos();
     });
 
