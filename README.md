@@ -40,7 +40,7 @@ SD2Snes cannot currently read the memory of Super Game Boy and games with certai
 
 ### RA2Snes won't load game or update SNES status
 
-The SD2NES firmware may have crashed power cycling the SNES should fix the issue. Ensuring a good USB connection and booting QUsb2Snes and RA2Snes before powering on the SNES will mitigate any crashes.
+The SD2NES firmware may have crashed. Power cycling the SNES should fix the issue. Ensuring a good USB connection and booting QUsb2Snes and RA2Snes before powering on the SNES will mitigate any crashes.
 
 ### Preemptive Unlocks
 
@@ -51,8 +51,6 @@ Some achievements may activate without the requirement being met. All known inst
 ### Achievement Won't Trigger
 
 Achievements might have a tight frame window. This may cause achievements not to activate because reading the memory of SD2Snes is not frame-perfect. 
-
-Achievements that utilize SRAM will also be affected, as SRAM is not updated continuously on SD2Snes.
 
 I recommend unlocking more achievements before retrying an achievement, as the fewer achievements there are, the fewer memory values need to be read from SD2Snes.
 
