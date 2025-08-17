@@ -31,6 +31,7 @@ ApplicationWindow {
     property bool setupFinished: false
     property bool loadedThemes: false
     property bool compact: UserInfoModel.compact
+    property bool bannerOpen: false
     property string baseDir: {
         if(Ra2snes.appDirPath[0] === "/")
             "file://" + Ra2snes.appDirPath;
@@ -180,7 +181,7 @@ ApplicationWindow {
 
         Connections {
             target: AchievementModel
-            function onUnlockedChanged()
+            function onUnlockedChanged(index)
             {
                 unlockSounds.playRandomSound(folderModelUnlocked);
             }

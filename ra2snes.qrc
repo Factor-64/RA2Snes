@@ -26,5 +26,6 @@
         <file>ui/updatedialog.qml</file>
         <file>ui/images/ra-icon.svg</file>
         <file>ui/images/sfc.svg</file>
+        <file>ui/banner.qml</file>
     </qresource>
 </RCC>
