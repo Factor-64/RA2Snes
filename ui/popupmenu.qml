@@ -221,7 +221,6 @@ Item {
                             modeMouse.enabled = false;
                             autoArea.enabled = false;
                             menuPopup.changeModeColor();
-
                         }
                     }
 
@@ -231,7 +230,6 @@ Item {
                         {
                             mainWindow.setupFinished = true;
                             changeCheckBox.enabled = true;
-
                             signoutArea.enabled = true;
                             signout.color = themeLoader.item.selectedLink;
                             compactCheckBox.enabled = true;
@@ -300,7 +298,8 @@ Item {
 
                     onExited: {
                         changeRect.color = themeLoader.item.popupBackgroundColor;
-                        autoHardcore.color = themeLoader.item.selectedLink;
+                        if(enabled)
+                            autoHardcore.color = themeLoader.item.selectedLink;
                     }
                 }
             }
@@ -447,9 +446,113 @@ Item {
 
                     onExited: {
                         compactRect.color = themeLoader.item.popupBackgroundColor;
-                        compactMode.color = themeLoader.item.selectedLink;
+                        if(enabled)
+                            compactMode.color = themeLoader.item.selectedLink;
+                    }
+                }
+            }
+            Rectangle {
+                id: bannerRect
+                width: menuPopup.width
+                anchors.left: parent.left
+                anchors.leftMargin: -12
+                height: 24
+                color: themeLoader.item.popupBackgroundColor
+                Row {
+                    spacing: 4
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    anchors.verticalCenter: parent.verticalCenter
 
-                        compactMouseArea.enabled = true;
+                    CheckBox {
+                        id: bannerCheckBox
+                        width: 14
+                        height: 14
+
+                        indicator: Rectangle {
+                            width: 14
+                            height: 14
+                            radius: 2
+                            color: bannerCheckBox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedColor;
+                            border.color: bannerCheckBox.checked ? themeLoader.item.checkBoxCheckedBorderColor : themeLoader.item.checkBoxCheckedBorderColor
+                            Text {
+                                anchors.centerIn: parent
+                                text: bannerCheckBox.checked ? "\u2713" : ""
+                                color: themeLoader.item.checkBoxCheckColor
+                                font.pixelSize: 12
+                            }
+                        }
+                        function openBanner()
+                        {
+                            var component = Qt.createComponent("./banner.qml");
+                            function createPopup() {
+                                if (component.status === Component.Ready)
+                                {
+                                    mainWindow.bannerOpen = true;
+                                    var popup = component.createObject(mainWindow);
+                                }
+                            }
+
+                            if (component.status === Component.Loading)
+                                component.statusChanged.connect(function() {
+                                    createPopup();
+                                });
+                            else
+                                createPopup();
+                        }
+
+                        onCheckedChanged: {
+                            if(bannerCheckBox.checked && !mainWindow.bannerOpen)
+                                openBanner();
+                        }
+                        Component.onCompleted: {
+                            if(bannerCheckBox.checked && !mainWindow.bannerOpen)
+                                openBanner();
+                        }
+                    }
+
+                    Text {
+                        id: bannerMode
+                        text: qsTr("Enable Banner")
+                        font.family: "Verdana"
+                        font.pixelSize: 13
+                        color: themeLoader.item.selectedLink
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
+                MouseArea {
+                    id: bannerMouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    enabled: !mainWindow.bannerOpen
+                    onClicked: {
+                        bannerCheckBox.checked = !bannerCheckBox.checked
+                    }
+                    onEntered: {
+                        bannerRect.color = themeLoader.item.popupHighlightColor;
+                        bannerMode.color = themeLoader.item.linkColor;
+                        themeRect.color = themeLoader.item.popupBackgroundColor;
+                        theme.color = themeLoader.item.selectedLink;
+                        themePopup.close();
+                    }
+
+                    onExited: {
+                        bannerRect.color = themeLoader.item.popupBackgroundColor;
+                        if(enabled)
+                            bannerMode.color = themeLoader.item.selectedLink;
+                    }
+                    onEnabledChanged: {
+                        if(enabled)
+                        {
+                            bannerCheckBox.enabled = false;
+                            bannerCheckBox.checked = false;
+                            bannerMode.color = themeLoader.item.selectedLink;
+                        }
+                        else
+                        {
+                            bannerCheckBox.enabled = false;
+                            bannerMode.color = themeLoader.item.popupItemDisabled;
+                        }
                     }
                 }
             }
@@ -633,7 +736,8 @@ Item {
 
                     onExited: {
                         signoutRect.color = themeLoader.item.popupBackgroundColor;
-                        signout.color = themeLoader.item.selectedLink;
+                        if(enabled)
+                            signout.color = themeLoader.item.selectedLink;
                     }
                 }
             }
