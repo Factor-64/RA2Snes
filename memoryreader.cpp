@@ -9,6 +9,9 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
 {
 
     uniqueMemoryAddresses.clear();
+    for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it) {
+        free(it.value());
+    }
     achievementTriggers.clear();
     //leaderboardTriggers.clear();
     rpState = 0;
@@ -324,17 +327,19 @@ void MemoryReader::processFrames(const QByteArray& data, unsigned int& frames)
             emit updateRichPresence(QByteArray(output));
         }
     }
-    while(frames > 0)
+
+    while (frames > 0)
     {
-        for(auto it = achievementTriggers.begin(); it != achievementTriggers.end();)
+        for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); )
         {
-            rc_trigger_t* trigger = &it.value()->trigger;
-            if (!trigger) { it++; continue; }
+            auto* entry = it.value();
+            if (!entry) { it = achievementTriggers.erase(it); continue; }
+
+            rc_trigger_t* trigger = &entry->trigger;
 
             int old_state = trigger->state;
             uint32_t old_measured_value = trigger->measured_value;
 
-            trigger->state = RC_TRIGGER_STATE_ACTIVE;
             int new_state = rc_evaluate_trigger(trigger, peek, &mem, nullptr);
 
             if (trigger->measured_value != old_measured_value &&
@@ -345,27 +350,32 @@ void MemoryReader::processFrames(const QByteArray& data, unsigned int& frames)
                 new_state != RC_TRIGGER_STATE_INACTIVE &&
                 new_state != RC_TRIGGER_STATE_WAITING)
             {
-                const int32_t new_percent = (int32_t)(((quint64)trigger->measured_value * 100) / trigger->measured_target);
+                const int32_t new_percent =
+                    (int32_t)(((quint64)trigger->measured_value * 100) / trigger->measured_target);
                 emit updateAchievementInfo(it.key(), Percent, new_percent);
                 emit updateAchievementInfo(it.key(), Value, trigger->measured_value);
             }
 
-            if(new_state == old_state) { it++; continue; }
+            if (new_state == old_state) {
+                it++;
+                continue;
+            }
 
             if (old_state == RC_TRIGGER_STATE_PRIMED)
                 emit updateAchievementInfo(it.key(), Primed, false);
 
             switch (new_state)
             {
-            case RC_TRIGGER_STATE_TRIGGERED:
+            case RC_TRIGGER_STATE_TRIGGERED: {
                 emit updateAchievementInfo(it.key(), Value, trigger->measured_value);
                 emit updateAchievementInfo(it.key(), Percent, 100);
                 emit achievementUnlocked(it.key(), QDateTime::currentDateTime());
-                decrementAddressCounts(it.value()->memrefs);
-                free(it.value());
-                achievementTriggers.erase(it);
-                continue;
 
+                decrementAddressCounts(entry->memrefs);
+                free(entry);
+                it = achievementTriggers.erase(it);
+                continue;
+            }
             case RC_TRIGGER_STATE_PRIMED:
                 emit updateAchievementInfo(it.key(), Primed, true);
                 break;
@@ -376,6 +386,7 @@ void MemoryReader::processFrames(const QByteArray& data, unsigned int& frames)
 
             it++;
         }
+
         frames--;
     }
 }

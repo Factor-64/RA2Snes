@@ -767,7 +767,7 @@ bool ra2snes::ignore() const
 
 void ra2snes::refreshRAData()
 {
-    reset = true;
+    doThisTaskNext = None;
     loggedin = false;
     raclient->refresh();
 }

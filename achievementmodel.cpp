@@ -89,12 +89,12 @@ QHash<int, QByteArray> AchievementModel::roleNames() const {
 }
 
 void AchievementModel::setUnlockedState(const unsigned int& i, const bool& unlocked, const QDateTime& time) {
-        m_achievements[i].unlocked = unlocked;
-        m_achievements[i].time_unlocked = time;
-        m_achievements[i].time_unlocked_string = time.toString("MMMM d yyyy, h:mmap");
-        QModelIndex index = createIndex(i, 0);
-        emit dataChanged(index, index, {UnlockedRole, TimeUnlockedRole, TimeUnlockedStringRole});
-        emit unlockedChanged();
+    m_achievements[i].unlocked = unlocked;
+    m_achievements[i].time_unlocked = time;
+    m_achievements[i].time_unlocked_string = time.toString("MMMM d yyyy, h:mmap");
+    QModelIndex index = createIndex(i, 0);
+    emit dataChanged(index, index, {UnlockedRole, TimeUnlockedRole, TimeUnlockedStringRole});
+    emit unlockedChanged(i);
 }
 
 void AchievementModel::primeAchievement(const unsigned int& id, const bool& p) {

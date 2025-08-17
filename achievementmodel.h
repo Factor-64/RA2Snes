@@ -51,7 +51,7 @@ public:
     void appendAchievement(AchievementInfo a);
 
 signals:
-    void unlockedChanged();
+    void unlockedChanged(const unsigned int& index);
 
 private:
     AchievementModel(QObject *parent = nullptr);
