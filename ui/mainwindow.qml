@@ -31,6 +31,7 @@ ApplicationWindow {
     property bool setupFinished: false
     property bool loadedThemes: false
     property bool compact: UserInfoModel.compact
+    property var bannerPopup: null
     property string baseDir: {
         if(Ra2snes.appDirPath[0] === "/")
             "file://" + Ra2snes.appDirPath;
@@ -86,6 +87,8 @@ ApplicationWindow {
                 Ra2snes.setTheme("Dark");
                 themeListTimer.restart();
             }
+            if(bannerPopup)
+                bannerPopup.themeSource = source;
         }
         active: true
         Component.onCompleted: {
@@ -245,7 +248,7 @@ ApplicationWindow {
             var component = Qt.createComponent("./updatedialog.qml");
             function createPopup() {
                 if (component.status === Component.Ready)
-                    var popup = component.createObject(null);
+                    var popup = component.createObject(mainWindow);
             }
 
             if (component.status === Component.Loading)

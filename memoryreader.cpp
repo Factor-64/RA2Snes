@@ -7,7 +7,6 @@ MemoryReader::MemoryReader(QObject *parent) : QObject(parent) {
 
 void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, const QList<LeaderboardInfo>& leaderboards, const QString& richPresence, const unsigned int& ramSize)
 {
-
     uniqueMemoryAddresses.clear();
     for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it) {
         free(it.value());
@@ -20,6 +19,8 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
     QMap<unsigned int, unsigned int> uniqueAddresses;
     for (const AchievementInfo& achievement : achievements)
     {
+        if(achievement.id == 101000001)
+            continue;
         QByteArray data = achievement.mem_addr.toLocal8Bit();
         const char* mem_addr = data.constData();
 
