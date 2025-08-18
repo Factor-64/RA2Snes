@@ -11,7 +11,7 @@ ApplicationWindow {
     maximumHeight: 150
     minimumWidth: 250
     minimumHeight: 150
-    title: "RA2Snes - Update!"
+    title: "Update!"
     color: themeLoader.item.mainWindowDarkAccentColor
     Material.theme: themeLoader.item.darkScrollBar ? Material.Dark : Material.Light
     Material.accent: themeLoader.item.accentColor

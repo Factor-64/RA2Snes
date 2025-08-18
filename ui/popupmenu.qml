@@ -128,6 +128,8 @@ Item {
                             signout.color = themeLoader.item.selectedLink;
                             compactMode.color = themeLoader.item.selectedLink;
                             hamburgerRectangle.color = themeLoader.item.popupBackgroundColor;
+                            bannerRect.color = themeLoader.item.popupBackgroundColor;
+                            ignoreRect.color = themeLoader.item.popupBackgroundColor;
                             for (let i = 0; i < themesList.contentItem.children.length; i++) {
                                 let item = themesList.contentItem.children[i];
                                 item.color = themeLoader.item.popupBackgroundColor;
@@ -469,8 +471,6 @@ Item {
                         width: 14
                         height: 14
 
-                        property var bannerPopup: null
-
                         indicator: Rectangle {
                             width: 14
                             height: 14
@@ -485,18 +485,19 @@ Item {
                             }
                         }
                         function openBanner() {
-                            if (bannerPopup && bannerPopup.visible)
+                            if (mainWindow.bannerPopup && mainWindow.bannerPopup.visible)
                                 return;
 
                             var component = Qt.createComponent("./banner.qml");
 
                             function createPopup() {
                                 if (component.status === Component.Ready) {
-                                    bannerPopup = component.createObject(null);
-                                    bannerPopup.visible = true;
+                                    mainWindow.bannerPopup = component.createObject(null);
+                                    mainWindow.bannerPopup.visible = true;
+                                    mainWindow.bannerPopup.themeSource = themeLoader.source;
 
-                                    bannerPopup.onClosing.connect(function() {
-                                        bannerPopup = null;
+                                    mainWindow.bannerPopup.onClosing.connect(function() {
+                                        mainWindow.bannerPopup = null;
                                         checked = false;
                                     });
                                 }
@@ -509,15 +510,15 @@ Item {
                         }
 
                         onCheckedChanged: {
-                            if (checked && (!bannerPopup || !bannerPopup.visible))
+                            if (checked && (!mainWindow.bannerPopup || !mainWindow.bannerPopup.visible))
                                 openBanner();
-                            else if (!checked && bannerPopup) {
-                                bannerPopup.close();
-                                bannerPopup = null;
+                            else if (!checked && mainWindow.bannerPopup) {
+                                mainWindow.bannerPopup.close();
+                                mainWindow.bannerPopup = null;
                             }
                         }
                         Component.onCompleted: {
-                            if (checked && (!bannerPopup || !bannerPopup.visible))
+                            if (checked && (!mainWindow.bannerPopup || !mainWindow.bannerPopup.visible))
                                 openBanner();
                         }
                     }
