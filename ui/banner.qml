@@ -29,7 +29,4 @@ ApplicationWindow {
             }
         }
     }
-    onClosing: {
-        mainWindow.bannerOpen = false;
-    }
 }

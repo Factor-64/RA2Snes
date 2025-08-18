@@ -469,6 +469,8 @@ Item {
                         width: 14
                         height: 14
 
+                        property var bannerPopup: null
+
                         indicator: Rectangle {
                             width: 14
                             height: 14
@@ -482,31 +484,40 @@ Item {
                                 font.pixelSize: 12
                             }
                         }
-                        function openBanner()
-                        {
+                        function openBanner() {
+                            if (bannerPopup && bannerPopup.visible)
+                                return;
+
                             var component = Qt.createComponent("./banner.qml");
+
                             function createPopup() {
-                                if (component.status === Component.Ready)
-                                {
-                                    mainWindow.bannerOpen = true;
-                                    var popup = component.createObject(mainWindow);
+                                if (component.status === Component.Ready) {
+                                    bannerPopup = component.createObject(null);
+                                    bannerPopup.visible = true;
+
+                                    bannerPopup.onClosing.connect(function() {
+                                        bannerPopup = null;
+                                        checked = false;
+                                    });
                                 }
                             }
 
                             if (component.status === Component.Loading)
-                                component.statusChanged.connect(function() {
-                                    createPopup();
-                                });
+                                component.statusChanged.connect(createPopup);
                             else
                                 createPopup();
                         }
 
                         onCheckedChanged: {
-                            if(bannerCheckBox.checked && !mainWindow.bannerOpen)
+                            if (checked && (!bannerPopup || !bannerPopup.visible))
                                 openBanner();
+                            else if (!checked && bannerPopup) {
+                                bannerPopup.close();
+                                bannerPopup = null;
+                            }
                         }
                         Component.onCompleted: {
-                            if(bannerCheckBox.checked && !mainWindow.bannerOpen)
+                            if (checked && (!bannerPopup || !bannerPopup.visible))
                                 openBanner();
                         }
                     }
@@ -524,7 +535,6 @@ Item {
                     id: bannerMouseArea
                     anchors.fill: parent
                     hoverEnabled: true
-                    enabled: !mainWindow.bannerOpen
                     onClicked: {
                         bannerCheckBox.checked = !bannerCheckBox.checked
                     }
@@ -538,21 +548,12 @@ Item {
 
                     onExited: {
                         bannerRect.color = themeLoader.item.popupBackgroundColor;
-                        if(enabled)
-                            bannerMode.color = themeLoader.item.selectedLink;
+                        bannerMode.color = themeLoader.item.selectedLink;
                     }
                     onEnabledChanged: {
-                        if(enabled)
-                        {
-                            bannerCheckBox.enabled = false;
-                            bannerCheckBox.checked = false;
-                            bannerMode.color = themeLoader.item.selectedLink;
-                        }
-                        else
-                        {
-                            bannerCheckBox.enabled = false;
-                            bannerMode.color = themeLoader.item.popupItemDisabled;
-                        }
+                        bannerCheckBox.enabled = false;
+                        bannerCheckBox.checked = false;
+                        bannerMode.color = themeLoader.item.selectedLink;
                     }
                 }
             }

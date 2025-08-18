@@ -31,7 +31,6 @@ ApplicationWindow {
     property bool setupFinished: false
     property bool loadedThemes: false
     property bool compact: UserInfoModel.compact
-    property bool bannerOpen: false
     property string baseDir: {
         if(Ra2snes.appDirPath[0] === "/")
             "file://" + Ra2snes.appDirPath;
@@ -246,7 +245,7 @@ ApplicationWindow {
             var component = Qt.createComponent("./updatedialog.qml");
             function createPopup() {
                 if (component.status === Component.Ready)
-                    var popup = component.createObject(mainWindow);
+                    var popup = component.createObject(null);
             }
 
             if (component.status === Component.Loading)
