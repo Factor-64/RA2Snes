@@ -62,6 +62,35 @@ QVariant AchievementModel::data(const QModelIndex &index, int role) const {
     }
 }
 
+QVariantMap AchievementModel::get(int row) const {
+    QVariantMap map;
+    if (row < 0 || row >= m_achievements.size())
+        return map;
+
+    const auto &a = m_achievements.at(row);
+
+    map["badgeLockedUrl"] = a.badge_locked_url;
+    map["badgeName"] = a.badge_name;
+    map["badgeUrl"] = a.badge_url;
+    map["description"] = a.description;
+    map["flags"] = a.flags;
+    map["id"] = a.id;
+    map["memAddr"] = a.mem_addr;
+    map["points"] = a.points;
+    map["title"] = a.title;
+    map["type"] = a.type;
+    map["timeUnlocked"] = a.time_unlocked;
+    map["timeUnlockedString"] = a.time_unlocked_string;
+    map["unlocked"] = a.unlocked;
+    map["achievementLink"] = a.achievement_link;
+    map["primed"] = a.primed;
+    map["value"] = a.value;
+    map["percent"] = a.percent;
+    map["target"] = a.target;
+
+    return map;
+}
+
 QHash<int, QByteArray> AchievementModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[BadgeLockedUrlRole] = "badgeLockedUrl";
@@ -88,13 +117,14 @@ QHash<int, QByteArray> AchievementModel::roleNames() const {
     return roles;
 }
 
-void AchievementModel::setUnlockedState(const unsigned int& i, const bool& unlocked, const QDateTime& time) {
+void AchievementModel::setUnlockedState(const unsigned int& i, const bool& unlocked, const QDateTime& time, const bool& e) {
     m_achievements[i].unlocked = unlocked;
     m_achievements[i].time_unlocked = time;
     m_achievements[i].time_unlocked_string = time.toString("MMMM d yyyy, h:mmap");
     QModelIndex index = createIndex(i, 0);
     emit dataChanged(index, index, {UnlockedRole, TimeUnlockedRole, TimeUnlockedStringRole});
-    emit unlockedChanged(i);
+    if(e)
+        emit unlockedChanged(i);
 }
 
 void AchievementModel::primeAchievement(const unsigned int& id, const bool& p) {

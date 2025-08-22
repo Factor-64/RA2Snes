@@ -12,6 +12,7 @@ ApplicationWindow {
     title: "RA2Snes - Banner"
     //flags: Qt.FramelessWindowHint
     property string themeSource: "./themes/Dark.qml"
+    property var achievementQueue: []
     Loader {
         id: themeLoader
         source: banner.themeSource
@@ -21,6 +22,20 @@ ApplicationWindow {
         }
         active: true
     }
+
+    Timer {
+        id: queueTimer
+        interval: 1000
+        repeat: false
+        running: false
+        onTriggered: {
+            let achievement = banner.achievementQueue.shift();
+            console.log("Unlocked:", achievement.title, "-", achievement.description);
+            if(banner.achievementQueue.length > 0 && !running)
+                queueTimer.restart();
+        }
+    }
+
     color: themeLoader.item.mainWindowDarkAccentColor
     Material.theme: themeLoader.item.darkScrollBar ? Material.Dark : Material.Light
     Material.accent: themeLoader.item.accentColor
@@ -37,6 +52,15 @@ ApplicationWindow {
                 else
                     banner.visibility = Window.FullScreen
             }
+        }
+    }
+
+    Connections {
+        target: AchievementModel
+        function onUnlockedChanged(index) {
+            banner.achievementQueue.push(AchievementModel.get(index));
+            if(!queueTimer.running)
+                queueTimer.restart()
         }
     }
 }

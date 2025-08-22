@@ -87,8 +87,8 @@ ApplicationWindow {
                 Ra2snes.setTheme("Dark");
                 themeListTimer.restart();
             }
-            if(bannerPopup)
-                bannerPopup.themeSource = source;
+            if(mainWindow.bannerPopup)
+                mainWindow.bannerPopup.themeSource = source;
         }
         active: true
         Component.onCompleted: {
@@ -261,6 +261,8 @@ ApplicationWindow {
     }
 
     onClosing: {
+        if(mainWindow.bannerPopup && mainWindow.bannerPopup.visible)
+            bannerPopup = null;
         Ra2snes.saveUISettings(windowWidth, windowHeight, compact);
     }
 }
