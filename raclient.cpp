@@ -404,7 +404,7 @@ void RAClient::handleAwardAchievementResponse(const QJsonObject& jsonObject)
             auto& achievement = ach_list[i];
             if(achievement.id == jsonObject["AchievementID"].toInt())
             {
-                achievement_model->setUnlockedState(i, true, achievedTimes[achievement.id]);
+                achievement_model->setUnlockedState(i, true, achievedTimes[achievement.id], true);
                 achievedTimes.remove(achievement.id);
                 gameinfo_model->updatePointCount(achievement.points);
                 //qDebug() << "AWARDED" << achievement.id;
@@ -562,7 +562,7 @@ void RAClient::handleStartSessionResponse(const QJsonObject& jsonObject)
                     winMap[achievement.id] = achievement.unlocked;
                 if(unlock["ID"].toInt() == achievement.id)
                 {
-                    achievement_model->setUnlockedState(i, true, QDateTime::fromSecsSinceEpoch(unlock["When"].toInt()));
+                    achievement_model->setUnlockedState(i, true, QDateTime::fromSecsSinceEpoch(unlock["When"].toInt()), false);
                     gameinfo_model->updatePointCount(achievement.points);
                 }
             }
