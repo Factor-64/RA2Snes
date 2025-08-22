@@ -40,7 +40,7 @@ SD2Snes cannot currently read the memory of Super Game Boy and games with certai
 
 ### RA2Snes won't load game or update SNES status
 
-The SD2NES firmware may have crashed. Power cycling the SNES should fix the issue. Ensuring a good USB connection and booting QUsb2Snes and RA2Snes before powering on the SNES will mitigate any crashes.
+The SD2Snes firmware may have crashed. Power cycling the SNES should fix the issue. Ensuring a good USB connection and booting QUsb2Snes and RA2Snes before powering on the SNES will mitigate any crashes.
 
 ### Preemptive Unlocks
 
