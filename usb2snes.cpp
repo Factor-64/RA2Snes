@@ -21,10 +21,11 @@
 #include <QJsonArray>
 #include <QFile>
 #include <QEventLoop>
-//#include <QDebug>
+#include <QDebug>
+#include <QLoggingCategory>
 
-//Q_LOGGING_CATEGORY(log_Usb2snes, "USB2SNES")
-//#define sDebug() qCDebug(log_Usb2snes)
+Q_LOGGING_CATEGORY(log_Usb2snes, "USB2SNES")
+#define sDebug() qCDebug(log_Usb2snes)
 
 Usb2Snes::Usb2Snes(bool autoAttach) : QObject()
 {
@@ -178,6 +179,7 @@ void Usb2Snes::onWebSocketTextReceived(QString message)
             if (!results.isEmpty())
             {
                 m_serverVersion = QVersionNumber::fromString(results.at(0));
+                //sDebug() << m_serverVersion;
                 m_istate = IReady;
                 changeState(Ready);
                 emit gotServerVersion();
@@ -195,18 +197,15 @@ void Usb2Snes::onWebSocketTextReceived(QString message)
         }
         case Info: {
             QStringList results = getJsonResults(message);
-            if(results.size() < 4)
-            {
-                infos();
-                return;
-            }
             Usb2Snes::DeviceInfo info;
-            info.firmwareVersion = results.at(0);
-            info.versionString = results.at(1);
-            info.romPlaying = results.at(2);
-            info.flags = results.mid(3);
+            //sDebug() << results;
+            if (results.size() > 0) info.firmwareVersion = results.at(0);
+            if (results.size() > 1) info.versionString   = results.at(1);
+            if (results.size() > 2) info.romPlaying      = results.at(2);
+            if (results.size() > 3) info.flags           = results.mid(3);
             changeState(Ready);
             m_istate = IReady;
+            //sDebug() << "infos done";
             emit infoDone(info);
             break;
         }
