@@ -261,8 +261,11 @@ ApplicationWindow {
     }
 
     onClosing: {
-        if(mainWindow.bannerPopup && mainWindow.bannerPopup.visible)
-            bannerPopup = null;
+        if(mainWindow.bannerPopup)
+        {
+            mainWindow.bannerPopup.close();
+            mainWindow.bannerPopup = null;
+        }
         Ra2snes.saveUISettings(windowWidth, windowHeight, compact);
     }
 }

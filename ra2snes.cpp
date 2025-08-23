@@ -55,7 +55,7 @@ ra2snes::ra2snes(QObject *parent)
         //qDebug() << "Connected to usb2snes server, trying to find a suitable device";
         raclient->clearAchievements();
         usb2snes->deviceList();
-        emit displayMessage("QUsb2Snes Connected", false);
+        emit displayMessage("QUsb2Snes/SNI Connected", false);
     });
 
     connect(usb2snes, &Usb2Snes::disconnected, this, [=]() {
@@ -64,7 +64,7 @@ ra2snes::ra2snes(QObject *parent)
         if(richTimer->isActive())
             richTimer->stop();
         //qDebug() << "Disconnected, trying to reconnect in 1 sec";
-        emit displayMessage("QUsb2Snes Not Connected", true);
+        emit displayMessage("QUsb2Snes/SNI Not Connected", true);
         raclient->clearAchievements();
         emit clearedAchievements();
         raclient->clearGame();
@@ -77,9 +77,10 @@ ra2snes::ra2snes(QObject *parent)
     connect(usb2snes, &Usb2Snes::deviceListDone, this, [=] (QStringList devices) {
         if (!devices.empty())
         {
+            //qDebug() << "Getting device list";
             doThisTaskNext = None;
-            reset = true;
             usb2snes->attach(devices.at(0));
+            reset = true;
             usb2snes->infos(true);
             emit displayMessage("Console Connected", false);
         }
@@ -191,6 +192,7 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
     {
         m_currentGame = infos.romPlaying.remove(QChar('\u0000'));
         m_currentGame.replace("?", " ");
+        //qDebug() << m_currentGame;
         if (m_currentGame.contains("m3nu.bin") || m_currentGame.contains("menu.bin") || reset)
         {
             if(reset)
@@ -483,7 +485,8 @@ void ra2snes::setCurrentConsole()
         }
         if(m_console == "SNES")
         {
-            raclient->setTitle("SD2SNES Menu", "https://avatars.githubusercontent.com/u/238664?v=4", "https://sd2snes.de/blog/");
+
+            raclient->setTitle(("SD2SNES " + usb2snes->firmwareString() + " Menu"), "https://avatars.githubusercontent.com/u/238664?v=4", "https://sd2snes.de/blog/");
             raclient->setHash("https://github.com/mrehkopf/sd2snes");
             if(isGB)
             {

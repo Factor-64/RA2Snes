@@ -4,7 +4,6 @@ import CustomModels 1.0
 
 ApplicationWindow {
     id: banner
-    visible: true
     width: 320
     height: 180
     minimumWidth: 320

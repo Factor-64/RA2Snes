@@ -453,111 +453,7 @@ Item {
                     }
                 }
             }
-            Rectangle {
-                id: bannerRect
-                width: menuPopup.width
-                anchors.left: parent.left
-                anchors.leftMargin: -12
-                height: 24
-                color: themeLoader.item.popupBackgroundColor
-                Row {
-                    spacing: 4
-                    anchors.left: parent.left
-                    anchors.leftMargin: 10
-                    anchors.verticalCenter: parent.verticalCenter
 
-                    CheckBox {
-                        id: bannerCheckBox
-                        width: 14
-                        height: 14
-
-                        indicator: Rectangle {
-                            width: 14
-                            height: 14
-                            radius: 2
-                            color: bannerCheckBox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedColor;
-                            border.color: bannerCheckBox.checked ? themeLoader.item.checkBoxCheckedBorderColor : themeLoader.item.checkBoxCheckedBorderColor
-                            Text {
-                                anchors.centerIn: parent
-                                text: bannerCheckBox.checked ? "\u2713" : ""
-                                color: themeLoader.item.checkBoxCheckColor
-                                font.pixelSize: 12
-                            }
-                        }
-                        function openBanner() {
-                            if (mainWindow.bannerPopup && mainWindow.bannerPopup.visible)
-                                return;
-
-                            var component = Qt.createComponent("./banner.qml");
-
-                            function createPopup() {
-                                if (component.status === Component.Ready) {
-                                    mainWindow.bannerPopup = component.createObject(null);
-                                    mainWindow.bannerPopup.visible = true;
-                                    mainWindow.bannerPopup.themeSource = themeLoader.source;
-
-                                    mainWindow.bannerPopup.onClosing.connect(function() {
-                                        mainWindow.bannerPopup = null;
-                                        checked = false;
-                                    });
-                                }
-                            }
-
-                            if (component.status === Component.Loading)
-                                component.statusChanged.connect(createPopup);
-                            else
-                                createPopup();
-                        }
-
-                        onCheckedChanged: {
-                            if (checked && (!mainWindow.bannerPopup || !mainWindow.bannerPopup.visible))
-                                openBanner();
-                            else if (!checked && mainWindow.bannerPopup) {
-                                mainWindow.bannerPopup.close();
-                                mainWindow.bannerPopup = null;
-                            }
-                        }
-                        Component.onCompleted: {
-                            if (checked && (!mainWindow.bannerPopup || !mainWindow.bannerPopup.visible))
-                                openBanner();
-                        }
-                    }
-
-                    Text {
-                        id: bannerMode
-                        text: qsTr("Enable Banner")
-                        font.family: "Verdana"
-                        font.pixelSize: 13
-                        color: themeLoader.item.selectedLink
-                        verticalAlignment: Text.AlignVCenter
-                    }
-                }
-                MouseArea {
-                    id: bannerMouseArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: {
-                        bannerCheckBox.checked = !bannerCheckBox.checked
-                    }
-                    onEntered: {
-                        bannerRect.color = themeLoader.item.popupHighlightColor;
-                        bannerMode.color = themeLoader.item.linkColor;
-                        themeRect.color = themeLoader.item.popupBackgroundColor;
-                        theme.color = themeLoader.item.selectedLink;
-                        themePopup.close();
-                    }
-
-                    onExited: {
-                        bannerRect.color = themeLoader.item.popupBackgroundColor;
-                        bannerMode.color = themeLoader.item.selectedLink;
-                    }
-                    onEnabledChanged: {
-                        bannerCheckBox.enabled = false;
-                        bannerCheckBox.checked = false;
-                        bannerMode.color = themeLoader.item.selectedLink;
-                    }
-                }
-            }
             Rectangle {
                 id: themeRect
                 width: menuPopup.width
@@ -594,6 +490,7 @@ Item {
                     }
                 }
             }
+
             Rectangle {
                 id: sep2
                 height: 5
@@ -604,6 +501,216 @@ Item {
 
                 Rectangle {
                     id: sep21
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.top
+                    anchors.topMargin: 2
+                    anchors.bottomMargin: 2
+                    height: 1
+                    width: parent.width
+                    color: themeLoader.item.popupLineColor
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: {
+                        themeRect.color = themeLoader.item.popupBackgroundColor;
+                        theme.color = themeLoader.item.selectedLink;
+                        themePopup.close();
+                    }
+                }
+            }
+
+            Rectangle {
+                id: bannerRect
+                width: menuPopup.width
+                anchors.left: parent.left
+                anchors.leftMargin: -12
+                height: 24
+                color: themeLoader.item.popupBackgroundColor
+                Row {
+                    spacing: 4
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    CheckBox {
+                        id: bannerCheckBox
+                        width: 14
+                        height: 14
+
+                        indicator: Rectangle {
+                            width: 14
+                            height: 14
+                            radius: 2
+                            color: bannerCheckBox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedColor;
+                            border.color: bannerCheckBox.checked ? themeLoader.item.checkBoxCheckedBorderColor : themeLoader.item.checkBoxCheckedBorderColor
+                            Text {
+                                anchors.centerIn: parent
+                                text: bannerCheckBox.checked ? "\u2713" : ""
+                                color: themeLoader.item.checkBoxCheckColor
+                                font.pixelSize: 12
+                            }
+                        }
+                        function openBanner() {
+                            if (mainWindow.bannerPopup)
+                                return;
+
+                            var component = Qt.createComponent("./banner.qml");
+
+                            function createPopup() {
+                                if (component.status === Component.Ready) {
+                                    mainWindow.bannerPopup = component.createObject(null);
+                                    mainWindow.bannerPopup.visible = true;
+                                    mainWindow.bannerPopup.themeSource = themeLoader.source;
+
+                                    mainWindow.bannerPopup.onClosing.connect(function() {
+                                        mainWindow.bannerPopup = null;
+                                        checked = false;
+                                    });
+                                }
+                            }
+
+                            if (component.status === Component.Loading)
+                                component.statusChanged.connect(createPopup);
+                            else
+                                createPopup();
+                        }
+
+                        onCheckedChanged: {
+                            if (checked && !mainWindow.bannerPopup)
+                                openBanner();
+                            else if (!checked && mainWindow.bannerPopup) {
+                                mainWindow.bannerPopup.close();
+                                mainWindow.bannerPopup = null;
+                            }
+                        }
+                        Component.onCompleted: {
+                            if (checked && !mainWindow.bannerPopup)
+                                openBanner();
+                        }
+                    }
+
+                    Text {
+                        id: bannerMode
+                        text: qsTr("Enable Banner")
+                        font.family: "Verdana"
+                        font.pixelSize: 13
+                        color: themeLoader.item.selectedLink
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
+                MouseArea {
+                    id: bannerMouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        bannerCheckBox.checked = !bannerCheckBox.checked
+                    }
+                    onEntered: {
+                        bannerRect.color = themeLoader.item.popupHighlightColor;
+                        bannerMode.color = themeLoader.item.linkColor;
+                        themeRect.color = themeLoader.item.popupBackgroundColor;
+                        theme.color = themeLoader.item.selectedLink;
+                        themePopup.close();
+                    }
+
+                    onExited: {
+                        bannerRect.color = themeLoader.item.popupBackgroundColor;
+                        bannerMode.color = themeLoader.item.selectedLink;
+                    }
+                }
+            }
+
+            Rectangle {
+                id: fullscreenRect
+                width: menuPopup.width
+                anchors.left: parent.left
+                anchors.leftMargin: -12
+                height: 24
+                color: themeLoader.item.popupBackgroundColor
+                Row {
+                    spacing: 4
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    CheckBox {
+                        id: fullscreenCheckBox
+                        width: 14
+                        height: 14
+
+                        indicator: Rectangle {
+                            width: 14
+                            height: 14
+                            radius: 2
+                            color: fullscreenCheckBox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedColor;
+                            border.color: fullscreenCheckBox.checked ? themeLoader.item.checkBoxCheckedBorderColor : themeLoader.item.checkBoxCheckedBorderColor
+                            Text {
+                                anchors.centerIn: parent
+                                text: fullscreenCheckBox.checked ? "\u2713" : ""
+                                color: themeLoader.item.checkBoxCheckColor
+                                font.pixelSize: 12
+                            }
+                        }
+
+                        onCheckedChanged: {
+                            if (checked && mainWindow.bannerPopup)
+                                mainWindow.bannerPopup.visibility = Window.FullScreen;
+                            else if (!checked && mainWindow.bannerPopup)
+                                mainWindow.bannerPopup.visibility = Window.Windowed;
+                        }
+                    }
+
+                    Text {
+                        id: fullscreenMode
+                        text: qsTr("FullScreen Banner")
+                        font.family: "Verdana"
+                        font.pixelSize: 13
+                        color: themeLoader.item.selectedLink
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
+                MouseArea {
+                    id: fullscreenMouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    enabled: mainWindow.bannerPopup
+                    onClicked: {
+                        fullscreenCheckBox.checked = !fullscreenCheckBox.checked
+                    }
+                    onEntered: {
+                        fullscreenRect.color = themeLoader.item.popupHighlightColor;
+                        fullscreenMode.color = themeLoader.item.linkColor;
+                        themeRect.color = themeLoader.item.popupBackgroundColor;
+                        theme.color = themeLoader.item.selectedLink;
+                        themePopup.close();
+                    }
+
+                    onExited: {
+                        fullscreenRect.color = themeLoader.item.popupBackgroundColor;
+                        if(enabled)
+                            fullscreenMode.color = themeLoader.item.selectedLink;
+                    }
+                    onEnabledChanged: {
+                        if(enabled)
+                            fullscreenMode.color = themeLoader.item.selectedLink;
+                        else
+                            fullscreenMode.color = themeLoader.item.popupItemDisabled;
+                    }
+                }
+            }
+
+            Rectangle {
+                id: sep3
+                height: 5
+                width: parent.width + 12
+                color: themeLoader.item.popupBackgroundColor
+                anchors.left: parent.left
+                anchors.leftMargin: -6
+
+                Rectangle {
+                    id: sep31
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
                     anchors.topMargin: 2
@@ -743,6 +850,7 @@ Item {
                     }
                 }
             }
+
         }
     }
     MouseArea {
