@@ -193,7 +193,7 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
         m_currentGame = infos.romPlaying.remove(QChar('\u0000'));
         m_currentGame.replace("?", " ");
         //qDebug() << m_currentGame;
-        if (m_currentGame.contains("m3nu.bin") || m_currentGame.contains("menu.bin") || reset)
+        if (m_currentGame.contains("m3nu.bin") || m_currentGame.contains("menu.bin") || reset || m_currentGame.isEmpty())
         {
             if(reset)
             {

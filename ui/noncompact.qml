@@ -158,6 +158,7 @@ Rectangle {
                 }
             }
         }
+
         RowLayout {
             Layout.topMargin: 8
             Layout.leftMargin: 20
@@ -172,6 +173,7 @@ Rectangle {
                 text: qsTr("Currently Playing")
             }
         }
+
         Rectangle {
             color: themeLoader.item.mainWindowDarkAccentColor
             Layout.leftMargin: 20
@@ -356,6 +358,7 @@ Rectangle {
                 }
             }
         }
+
         Loader {
             id: achievementHeaderLoader
             Layout.fillWidth: true
