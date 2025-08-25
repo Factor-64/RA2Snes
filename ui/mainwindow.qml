@@ -26,6 +26,16 @@ ApplicationWindow {
     minimumHeight: 600
     title: "RA2Snes - v" + Ra2snes.version
 
+    Shortcut {
+        sequence: StandardKey.Cancel
+        onActivated: {
+            if (mainWindow.visibility === Window.FullScreen)
+                mainWindow.visibility = Window.Windowed
+            else
+                mainWindow.visibility = Window.FullScreen
+        }
+    }
+
     property int windowWidth: width
     property int windowHeight: height
     property bool setupFinished: false
