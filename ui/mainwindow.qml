@@ -41,6 +41,7 @@ ApplicationWindow {
     property bool setupFinished: false
     property bool loadedThemes: false
     property bool compact: UserInfoModel.compact
+    property int errorHeight: 0
     property var bannerPopup: null
     property string baseDir: {
         if(Ra2snes.appDirPath[0] === "/")
@@ -240,15 +241,107 @@ ApplicationWindow {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
                 Layout.margins: 10
-                source: mainWindow.compact ? "./compact.qml" : "./noncompact.qml"
                 active: false
                 Component.onCompleted: {
                     mainWindow.setupTheme();
                 }
+                Loader {
+                    id: popupLoader
+                    anchors.top: parent.top
+                    anchors.right: parent.right
+                    anchors.topMargin: 10
+                    anchors.rightMargin: 20
+                    width: 32
+                    height: 32
+                    active: true
+                    z: 20
+                    Component.onCompleted: {
+                        popupLoader.setSource(
+                            "./popupmenu.qml",
+                            { mainWindow: mainWindow }
+                        )
+                    }
+                }
+                Loader {
+                    id: errorLoader
+                    width: parent.width
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.leftMargin: {
+                        if(!mainWindow.compact)
+                            164;
+                        else
+                            20;
+                    }
+                    anchors.topMargin: {
+                        if(!mainWindow.compact)
+                            128;
+                        else
+                            100;
+                    }
+                    z: 21
+                    Component.onCompleted: {
+                        errorLoader.setSource(
+                            "./errormessage.qml",
+                            { mainWindow: mainWindow }
+                        )
+                    }
+                }
+                /*
+                Loader {
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.fill: parent
+                    anchors.topMargin: 100
+                    anchors.leftMargin: 20
+
+
+                    width: parent.width - 190
+                    anchors.bottom: parent.bottom
+                    anchors.left: parent.left
+                    anchors.leftMargin: 168
+                    anchors.bottomMargin: 40
+                    source: "./errormessage.qml"
+                }*/
             }
+
         }
         ScrollBar.vertical: ScrollBar {
             policy: ScrollBar.AsNeeded
+        }
+    }
+
+    Rectangle {
+        id: challenges
+        height: 84
+        width: (parent.width - 20) / 2
+        color: "steelblue"
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.rightMargin: 20
+        z: 100
+
+        Text {
+            anchors.centerIn: parent
+            color: "white"
+            text: "Challenge Icons"
+        }
+    }
+
+    Rectangle {
+        id: timers
+        height: 84
+        width: (parent.width - 20) / 2
+        color: "grey"
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.leftMargin: 20
+        z: 100
+
+        Text {
+            anchors.centerIn: parent
+            color: "white"
+            text: "Timers"
         }
     }
 
@@ -277,6 +370,22 @@ ApplicationWindow {
             mainWindow.bannerPopup = null;
         }
         Ra2snes.saveUISettings(windowWidth, windowHeight, compact);
+    }
+
+    Component.onCompleted: {
+        mainLoader.setSource(
+            mainWindow.compact ? "./compact.qml" : "./noncompact.qml",
+            { mainWindow: mainWindow }
+        )
+    }
+
+    onCompactChanged: {
+        mainLoader.setSource(
+            mainWindow.compact ? "./compact.qml" : "./noncompact.qml",
+            { mainWindow: mainWindow }
+        )
+        if(errorLoader.item)
+            errorLoader.item.updateMessage();
     }
 }
 //Pumpkin
