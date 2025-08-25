@@ -13,6 +13,7 @@ Rectangle {
     radius: 6
     anchors.margins: 10
     clip: false
+    property var mainWindow
 
     ColumnLayout {
         id: contentColumn
@@ -22,26 +23,6 @@ Rectangle {
             color: themeLoader.item.mainWindowDarkAccentColor
             Layout.fillWidth: true
             implicitHeight: 168
-
-            Loader {
-                anchors.top: parent.top
-                anchors.right: parent.right
-                anchors.topMargin: 20
-                anchors.rightMargin: 20
-                width: 32
-                height: 32
-                source: "./popupmenu.qml"
-                active: true
-            }
-
-            Loader {
-                width: parent.width - 190
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                anchors.leftMargin: 168
-                anchors.bottomMargin: 40
-                source: "./errormessage.qml"
-            }
 
             Row {
                 id: userRow
@@ -611,7 +592,7 @@ Rectangle {
                 listview.active = true;
                 completionHeader.visible = true;
                 completionIcon.visible = true;
-                mainWindow.setupFinished = true;
+                contentForm.mainWindow.setupFinished = true;
                 sorting.active = true;
             }
         }
@@ -624,12 +605,12 @@ Rectangle {
                 completionHeader.visible = false;
                 completionIcon.visible = false;
                 sorting.active = false;
-                mainWindow.setupFinished = false;
+                contentForm.mainWindow.setupFinished = false;
             }
         }
     }
     Component.onCompleted: {
-        if(mainWindow.setupFinished)
+        if(contentForm.mainWindow.setupFinished)
         {
             achievementHeaderLoader.active = true;
             listview.active = true;

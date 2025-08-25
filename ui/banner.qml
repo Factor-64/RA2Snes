@@ -21,6 +21,26 @@ ApplicationWindow {
         }
     }
 
+    Shortcut {
+        sequence: "R"
+        onActivated: {
+            if(content.rotation === 270)
+                content.rotation = 0;
+            else
+                content.rotation += 90;
+            if(content.rotation === 90 || content.rotation === 270)
+            {
+                banner.baseWidth = 180
+                banner.baseHeight = 320
+            }
+            else
+            {
+                banner.baseWidth = 320
+                banner.baseHeight = 180
+            }
+        }
+    }
+
     property string themeSource: "./themes/Dark.qml"
     property var achievementQueue: []
     Loader {
@@ -50,12 +70,18 @@ ApplicationWindow {
     Material.theme: themeLoader.item.darkScrollBar ? Material.Dark : Material.Light
     Material.accent: themeLoader.item.accentColor
 
-    property real scaleFactor: Math.min(width / 320, height / 180)
+    property int baseWidth: 320
+    property int baseHeight: 180
+
+    property real scaleFactor: Math.min(width / baseWidth, height / baseHeight)
     Item {
+        id: content
         width: 320
         height: 180
         anchors.centerIn: parent
         scale: banner.scaleFactor
+        transformOrigin: Item.Center
+        rotation: 0
         ColumnLayout {
             anchors.centerIn: parent
             spacing: 6

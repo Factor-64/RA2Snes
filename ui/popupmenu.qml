@@ -4,6 +4,8 @@ import CustomModels 1.0
 import Qt5Compat.GraphicalEffects
 
 Item {
+    id: dropdown
+    property var mainWindow
     Rectangle {
         id: hamburgerRectangle
         width: 32
@@ -52,7 +54,7 @@ Item {
         onOpened: {
             popupContainer.x = x - 300;
             popupContainer.y = y - 60;
-            popupContainer.height = mainWindow.height;
+            popupContainer.height = dropdown.mainWindow.height;
             popupContainer.enabled = true;
         }
 
@@ -79,7 +81,7 @@ Item {
             z: 22
             width: 150
             clip: true
-            height: (mainWindow.themes.length * 24) + 8
+            height: (dropdown.mainWindow.themes.length * 24) + 8
             background: Rectangle {
                 id: themePopupBG
                 color: themeLoader.item.popupBackgroundColor
@@ -88,7 +90,7 @@ Item {
                 id: themesList
                 anchors.fill: parent
                 anchors.topMargin: -8
-                model: mainWindow.themes
+                model: dropdown.mainWindow.themes
                 spacing: 0
                 z: 5
                 delegate: Rectangle {
@@ -115,7 +117,7 @@ Item {
                         hoverEnabled: true
                         onClicked: {
                             Ra2snes.setTheme(themeName.text);
-                            mainWindow.setupTheme();
+                            dropdown.mainWindow.setupTheme();
                             menuPopupBG.color = themeLoader.item.popupBackgroundColor;
                             themePopupBG.color = themeLoader.item.popupBackgroundColor;
                             compactRect.color = themeLoader.item.popupBackgroundColor;
@@ -179,12 +181,12 @@ Item {
 
             function updateComboBox()
             {
-                themesList.model = mainWindow.themes;
-                height = (mainWindow.themes.length * 24) + 8;
-                mainWindow.loadedThemes = true;
+                themesList.model = dropdown.mainWindow.themes;
+                height = (dropdown.mainWindow.themes.length * 24) + 8;
+                dropdown.mainWindow.loadedThemes = true;
             }
             Component.onCompleted: {
-                mainWindow.themesUpdated.connect(updateComboBox);
+                dropdown.mainWindow.themesUpdated.connect(updateComboBox);
             }
         }
 
@@ -212,12 +214,9 @@ Item {
                         target: Ra2snes
                         function onDisableModeSwitching()
                         {
-                            mainWindow.setupFinished = false;
+                            dropdown.mainWindow.setupFinished = false;
                             changeCheckBox.enabled = false;
                             signoutArea.enabled = false;
-                            compactCheckBox.enabled = false;
-                            compactMouseArea.enabled = false;
-                            compactMode.color = themeLoader.item.popupItemDisabled;
                             autoHardcore.color = themeLoader.item.popupItemDisabled;
                             signout.color = themeLoader.item.popupItemDisabled;
                             modeMouse.enabled = false;
@@ -230,13 +229,10 @@ Item {
                         target: Ra2snes
                         function onEnableModeSwitching()
                         {
-                            mainWindow.setupFinished = true;
+                            dropdown.mainWindow.setupFinished = true;
                             changeCheckBox.enabled = true;
                             signoutArea.enabled = true;
                             signout.color = themeLoader.item.selectedLink;
-                            compactCheckBox.enabled = true;
-                            compactMouseArea.enabled = true;
-                            compactMode.color = themeLoader.item.selectedLink;
                             autoHardcore.color = themeLoader.item.selectedLink;
                             autoArea.enabled = true;
                             modeMouse.enabled = !changeCheckBox.checked;
@@ -398,7 +394,7 @@ Item {
                         id: compactCheckBox
                         width: 14
                         height: 14
-                        enabled: mainWindow.loadedThemes
+                        enabled: dropdown.mainWindow.loadedThemes
 
                         indicator: Rectangle {
                             width: 14
@@ -415,10 +411,10 @@ Item {
                         }
 
                         onCheckedChanged: {
-                            mainWindow.compact = compactCheckBox.checked;
+                            dropdown.mainWindow.compact = compactCheckBox.checked;
                         }
                         Component.onCompleted: {
-                            compactCheckBox.checked = mainWindow.compact;
+                            compactCheckBox.checked = dropdown.mainWindow.compact;
                         }
                     }
 
@@ -553,26 +549,26 @@ Item {
                             }
                         }
                         function openBanner() {
-                            if (mainWindow.bannerPopup)
+                            if (dropdown.mainWindow.bannerPopup)
                                 return;
 
                             var component = Qt.createComponent("./banner.qml");
 
                             function createPopup() {
                                 if (component.status === Component.Ready) {
-                                    mainWindow.bannerPopup = component.createObject(null);
-                                    mainWindow.bannerPopup.visible = true;
-                                    mainWindow.bannerPopup.themeSource = themeLoader.source;
+                                    dropdown.mainWindow.bannerPopup = component.createObject(null);
+                                    dropdown.mainWindow.bannerPopup.visible = true;
+                                    dropdown.mainWindow.bannerPopup.themeSource = themeLoader.source;
 
-                                    mainWindow.bannerPopup.onClosing.connect(function() {
-                                        mainWindow.bannerPopup = null;
+                                    dropdown.mainWindow.bannerPopup.onClosing.connect(function() {
+                                        dropdown.mainWindow.bannerPopup = null;
                                         checked = false;
                                     });
 
-                                    mainWindow.bannerPopup.onVisibilityChanged.connect(function() {
-                                        if(mainWindow.bannerPopup)
+                                    dropdown.mainWindow.bannerPopup.onVisibilityChanged.connect(function() {
+                                        if(dropdown.mainWindow.bannerPopup)
                                         {
-                                            fullscreenCheckBox.checked = (mainWindow.bannerPopup.visibility === Window.Windowed ? false : true)
+                                            fullscreenCheckBox.checked = (dropdown.mainWindow.bannerPopup.visibility === Window.Windowed ? false : true)
                                         }
                                     });
                                 }
@@ -585,15 +581,15 @@ Item {
                         }
 
                         onCheckedChanged: {
-                            if (checked && !mainWindow.bannerPopup)
+                            if (checked && !dropdown.mainWindow.bannerPopup)
                                 openBanner();
-                            else if (!checked && mainWindow.bannerPopup) {
-                                mainWindow.bannerPopup.close();
-                                mainWindow.bannerPopup = null;
+                            else if (!checked && dropdown.mainWindow.bannerPopup) {
+                                dropdown.mainWindow.bannerPopup.close();
+                                dropdown.mainWindow.bannerPopup = null;
                             }
                         }
                         Component.onCompleted: {
-                            if (checked && !mainWindow.bannerPopup)
+                            if (checked && !dropdown.mainWindow.bannerPopup)
                                 openBanner();
                         }
                     }
@@ -662,10 +658,10 @@ Item {
                         }
 
                         onCheckedChanged: {
-                            if (checked && mainWindow.bannerPopup)
-                                mainWindow.bannerPopup.visibility = Window.FullScreen;
-                            else if (!checked && mainWindow.bannerPopup)
-                                mainWindow.bannerPopup.visibility = Window.Windowed;
+                            if (checked && dropdown.mainWindow.bannerPopup)
+                                dropdown.mainWindow.bannerPopup.visibility = Window.FullScreen;
+                            else if (!checked && dropdown.mainWindow.bannerPopup)
+                                dropdown.mainWindow.bannerPopup.visibility = Window.Windowed;
                         }
                     }
 
@@ -682,7 +678,7 @@ Item {
                     id: fullscreenMouseArea
                     anchors.fill: parent
                     hoverEnabled: true
-                    enabled: mainWindow.bannerPopup
+                    enabled: dropdown.mainWindow.bannerPopup
                     onClicked: {
                         fullscreenCheckBox.checked = !fullscreenCheckBox.checked
                     }
@@ -755,7 +751,7 @@ Item {
                         id: ignoreCheckBox
                         width: 14
                         height: 14
-                        enabled: mainWindow.loadedThemes
+                        enabled: dropdown.mainWindow.loadedThemes
 
                         indicator: Rectangle {
                             width: 14

@@ -3,6 +3,12 @@ import CustomModels 1.0
 
 Item {
     id: outer
+    property var mainWindow
+    function updateMessage()
+    {
+        errorMessage.showRichPresence();
+    }
+
     Text {
         id: errorMessage
         font.family: "Verdana"
@@ -17,12 +23,11 @@ Item {
             }
         }
         onHeightChanged: {
-            if(mainWindow.compact)
-                outer.parent.errorHeight = height;
+            outer.mainWindow.errorHeight = height;
         }
 
         function showRichPresence() {
-            if(errorMessage.color == themeLoader.item.basicTextColor && mainWindow.compact)
+            if(errorMessage.color == themeLoader.item.basicTextColor && outer.mainWindow.compact)
             {
                 errorMessage.color = themeLoader.item.basicTextColor;
                 errorMessage.font.pixelSize = 11;

@@ -13,6 +13,7 @@ Rectangle {
     radius: 6
     anchors.margins: 10
     clip: false
+    property var mainWindow
 
     ColumnLayout {
         id: contentColumn
@@ -22,7 +23,7 @@ Rectangle {
             id: playRect
             color: themeLoader.item.mainWindowDarkAccentColor
             Layout.fillWidth: true
-            implicitHeight: 116 + errorLoader.errorHeight
+            implicitHeight: 116 + contentForm.mainWindow.errorHeight
 
             Row {
                 spacing: 0
@@ -426,17 +427,6 @@ Rectangle {
             }
 
             Loader {
-                property int errorHeight: 0
-                id: errorLoader
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.fill: parent
-                anchors.topMargin: 100
-                anchors.leftMargin: 20
-                source: "./errormessage.qml"
-            }
-
-            Loader {
                 id: progressLoader
                 anchors.topMargin: 20
                 anchors.left: parent.left
@@ -453,7 +443,7 @@ Rectangle {
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
                 anchors.rightMargin: 20
-                anchors.bottomMargin: errorLoader.height
+                anchors.bottomMargin: contentForm.mainWindow.errorHeight
                 text: {
                     if(GameInfoModel.mastered)
                         qsTr("Mastered");
@@ -471,16 +461,7 @@ Rectangle {
                    else themeLoader.item.statusUnfinishedTextColor;
                 }
             }
-            Loader {
-                anchors.top: parent.top
-                anchors.right: parent.right
-                anchors.topMargin: 10
-                anchors.rightMargin: 20
-                width: 32
-                height: 32
-                source: "./popupmenu.qml"
-                active: true
-            }
+
             Loader {
                 anchors.top: parent.top
                 anchors.right: parent.right
@@ -519,7 +500,7 @@ Rectangle {
                 sortedAchievementModel.sortByNormal();
                 sorting.active = true;
                 gameInfo.visible = true;
-                mainWindow.setupFinished = true;
+                contentForm.mainWindow.setupFinished = true;
                 listview.active = true;
             }
         }
@@ -529,14 +510,14 @@ Rectangle {
             function onClearedAchievements() {
                 sorting.active = false;
                 listview.active = false;
-                mainWindow.setupFinished = false;
+                contentForm.mainWindow.setupFinished = false;
                 gameInfo.visible = false;
             }
         }
     }
 
     Component.onCompleted: {
-        if(mainWindow.setupFinished)
+        if(contentForm.mainWindow.setupFinished)
         {
             sorting.active = true;
             listview.active = true;
