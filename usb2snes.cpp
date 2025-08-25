@@ -199,7 +199,12 @@ void Usb2Snes::onWebSocketTextReceived(QString message)
             QStringList results = getJsonResults(message);
             Usb2Snes::DeviceInfo info;
             //sDebug() << results;
-            if (results.size() > 0) info.firmwareVersion = results.at(0);
+            if (results.isEmpty())
+            {
+                infos();
+                break;
+            }
+            info.firmwareVersion = results.at(0);
             if (results.size() > 1) info.versionString   = results.at(1);
             if (results.size() > 2) info.romPlaying      = results.at(2);
             if (results.size() > 3) info.flags           = results.mid(3);

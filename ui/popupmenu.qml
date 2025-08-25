@@ -568,6 +568,13 @@ Item {
                                         mainWindow.bannerPopup = null;
                                         checked = false;
                                     });
+
+                                    mainWindow.bannerPopup.onVisibilityChanged.connect(function() {
+                                        if(mainWindow.bannerPopup)
+                                        {
+                                            fullscreenCheckBox.checked = (mainWindow.bannerPopup.visibility === Window.Windowed ? false : true)
+                                        }
+                                    });
                                 }
                             }
 
