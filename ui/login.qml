@@ -1,6 +1,6 @@
-import QtQuick 2.15
-import QtQuick.Controls.Material 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls.Material
+import QtQuick.Layouts
 import CustomModels 1.0
 import Qt.labs.folderlistmodel
 

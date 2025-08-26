@@ -128,6 +128,7 @@ ListView {
 				}
 			}
 		}
+
 		Text {
 			anchors.left: parent.left
 			anchors.bottom: parent.bottom

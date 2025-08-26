@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls.Material
-import QtQuick.Layouts
 import CustomModels 1.0
 import QtMultimedia
 import Qt.labs.folderlistmodel
@@ -33,6 +32,29 @@ ApplicationWindow {
                 mainWindow.visibility = Window.Windowed
             else
                 mainWindow.visibility = Window.FullScreen
+        }
+    }
+
+    Shortcut {
+        sequence: "Ctrl+="
+        onActivated: {
+            if(mainLoader.scale < 2)
+                mainLoader.scale += 0.25
+        }
+    }
+
+    Shortcut {
+        sequence: "Ctrl+-"
+        onActivated: {
+            if(mainLoader.scale > 0.25)
+                mainLoader.scale -= 0.25
+        }
+    }
+
+    Shortcut {
+        sequence: "R"
+        onActivated: {
+            mainLoader.rotation = (mainLoader.rotation + 90) % 360
         }
     }
 
@@ -220,7 +242,7 @@ ApplicationWindow {
     Flickable {
         id: flickable
         anchors.fill: parent
-        contentHeight: infoColumn.height
+        contentHeight: mainLoader.height * mainLoader.scale
         flickableDirection: Flickable.VerticalFlick
         focus: true
         MouseArea {
@@ -230,83 +252,96 @@ ApplicationWindow {
             }
         }
 
-        ColumnLayout {
-            id: infoColumn
-            width: Math.min(parent.width,900)
+        function fixRotation() {
+            let r =  mainLoader.rotation;
+            if(r === 90 || r === 270)
+            {
+                flickable.contentHeight = -1;
+                flickable.contentWidth = mainLoader.height * mainLoader.scale;
+                flickable.flickableDirection = Flickable.HorizontalFlick;
+            }
+            else
+            {
+                flickable.contentHeight = mainLoader.height * mainLoader.scale;
+                flickable.contentWidth = -1;
+                flickable.flickableDirection = Flickable.VerticalFlick;
+            }
+        }
+
+        Loader {
+            id: mainLoader
+            scale: 1
+            rotation: 0
+            width: {
+                if(rotation === 90 || rotation === 270)
+                    Math.min(parent.height, 900)
+                else
+                    Math.min(parent.width, 900)
+            }
             anchors.horizontalCenter: parent.horizontalCenter
-            spacing: 10
-
-            Loader {
-                id: mainLoader
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                Layout.margins: 10
-                active: false
-                Component.onCompleted: {
-                    mainWindow.setupTheme();
-                }
-                Loader {
-                    id: popupLoader
-                    anchors.top: parent.top
-                    anchors.right: parent.right
-                    anchors.topMargin: 10
-                    anchors.rightMargin: 20
-                    width: 32
-                    height: 32
-                    active: true
-                    z: 20
-                    Component.onCompleted: {
-                        popupLoader.setSource(
-                            "./popupmenu.qml",
-                            { mainWindow: mainWindow }
-                        )
-                    }
-                }
-                Loader {
-                    id: errorLoader
-                    width: parent.width
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.leftMargin: {
-                        if(!mainWindow.compact)
-                            164;
-                        else
-                            20;
-                    }
-                    anchors.topMargin: {
-                        if(!mainWindow.compact)
-                            128;
-                        else
-                            100;
-                    }
-                    z: 21
-                    Component.onCompleted: {
-                        errorLoader.setSource(
-                            "./errormessage.qml",
-                            { mainWindow: mainWindow }
-                        )
-                    }
-                }
-                /*
-                Loader {
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.fill: parent
-                    anchors.topMargin: 100
-                    anchors.leftMargin: 20
-
-
-                    width: parent.width - 190
-                    anchors.bottom: parent.bottom
-                    anchors.left: parent.left
-                    anchors.leftMargin: 168
-                    anchors.bottomMargin: 40
-                    source: "./errormessage.qml"
-                }*/
+            anchors.verticalCenter: parent.verticalCenter
+            active: false
+            Component.onCompleted: {
+                mainWindow.setupTheme();
+            }
+            onRotationChanged: {
+                flickable.fixRotation();
+            }
+            onScaleChanged: {
+                flickable.fixRotation();
+            }
+            onHeightChanged: {
+                flickable.fixRotation();
             }
 
+            Loader {
+                id: popupLoader
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.topMargin: 10
+                anchors.rightMargin: 20
+                width: 32
+                height: 32
+                active: true
+                z: 20
+                Component.onCompleted: {
+                    popupLoader.setSource(
+                        "./popupmenu.qml",
+                        { mainWindow: mainWindow }
+                    )
+                }
+            }
+            Loader {
+                id: errorLoader
+                width: parent.width
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.leftMargin: {
+                    if(!mainWindow.compact)
+                        164;
+                    else
+                        20;
+                }
+                anchors.topMargin: {
+                    if(!mainWindow.compact)
+                        128;
+                    else
+                        100;
+                }
+                z: 21
+                Component.onCompleted: {
+                    errorLoader.setSource(
+                        "./errormessage.qml",
+                        { mainWindow: mainWindow }
+                    )
+                }
+            }
         }
+
         ScrollBar.vertical: ScrollBar {
+            policy: ScrollBar.AsNeeded
+        }
+        ScrollBar.horizontal: ScrollBar {
             policy: ScrollBar.AsNeeded
         }
     }
@@ -318,6 +353,7 @@ ApplicationWindow {
         color: "steelblue"
         anchors.bottom: parent.bottom
         anchors.right: parent.right
+        visible: false
         anchors.rightMargin: 20
         z: 100
 
@@ -330,6 +366,7 @@ ApplicationWindow {
 
     Rectangle {
         id: timers
+        visible: false
         height: 84
         width: (parent.width - 20) / 2
         color: "grey"

@@ -1,27 +1,23 @@
 import QtQuick
 import QtQuick.Controls.Material
-import QtQuick.Layouts
 import CustomModels 1.0
 
 Flow {
 	id: sortingSettingsFlow
 	spacing: 6
-	Layout.fillWidth: true
-	Layout.leftMargin: 20
-	Layout.bottomMargin: 10
-	Layout.rightMargin: 20
-	Layout.topMargin: 10
+	anchors.leftMargin: 20
+	anchors.bottomMargin: 10
+	anchors.rightMargin: 20
+	anchors.topMargin: 10
 
-	RowLayout {
+	Row {
 		id: sortingTextRow
 		spacing: 6
-		Layout.fillWidth: true
 		Text{
 			text: qsTr("Sort:")
 			font.family: "Verdana"
 			font.pixelSize: 13
 			color: themeLoader.item.basicTextColor
-			Layout.fillWidth: true
 		}
 		Text{
 			id: normal
@@ -29,7 +25,6 @@ Flow {
 			font.family: "Verdana"
 			font.pixelSize: 13
 			color: themeLoader.item.linkColor
-			Layout.fillWidth: true
 			MouseArea {
 				id: mouseAreaNormal
 				anchors.fill: parent
@@ -77,7 +72,6 @@ Flow {
 			font.family: "Verdana"
 			font.pixelSize: 13
 			color: themeLoader.item.basicTextColor
-			Layout.fillWidth: true
 		}
 		Text{
 			id: points
@@ -85,7 +79,6 @@ Flow {
 			font.family: "Verdana"
 			font.pixelSize: 13
 			color: themeLoader.item.linkColor
-			Layout.fillWidth: true
 			MouseArea {
 				id: mouseAreaPoints
 				anchors.fill: parent
@@ -133,7 +126,6 @@ Flow {
 			font.family: "Verdana"
 			font.pixelSize: 13
 			color: themeLoader.item.basicTextColor
-			Layout.fillWidth: true
 		}
 		Text{
 			id: title
@@ -141,7 +133,6 @@ Flow {
 			font.family: "Verdana"
 			font.pixelSize: 13
 			color: themeLoader.item.linkColor
-			Layout.fillWidth: true
 			MouseArea {
 				id: mouseAreaTitleSort
 				anchors.fill: parent
@@ -189,7 +180,6 @@ Flow {
 			font.family: "Verdana"
 			font.pixelSize: 13
 			color: themeLoader.item.basicTextColor
-			Layout.fillWidth: true
 		}
 		Text{
 			id: type
@@ -197,7 +187,6 @@ Flow {
 			font.family: "Verdana"
 			font.pixelSize: 13
 			color: themeLoader.item.linkColor
-			Layout.fillWidth: true
 			MouseArea {
 				id: mouseAreaType
 				anchors.fill: parent
@@ -245,7 +234,6 @@ Flow {
 			font.family: "Verdana"
 			font.pixelSize: 13
 			color: themeLoader.item.basicTextColor
-			Layout.fillWidth: true
 		}
 		Text{
 			id: time
@@ -253,7 +241,6 @@ Flow {
 			font.family: "Verdana"
 			font.pixelSize: 13
 			color: themeLoader.item.linkColor
-			Layout.fillWidth: true
 			MouseArea {
 				id: mouseAreaTime
 				anchors.fill: parent
@@ -301,7 +288,6 @@ Flow {
 			font.family: "Verdana"
 			font.pixelSize: 13
 			color: themeLoader.item.basicTextColor
-			Layout.fillWidth: true
 		}
 		Text{
 			id: primed
@@ -309,7 +295,6 @@ Flow {
 			font.family: "Verdana"
 			font.pixelSize: 13
 			color: themeLoader.item.linkColor
-			Layout.fillWidth: true
 			MouseArea {
 				id: mouseAreaPrime
 				anchors.fill: parent
@@ -357,7 +342,6 @@ Flow {
 			font.family: "Verdana"
 			font.pixelSize: 13
 			color: themeLoader.item.basicTextColor
-			Layout.fillWidth: true
 		}
 		Text{
 			id: progress
@@ -365,7 +349,6 @@ Flow {
 			font.family: "Verdana"
 			font.pixelSize: 13
 			color: themeLoader.item.linkColor
-			Layout.fillWidth: true
 			MouseArea {
 				id: mouseAreaProgress
 				anchors.fill: parent
@@ -421,15 +404,12 @@ Flow {
 		value: Math.max(0,sortingSettingsFlow.width - sortingTextRow.width - sortingCheckBoxes.width - (sortingSettingsFlow.spacing * 3))
 	}
 
-	RowLayout {
+	Row {
 		id: sortingCheckBoxes
-		Layout.alignment: Qt.AlignRight
-		Layout.fillWidth: true
 		spacing: 14
 
 		Row {
 			spacing: 4
-			Layout.fillWidth: true
 			CheckBox {
 				id: missableCheckBox
 				width: 14
@@ -474,7 +454,6 @@ Flow {
 		}
 		Row {
 			spacing: 4
-			Layout.fillWidth: true
 
 			CheckBox {
 				id: hideCheckBox
