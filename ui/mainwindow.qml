@@ -278,8 +278,7 @@ ApplicationWindow {
                 else
                     Math.min(parent.width, 900)
             }
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.centerIn: parent
             active: false
             Component.onCompleted: {
                 mainWindow.setupTheme();
@@ -351,12 +350,11 @@ ApplicationWindow {
         height: 84
         width: (parent.width - 20) / 2
         color: "steelblue"
+        visible: true
         anchors.bottom: parent.bottom
         anchors.right: parent.right
-        visible: false
         anchors.rightMargin: 20
         z: 100
-
         Text {
             anchors.centerIn: parent
             color: "white"
@@ -366,21 +364,21 @@ ApplicationWindow {
 
     Rectangle {
         id: timers
-        visible: false
+        visible: true
         height: 84
         width: (parent.width - 20) / 2
         color: "grey"
+        z: 100
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.leftMargin: 20
-        z: 100
-
         Text {
             anchors.centerIn: parent
             color: "white"
             text: "Timers"
         }
     }
+
 
     Connections {
         target: Ra2snes

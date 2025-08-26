@@ -50,6 +50,7 @@ ListView {
 				Layout.alignment: Qt.AlignVCenter
 				cache: true
 				asynchronous: true
+				smooth: false
 			}
 
 			ColumnLayout {

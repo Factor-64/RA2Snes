@@ -13,6 +13,7 @@ Rectangle {
     radius: 6
     anchors.margins: 10
     clip: false
+    Layout.fillWidth: true
     property var mainWindow
 
     ColumnLayout {
@@ -24,21 +25,20 @@ Rectangle {
             color: themeLoader.item.mainWindowDarkAccentColor
             Layout.fillWidth: true
             implicitHeight: 116 + contentForm.mainWindow.errorHeight
-
             Row {
+                id: topRow
                 spacing: 0
                 Rectangle {
+                    id: userRect
                     color: themeLoader.item.mainWindowDarkAccentColor
-                    width: contentColumn.width/2 - 32
+                    width: Math.min((playRect.width / 2), (user.implicitWidth + 78))
                     implicitHeight: 108
                     clip: true
                     Column {
                         id: userRow
                         spacing: 4
                         anchors.leftMargin: 20
-                        anchors.rightMargin: 20
                         anchors.topMargin: 10
-                        anchors.bottomMargin: 20
                         anchors.left: parent.left
                         anchors.top: parent.top
                         Row {
@@ -53,11 +53,14 @@ Rectangle {
                             }
                             Text {
                                 id: user
-                                text: UserInfoModel.username
+                                //text: UserInfoModel.username
+                                text: "AAAAAAAAAAAAAAAAAAAAAAAAA"
                                 color: themeLoader.item.linkColor
+                                elide: Text.ElideRight
                                 font.bold: true
                                 font.family: "Verdana"
                                 font.pixelSize: 24
+                                width: userRect.width - 58
                                 MouseArea {
                                     id: mouseAreaUser
                                     anchors.fill: parent
@@ -152,46 +155,32 @@ Rectangle {
                         }
                     }
                 }
+
                 Rectangle {
                     id: gameRectangle
                     color: themeLoader.item.mainWindowDarkAccentColor
-                    width: contentColumn.width/2 - 22
+                    width: Math.max((playRect.width / 2) - 56, (playRect.width - userRect.width - 56))
                     implicitHeight: 108
                     clip: true
-                    onWidthChanged: {
-                        if(gameRectangle.width - 30 <= gameColumn.width)
-                        {
-                            gameColumn.anchors.left = left;
-                            gameColumn.anchors.right = undefined;
-                        }
-                        else
-                        {
-                            gameColumn.anchors.left = undefined;
-                            gameColumn.anchors.right = right;
-                        }
-                    }
 
                     Column {
                         id: gameColumn
                         spacing: 0
-                        anchors.rightMargin: 20
                         anchors.topMargin: 10
-                        anchors.leftMargin: 10
-                        anchors.bottomMargin: 20
-                        anchors.top: parent.top
-                        width: 292
-                        onWidthChanged: {
-                            if(gameRectangle.width - 30 <= gameColumn.width)
-                            {
-                                anchors.left = parent.left;
-                            }
+                        property bool implic: true
+                        anchors.leftMargin: {
+                            let lm = gameRectangle.width - gameRow.implicitWidth;;
+                            if(!implic)
+                                lm -= 22;
+                            if(lm > 4)
+                                lm;
                             else
-                            {
-                                anchors.right = parent.right;
-                            }
+                                4;
                         }
-
+                        anchors.top: parent.top
+                        anchors.left: parent.left
                         Row {
+                            id: gameRow
                             spacing: 10
                             Image {
                                 cache: true
@@ -250,6 +239,19 @@ Rectangle {
                                     color: themeLoader.item.linkColor
                                     font.family: "Verdana"
                                     font.pixelSize: 13
+                                    elide: Text.ElideRight
+                                    width: {
+                                        if(implicitWidth + 48 > gameRectangle.width)
+                                        {
+                                            gameColumn.implic = false;
+                                            gameRectangle.width - 48;
+                                        }
+                                        else
+                                        {
+                                            gameColumn.implic = true;
+                                            implicitWidth;
+                                        }
+                                    }
 
                                     MouseArea {
                                         id: mouseAreaGame
@@ -425,7 +427,6 @@ Rectangle {
                     }
                 }
             }
-
             Loader {
                 id: progressLoader
                 anchors.topMargin: 20
