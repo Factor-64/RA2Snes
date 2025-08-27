@@ -22,7 +22,7 @@ ApplicationWindow {
     }
 
     Shortcut {
-        sequence: "R"
+        sequence: "Ctrl+R"
         onActivated: {
             let content = content1;
             if(content2.visible)

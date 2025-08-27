@@ -133,6 +133,7 @@ void AchievementModel::primeAchievement(const unsigned int& id, const bool& p) {
             m_achievements[i].primed = p;
             QModelIndex index = createIndex(i, 0);
             emit dataChanged(index, index, {PrimedRole});
+            emit primedChanged(m_achievements[i].badge_url);
             break;
         }
     }

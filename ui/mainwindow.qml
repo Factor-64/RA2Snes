@@ -52,9 +52,12 @@ ApplicationWindow {
     }
 
     Shortcut {
-        sequence: "R"
+        sequence: "Ctrl+R"
         onActivated: {
-            mainLoader.rotation = (mainLoader.rotation + 90) % 360
+            let r = (mainLoader.rotation + 90) % 360
+            mainWindow.isSideways = (r === 90 || r === 270);
+            mainLoader.rotation = r;
+
         }
     }
 
@@ -62,6 +65,7 @@ ApplicationWindow {
     property int windowHeight: height
     property bool setupFinished: false
     property bool loadedThemes: false
+    property bool isSideways: false
     property bool compact: UserInfoModel.compact
     property int errorHeight: 0
     property var bannerPopup: null
@@ -242,8 +246,9 @@ ApplicationWindow {
     Flickable {
         id: flickable
         anchors.fill: parent
-        contentHeight: mainLoader.height * mainLoader.scale
-        flickableDirection: Flickable.VerticalFlick
+        contentWidth: mainWindow.isSideways ? mainLoader.height * mainLoader.scale : -1
+        contentHeight: mainWindow.isSideways ? -1 : mainLoader.height * mainLoader.scale
+        flickableDirection: mainWindow.isSideways ? Flickable.HorizontalFlick : Flickable.VerticalFlick
         focus: true
         MouseArea {
             anchors.fill: parent
@@ -252,45 +257,15 @@ ApplicationWindow {
             }
         }
 
-        function fixRotation() {
-            let r =  mainLoader.rotation;
-            if(r === 90 || r === 270)
-            {
-                flickable.contentHeight = -1;
-                flickable.contentWidth = mainLoader.height * mainLoader.scale;
-                flickable.flickableDirection = Flickable.HorizontalFlick;
-            }
-            else
-            {
-                flickable.contentHeight = mainLoader.height * mainLoader.scale;
-                flickable.contentWidth = -1;
-                flickable.flickableDirection = Flickable.VerticalFlick;
-            }
-        }
-
         Loader {
             id: mainLoader
             scale: 1
             rotation: 0
-            width: {
-                if(rotation === 90 || rotation === 270)
-                    Math.min(parent.height, 900)
-                else
-                    Math.min(parent.width, 900)
-            }
+            width: mainWindow.isSideways ? Math.min(parent.height, 900) : Math.min(parent.width, 900)
             anchors.centerIn: parent
             active: false
             Component.onCompleted: {
                 mainWindow.setupTheme();
-            }
-            onRotationChanged: {
-                flickable.fixRotation();
-            }
-            onScaleChanged: {
-                flickable.fixRotation();
-            }
-            onHeightChanged: {
-                flickable.fixRotation();
             }
 
             Loader {
@@ -345,40 +320,78 @@ ApplicationWindow {
         }
     }
 
-    Rectangle {
-        id: challenges
-        height: 84
-        width: (parent.width - 20) / 2
-        color: "steelblue"
-        visible: true
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.rightMargin: 20
-        z: 100
-        Text {
-            anchors.centerIn: parent
-            color: "white"
-            text: "Challenge Icons"
-        }
-    }
+    Item {
+        id: hud
+        rotation: mainLoader.rotation
+        anchors.centerIn: parent
 
-    Rectangle {
-        id: timers
-        visible: true
-        height: 84
-        width: (parent.width - 20) / 2
-        color: "grey"
-        z: 100
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.leftMargin: 20
-        Text {
-            anchors.centerIn: parent
-            color: "white"
-            text: "Timers"
-        }
-    }
+        width: mainWindow.isSideways ? parent.height : parent.width
+        height: mainWindow.isSideways ? parent.width : parent.height
 
+        Row {
+            id: challenges
+            height: 84
+            spacing: 8
+            width: (parent.width - 84) / 2
+            anchors.rightMargin: 20
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            z: 100
+            layoutDirection: Qt.RightToLeft
+
+            property var activeIcons: {}
+            function addChallengeIcons(sourceUrl) {
+                if (!activeIcons)
+                    activeIcons = {};
+                if(activeIcons.hasOwnProperty(sourceUrl))
+                {
+                    removeChallengeIcon(activeIcons[sourceUrl]);
+                    delete activeIcons[sourceUrl];
+                    return;
+                }
+                const currentCount = challenges.children.length;
+                if(currentCount === 4)
+                    return;
+                const imageCode = `
+                    import QtQuick
+                    Image {
+                        source: "` + sourceUrl + `"
+                        width: 64
+                        height: 64
+                        smooth: false
+                        fillMode: Image.PreserveAspectFit
+                    }
+                `;
+                const imageItem = Qt.createQmlObject(imageCode, challenges, "dynamicImage");
+                if (imageItem)
+                    activeIcons[sourceUrl] = currentCount;
+            }
+            function removeChallengeIcon(index) {
+                const child = challenges.children[index];
+                if (child && child instanceof Image) {
+                    child.destroy();
+                }
+            }
+        }
+
+        /*Rectangle {
+            id: timers
+            visible: true
+            height: 84
+            width: (parent.width - 20) / 2
+            color: "grey"
+            z: 100
+            visible: false
+            anchors.leftMargin: 20
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            Text {
+                anchors.centerIn: parent
+                color: "white"
+                text: "Timers"
+            }
+        }*/
+    }
 
     Connections {
         target: Ra2snes
@@ -395,6 +408,13 @@ ApplicationWindow {
                 });
             else
                 createPopup();
+        }
+    }
+
+    Connections {
+        target: AchievementModel
+        function onPrimedChanged(badgeUrl) {
+            challenges.addChallengeIcons(badgeUrl);
         }
     }
 
