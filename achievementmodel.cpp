@@ -145,6 +145,8 @@ void AchievementModel::updateAchievementValue(const unsigned int& id, const int&
             m_achievements[i].value = value;
             QModelIndex index = createIndex(i, 0);
             emit dataChanged(index, index, {ValueRole});
+            if(!m_achievements[i].unlocked && m_achievements[i].target)
+                emit valueChanged(m_achievements[i].badge_url, value, m_achievements[i].target);
             break;
         }
     }
