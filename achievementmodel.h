@@ -54,6 +54,7 @@ public:
 
 signals:
     void unlockedChanged(const unsigned int& index);
+    void primedChanged(const QUrl& index);
 
 private:
     AchievementModel(QObject *parent = nullptr);

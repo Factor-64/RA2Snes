@@ -53,8 +53,7 @@ Rectangle {
                             }
                             Text {
                                 id: user
-                                //text: UserInfoModel.username
-                                text: "AAAAAAAAAAAAAAAAAAAAAAAAA"
+                                text: UserInfoModel.username
                                 color: themeLoader.item.linkColor
                                 elide: Text.ElideRight
                                 font.bold: true
