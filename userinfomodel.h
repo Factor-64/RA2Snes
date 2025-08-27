@@ -15,6 +15,7 @@ class UserInfoModel : public QObject {
     Q_PROPERTY(int height READ height CONSTANT)
     Q_PROPERTY(bool autohardcore READ autohardcore NOTIFY dataChanged)
     Q_PROPERTY(bool compact READ compact CONSTANT)
+    Q_PROPERTY(bool banner READ banner CONSTANT)
 
 public:
     static UserInfoModel* instance() {
@@ -38,6 +39,7 @@ public:
     bool autohardcore() const;
     bool compact() const;
     bool ingamehooks() const;
+    bool banner() const;
 
     void username(const QString& u);
     void token(const QString& t);
@@ -54,6 +56,7 @@ public:
     void height(const int& h);
     void compact(const bool& c);
     void ingamehooks(const bool& n);
+    void banner(const bool& n);
 
 signals:
     void dataChanged();

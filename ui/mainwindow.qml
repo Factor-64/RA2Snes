@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls.Material
+import QtQuick.Layouts
 import CustomModels 1.0
 import QtMultimedia
 import Qt.labs.folderlistmodel
@@ -25,38 +26,50 @@ ApplicationWindow {
     minimumHeight: 600
     title: "RA2Snes - v" + Ra2snes.version
 
+    property bool fullScreen: false
+
+    function toggleFullScreen() {
+        if (mainWindow.fullScreen)
+        {
+            mainWindow.fullScreen = false;
+            mainWindow.visibility = Window.Windowed
+        }
+        else
+        {
+            mainWindow.fullScreen = true
+            mainWindow.visibility = Window.FullScreen
+        }
+    }
+
     Shortcut {
         sequence: StandardKey.Cancel
         onActivated: {
-            if (mainWindow.visibility === Window.FullScreen)
-                mainWindow.visibility = Window.Windowed
-            else
-                mainWindow.visibility = Window.FullScreen
+            mainWindow.toggleFullScreen();
         }
     }
 
     Shortcut {
         sequence: "Ctrl+="
         onActivated: {
-            if(mainLoader.scale < 2)
-                mainLoader.scale += 0.25
+            if(mainGroup.scale < 2)
+                mainGroup.scale += 0.25
         }
     }
 
     Shortcut {
         sequence: "Ctrl+-"
         onActivated: {
-            if(mainLoader.scale > 0.25)
-                mainLoader.scale -= 0.25
+            if(mainGroup.scale > 0.25)
+                mainGroup.scale -= 0.25
         }
     }
 
     Shortcut {
         sequence: "Ctrl+R"
         onActivated: {
-            let r = (mainLoader.rotation + 90) % 360
+            let r = (mainGroup.rotation + 90) % 360
             mainWindow.isSideways = (r === 90 || r === 270);
-            mainLoader.rotation = r;
+            mainGroup.rotation = r;
 
         }
     }
@@ -243,12 +256,13 @@ ApplicationWindow {
         }
     }
 
+    property real loaderScale: mainGroup.scale
+
     Flickable {
         id: flickable
         anchors.fill: parent
-        contentWidth: mainWindow.isSideways ? mainLoader.height * mainLoader.scale : -1
-        contentHeight: mainWindow.isSideways ? -1 : mainLoader.height * mainLoader.scale
-        flickableDirection: mainWindow.isSideways ? Flickable.HorizontalFlick : Flickable.VerticalFlick
+        contentHeight: mainLoader.height * mainGroup.scale
+        flickableDirection: Flickable.VerticalFlick
         focus: true
         MouseArea {
             anchors.fill: parent
@@ -256,18 +270,20 @@ ApplicationWindow {
                 flickable.focus = true;
             }
         }
-
-        Loader {
-            id: mainLoader
-            scale: 1
-            rotation: 0
-            width: mainWindow.isSideways ? Math.min(parent.height, 900) : Math.min(parent.width, 900)
+        Item {
+            id: mainGroup
             anchors.centerIn: parent
-            active: false
-            Component.onCompleted: {
-                mainWindow.setupTheme();
+            width: mainLoader.width
+            height: mainLoader.height
+            scale: 1
+            Loader {
+                id: mainLoader
+                width: Math.min(mainWindow.width, 900)
+                active: false
+                Component.onCompleted: {
+                    mainWindow.setupTheme();
+                }
             }
-
             Loader {
                 id: popupLoader
                 anchors.top: parent.top
@@ -290,18 +306,8 @@ ApplicationWindow {
                 width: parent.width
                 anchors.top: parent.top
                 anchors.left: parent.left
-                anchors.leftMargin: {
-                    if(!mainWindow.compact)
-                        164;
-                    else
-                        20;
-                }
-                anchors.topMargin: {
-                    if(!mainWindow.compact)
-                        128;
-                    else
-                        100;
-                }
+                anchors.leftMargin: mainWindow.compact ? 20 : 164
+                anchors.topMargin: mainWindow.compact ? 100 : 128
                 z: 21
                 Component.onCompleted: {
                     errorLoader.setSource(
@@ -322,75 +328,150 @@ ApplicationWindow {
 
     Item {
         id: hud
-        rotation: mainLoader.rotation
-        anchors.centerIn: parent
-
-        width: mainWindow.isSideways ? parent.height : parent.width
-        height: mainWindow.isSideways ? parent.width : parent.height
+        anchors.fill: parent
+        visible: mainWindow.setupFinished
+        onVisibleChanged: {
+            challenges.removeAllChallengeIcons();
+        }
 
         Row {
             id: challenges
             height: 84
             spacing: 8
-            width: (parent.width - 84) / 2
+            width: 280
             anchors.rightMargin: 20
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             z: 100
             layoutDirection: Qt.RightToLeft
+            SequentialAnimation {
+                id: seq
+                property var targetItem: null
+
+                PropertyAnimation { target: seq.targetItem; property: "opacity"; to: 0; duration: 200 }
+                ScriptAction { script: seq.targetItem.destroy() }
+            }
 
             property var activeIcons: {}
-            function addChallengeIcons(sourceUrl) {
+            function addChallengeIcons(sourceUrl, value, total) {
                 if (!activeIcons)
                     activeIcons = {};
-                if(activeIcons.hasOwnProperty(sourceUrl))
+                const type = (total === 0)
+                const has = activeIcons.hasOwnProperty(sourceUrl);
+                if(has && (type || value === 0))
                 {
                     removeChallengeIcon(activeIcons[sourceUrl]);
                     delete activeIcons[sourceUrl];
                     return;
                 }
+                else if(has)
+                {
+                    updateScore(activeIcons[sourceUrl], value, total);
+                    return;
+                }
                 const currentCount = challenges.children.length;
                 if(currentCount === 4)
                     return;
-                const imageCode = `
-                    import QtQuick
-                    Image {
-                        source: "` + sourceUrl + `"
-                        width: 64
-                        height: 64
-                        smooth: false
-                        fillMode: Image.PreserveAspectFit
-                    }
-                `;
+                var imageCode;
+                if(type)
+                {
+
+                    imageCode = `
+                        import QtQuick
+                        Column {
+                            id: wrapper${currentCount}
+                            opacity: 0
+
+                            SequentialAnimation {
+                                running: true
+                                PropertyAnimation { target: wrapper${currentCount}; property: "opacity"; to: 1; duration: 200 }
+                            }
+                            Image {
+                                source: "${sourceUrl}"
+                                width: 64
+                                height: 64
+                                smooth: false
+                                fillMode: Image.PreserveAspectFit
+                            }
+                        }
+                    `;
+                }
+                else
+                {
+                    imageCode = `
+                        import QtQuick
+                        Column {
+                            id: wrapper${currentCount}
+                            opacity: 0
+
+                            SequentialAnimation {
+                                running: true
+                                PropertyAnimation { target: wrapper${currentCount}; property: "opacity"; to: 1; duration: 200 }
+                            }
+
+                            Timer {
+                                objectName: "timer${currentCount}"
+                                interval: 60000
+                                repeat: false
+                                running: true
+                                onTriggered: {
+                                    challenges.removeChallengeIcon(${currentCount})
+                                }
+                            }
+
+                            Text {
+                                objectName: "icon${currentCount}"
+                                text: "${value}/${total}"
+                                font.bold: true
+                                font.family: "Verdana"
+                                font.pixelSize: 13
+                                color: themeLoader.item.progressBarColor
+                                anchors.horizontalCenter: parent.horizontalCenter
+                            }
+                            Image {
+                                source: "${sourceUrl}"
+                                width: 64
+                                height: 64
+                                smooth: false
+                                fillMode: Image.PreserveAspectFit
+                            }
+                        }
+                    `;
+                }
+
                 const imageItem = Qt.createQmlObject(imageCode, challenges, "dynamicImage");
                 if (imageItem)
                     activeIcons[sourceUrl] = currentCount;
             }
             function removeChallengeIcon(index) {
                 const child = challenges.children[index];
-                if (child && child instanceof Image) {
-                    child.destroy();
+                if (!child) return;
+                seq.targetItem = child;
+                seq.start();
+            }
+            function removeAllChallengeIcons() {
+                for(var i = 0; i < challenges.children.length; i++)
+                {
+                    const child = challenges.children[i];
+                    if (!child) return;
+                    seq.targetItem = child;
+                    seq.start();
                 }
             }
-        }
-
-        /*Rectangle {
-            id: timers
-            visible: true
-            height: 84
-            width: (parent.width - 20) / 2
-            color: "grey"
-            z: 100
-            visible: false
-            anchors.leftMargin: 20
-            anchors.left: parent.left
-            anchors.bottom: parent.bottom
-            Text {
-                anchors.centerIn: parent
-                color: "white"
-                text: "Timers"
+            function updateScore(index, value, total) {
+                const child = challenges.children[index];
+                const label = child.children.find(item => item.objectName === `icon${index}`);
+                if (label) label.text = `${value}/${total}`;
+                const timer = child.children.find(item => item.objectName === `timer${index}`);
+                if (timer)
+                {
+                    if(value === total)
+                        timer.interval = 30000;
+                    timer.restart();
+                }
             }
-        }*/
+
+        }
     }
 
     Connections {
@@ -414,17 +495,26 @@ ApplicationWindow {
     Connections {
         target: AchievementModel
         function onPrimedChanged(badgeUrl) {
-            challenges.addChallengeIcons(badgeUrl);
+            challenges.addChallengeIcons(badgeUrl, 0, 0);
+        }
+    }
+
+    Connections {
+        target: AchievementModel
+        function onValueChanged(badgeUrl, value, total) {
+            challenges.addChallengeIcons(badgeUrl, value, total);
         }
     }
 
     onClosing: {
+        let b = false
         if(mainWindow.bannerPopup)
         {
+            b = true;
             mainWindow.bannerPopup.close();
             mainWindow.bannerPopup = null;
         }
-        Ra2snes.saveUISettings(windowWidth, windowHeight, compact);
+        Ra2snes.saveUISettings(windowWidth, windowHeight, compact, b);
     }
 
     Component.onCompleted: {

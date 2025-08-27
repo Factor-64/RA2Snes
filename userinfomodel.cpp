@@ -65,6 +65,11 @@ bool UserInfoModel::ingamehooks() const
     return m_userInfo.ingamehooks;
 }
 
+bool UserInfoModel::banner() const
+{
+    return m_userInfo.banner;
+}
+
 void UserInfoModel::username(const QString& u)
 {
     m_userInfo.username = u;
@@ -146,6 +151,11 @@ void UserInfoModel::compact(const bool& c)
 void UserInfoModel::ingamehooks(const bool& n)
 {
     m_userInfo.ingamehooks = n;
+}
+
+void UserInfoModel::banner(const bool& b)
+{
+    m_userInfo.banner = b;
 }
 
 void UserInfoModel::clearUser() {

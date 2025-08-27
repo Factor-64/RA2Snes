@@ -82,6 +82,7 @@ ApplicationWindow {
         ColumnLayout {
             anchors.centerIn: parent
             spacing: 6
+
             onImplicitWidthChanged: {
                 if(implicitWidth < 300) {
                     content1.layoutScale += 0.05;
@@ -169,9 +170,24 @@ ApplicationWindow {
         rotation: 0
         visible: !content1.visible
 
+        property real layoutScale: 1.0
+
+        function resetLayout() {
+            content2.layoutScale = 1.0;
+        }
+
         ColumnLayout {
             anchors.centerIn: parent
             spacing: 0
+
+            onImplicitWidthChanged: {
+                if(implicitWidth < 300) {
+                    content2.layoutScale += 0.05;
+                }
+                else if(implicitWidth > 320 && content2.layoutScale > 0.0) {
+                    content2.layoutScale -= 0.05;
+                }
+            }
 
             RowLayout {
                 Layout.alignment: Qt.AlignHCenter
@@ -179,12 +195,11 @@ ApplicationWindow {
 
                 Image {
                     id: badge
-                    Layout.preferredWidth: 64
-                    Layout.preferredHeight: 64
+                    Layout.preferredWidth: 64 * content2.layoutScale
+                    Layout.preferredHeight: Layout.preferredWidth
                     fillMode: Image.PreserveAspectFit
                     cache: true
                     asynchronous: true
-                    smooth: false
                 }
 
                 ColumnLayout {
@@ -197,16 +212,19 @@ ApplicationWindow {
 
                         Text {
                             id: titleText
-                            font.pixelSize: 13
+                            font.pixelSize: 13 * content2.layoutScale
                             font.family: "Verdana"
                             color: themeLoader.item.linkColor
                             Layout.maximumWidth: 214 - points.implicitWidth
                             elide: Text.ElideRight
+                            onTextChanged: {
+                                content2.resetLayout();
+                            }
                         }
 
                         Text {
                             id: points
-                            font.pixelSize: 13
+                            font.pixelSize: 13 * content2.layoutScale
                             font.family: "Verdana"
                             color: themeLoader.item.basicTextColor
                         }
@@ -214,7 +232,7 @@ ApplicationWindow {
 
                     Text {
                         id: description
-                        font.pixelSize: 13
+                        font.pixelSize: 13 * content2.layoutScale
                         color: themeLoader.item.basicTextColor
                         elide: Text.ElideRight
                         wrapMode: Text.WordWrap
@@ -235,7 +253,7 @@ ApplicationWindow {
 
                     Text {
                         id: unlockedTime
-                        font.pixelSize: 10
+                        font.pixelSize: 10 * content2.layoutScale
                         color: themeLoader.item.timeStampColor
                         wrapMode: Text.WordWrap
                         Layout.alignment: Qt.AlignLeft
@@ -258,8 +276,8 @@ ApplicationWindow {
         unlockedTime.text = achievement.timeUnlockedString;
         content1.visible = false;
         if(len > 1)
-            queueTimer.interval = 1000;
-        //queueTimer.restart();
+            queueTimer.interval = 1500;
+        queueTimer.restart();
     }
 
     Timer {
@@ -283,9 +301,4 @@ ApplicationWindow {
                 banner.runQueue();
         }
     }
-
-    /*Component.onCompleted: {
-        banner.achievementQueue.push(AchievementModel.get(8));
-        banner.runQueue();
-    }*/
 }

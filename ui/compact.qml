@@ -24,7 +24,7 @@ Rectangle {
             id: playRect
             color: themeLoader.item.mainWindowDarkAccentColor
             Layout.fillWidth: true
-            implicitHeight: 116 + contentForm.mainWindow.errorHeight
+            implicitHeight: 128
             Row {
                 id: topRow
                 spacing: 0
@@ -443,7 +443,7 @@ Rectangle {
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
                 anchors.rightMargin: 20
-                anchors.bottomMargin: contentForm.mainWindow.errorHeight
+                anchors.bottomMargin: 12
                 text: {
                     if(GameInfoModel.mastered)
                         qsTr("Mastered");
