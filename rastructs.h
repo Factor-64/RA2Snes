@@ -73,6 +73,7 @@ struct UserInfo {
     bool autohardcore;
     bool compact;
     bool ingamehooks;
+    bool banner;
 };
 
 struct GameInfo {

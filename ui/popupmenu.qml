@@ -11,7 +11,7 @@ Item {
         width: 32
         height: 32
         color: themeLoader.item.mainWindowDarkAccentColor
-        z: 20
+        z: 120
 
         Image {
             id: hamburger
@@ -29,6 +29,10 @@ Item {
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
+            onClicked: {
+                hamburgerRectangle.color = themeLoader.item.popupBackgroundColor;
+                menuPopup.open();
+            }
 
             onEntered: {
                 hamburgerRectangle.color = themeLoader.item.popupBackgroundColor;
@@ -39,22 +43,60 @@ Item {
 
     Popup {
         id: menuPopup
-        x: hamburgerRectangle.x - width + hamburgerRectangle.width
-        y: hamburgerRectangle.y + hamburgerRectangle.height
-        z: 20
+        x: {
+            switch(scale) {
+                case 1:
+                    return -118;
+                case 1.25:
+                    return -103;
+                case 1.5:
+                    return -93;
+                case 1.75:
+                    return -86;
+                case 2:
+                    return -80.5;
+                case 0.75:
+                    return -144;
+                case 0.5:
+                    return -192;
+                case 0.25:
+                    return -345;
+            }
+        }
+        y: {
+            switch(scale) {
+                case 1:
+                    return 32;
+                case 1.25:
+                    return 55;
+                case 1.50:
+                    return 71.5;
+                case 1.75:
+                    return 83;
+                case 2:
+                    return 91.5;
+                case 0.75:
+                    return -8;
+                case 0.5:
+                    return -87.5;
+                case 0.25:
+                    return -327;
+            }
+        }
+        z: 121
+        scale: dropdown.mainWindow.loaderScale
         width: 150
-        height: popupColumn.implicitHeight + 8
+        height: (popupColumn.implicitHeight + 8)
         clip: true
         background: Rectangle {
             id: menuPopupBG
-            width: parent.width
-            height: parent.height + 8
             color: themeLoader.item.popupBackgroundColor
         }
+
         onOpened: {
-            popupContainer.x = x - 300;
-            popupContainer.y = y - 60;
+            popupContainer.x = (-1*(dropdown.mainWindow.width / 2));
             popupContainer.height = dropdown.mainWindow.height;
+            popupContainer.width = dropdown.mainWindow.width;
             popupContainer.enabled = true;
         }
 
@@ -67,6 +109,7 @@ Item {
             }
             else mode.color = themeLoader.item.popupItemDisabled;
         }
+
         enter: Transition {
             NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 0}
         }
@@ -76,9 +119,48 @@ Item {
 
         Popup {
             id: themePopup
-            x: -162
-            y: themeRect.y - 12
-            z: 22
+            x: {
+                switch(scale) {
+                    case 1:
+                        return -150;
+                    case 1.25:
+                        return -135;
+                    case 1.50:
+                        return -125;
+                    case 1.75:
+                        return -117.5;
+                    case 2:
+                        return -112.5;
+                    case 0.75:
+                        return -175;
+                    case 0.5:
+                        return -224;
+                    case 0.25:
+                        return -374;
+                }
+            }
+            y: {
+                switch(scale) {
+                    case 1:
+                        return themeRect.y - 4;
+                    case 1.25:
+                        return themeRect.y + 6.5;
+                    case 1.50:
+                        return themeRect.y + 13.5;
+                    case 1.75:
+                        return themeRect.y + 18.5;
+                    case 2:
+                        return themeRect.y + 22;
+                    case 0.75:
+                        return themeRect.y - 21;
+                    case 0.5:
+                        return themeRect.y - 57;
+                    case 0.25:
+                        return themeRect.y - 160;
+                }
+            }
+            scale: menuPopup.scale;
+            z: 122
             width: 150
             clip: true
             height: (dropdown.mainWindow.themes.length * 24) + 8
@@ -86,6 +168,14 @@ Item {
                 id: themePopupBG
                 color: themeLoader.item.popupBackgroundColor
             }
+
+            function closeThemes()
+            {
+                themeRect.color = themeLoader.item.popupBackgroundColor;
+                theme.color = themeLoader.item.selectedLink;
+                themePopup.close();
+            }
+
             ListView {
                 id: themesList
                 anchors.fill: parent
@@ -115,36 +205,46 @@ Item {
                     MouseArea {
                         anchors.fill: parent
                         hoverEnabled: true
+
+                        function resetColors(item, skip) {
+                            for (let i = 0; i < item.children.length; i++) {
+                                let child = item.children[i];
+                                let s = skip;
+
+                                if (child instanceof CheckBox)
+                                    s = true
+                                else if (child instanceof Rectangle)
+                                {
+                                     if (!s)
+                                     {
+                                        if(child.height !== 1)
+                                            child.color = themeLoader.item.popupBackgroundColor;
+                                        else
+                                            child.color = themeLoader.item.popupLineColor;
+                                     }
+                                     else
+                                         return;
+                                }
+                                else if (child instanceof Text)
+                                    child.color = themeLoader.item.selectedLink;
+
+                                if (child.children && child.children.length > 0) {
+                                    resetColors(child, s);
+                                }
+                            }
+                        }
                         onClicked: {
                             Ra2snes.setTheme(themeName.text);
                             dropdown.mainWindow.setupTheme();
-                            menuPopupBG.color = themeLoader.item.popupBackgroundColor;
-                            themePopupBG.color = themeLoader.item.popupBackgroundColor;
-                            compactRect.color = themeLoader.item.popupBackgroundColor;
-                            changeRect.color = themeLoader.item.popupBackgroundColor;
-                            modeRect.color = themeLoader.item.popupBackgroundColor;
-                            themeRect.color = themeLoader.item.popupHighlightColor;
-                            theme.color = themeLoader.item.linkColor;
-                            signoutRect.color = themeLoader.item.popupBackgroundColor;
+                            resetColors(popupColumn, false);
+                            resetColors(themesList, false);
                             menuPopup.changeModeColor();
-                            signout.color = themeLoader.item.selectedLink;
-                            compactMode.color = themeLoader.item.selectedLink;
                             hamburgerRectangle.color = themeLoader.item.popupBackgroundColor;
-                            bannerRect.color = themeLoader.item.popupBackgroundColor;
-                            ignoreRect.color = themeLoader.item.popupBackgroundColor;
-                            for (let i = 0; i < themesList.contentItem.children.length; i++) {
-                                let item = themesList.contentItem.children[i];
-                                item.color = themeLoader.item.popupBackgroundColor;
-                                for (let j = 0; j < item.children.length; j++) {
-                                    let child = item.children[j];
-                                    if (child.color !== undefined) {
-                                        child.color = themeLoader.item.selectedLink;
-                                    }
-                                }
-                            }
 
                             themeDel.color = themeLoader.item.popupHighlightColor;
                             themeName.color = themeLoader.item.linkColor;
+                            themeRect.color = themeLoader.item.popupHighlightColor;
+                            theme.color = themeLoader.item.linkColor;
                         }
                         onEntered: {
                             themeDel.color = themeLoader.item.popupHighlightColor;
@@ -182,25 +282,24 @@ Item {
             function updateComboBox()
             {
                 themesList.model = dropdown.mainWindow.themes;
-                height = (dropdown.mainWindow.themes.length * 24) + 8;
+                themePopup.height = (dropdown.mainWindow.themes.length * 24) + 8;
                 dropdown.mainWindow.loadedThemes = true;
             }
             Component.onCompleted: {
                 dropdown.mainWindow.themesUpdated.connect(updateComboBox);
             }
+
         }
 
-        Column {
+        contentItem: Column {
             id: popupColumn
-            anchors.fill: parent
             spacing: 0
-            anchors.topMargin: -8
+            anchors.fill: parent
+            anchors.topMargin: 4
 
             Rectangle {
                 id: changeRect
-                width: menuPopup.width
-                anchors.left: parent.left
-                anchors.leftMargin: -12
+                width: parent.width
                 height: 24
                 color: themeLoader.item.popupBackgroundColor
                 Row {
@@ -208,7 +307,6 @@ Item {
                     anchors.left: parent.left
                     anchors.leftMargin: 10
                     anchors.verticalCenter: parent.verticalCenter
-
                     Connections {
                         id: disableSwitch
                         target: Ra2snes
@@ -289,9 +387,7 @@ Item {
                     onEntered: {
                         changeRect.color = themeLoader.item.popupHighlightColor;
                         autoHardcore.color = themeLoader.item.linkColor;
-                        themeRect.color = themeLoader.item.popupBackgroundColor;
-                        theme.color = themeLoader.item.selectedLink;
-                        themePopup.close();
+                        themePopup.closeThemes();
                     }
 
                     onExited: {
@@ -304,9 +400,7 @@ Item {
 
             Rectangle {
                 id: modeRect
-                width: menuPopup.width
-                anchors.left: parent.left
-                anchors.leftMargin: -12
+                width: parent.width
                 height: 24
                 color: themeLoader.item.popupBackgroundColor
                 Text {
@@ -321,9 +415,10 @@ Item {
                     }
                     font.family: "Verdana"
                     font.pixelSize: 13
-                    color: {
+                    Component.onCompleted: {
                         menuPopup.changeModeColor();
                     }
+
                     verticalAlignment: Text.AlignVCenter
                 }
                 MouseArea {
@@ -336,9 +431,7 @@ Item {
                     }
                     onEntered: {
                         modeRect.color = themeLoader.item.popupHighlightColor;
-                        themeRect.color = themeLoader.item.popupBackgroundColor;
-                        theme.color = themeLoader.item.selectedLink;
-                        themePopup.close();
+                        themePopup.closeThemes();
                     }
 
                     onExited: {
@@ -350,10 +443,10 @@ Item {
             Rectangle {
                 id: sep1
                 height: 5
-                width: parent.width + 12
+                width: parent.width - 20
                 color: themeLoader.item.popupBackgroundColor
                 anchors.left: parent.left
-                anchors.leftMargin: -6
+                anchors.leftMargin: 10
 
                 Rectangle {
                     id: sep11
@@ -370,18 +463,55 @@ Item {
                     anchors.fill: parent
                     hoverEnabled: true
                     onEntered: {
-                        themeRect.color = themeLoader.item.popupBackgroundColor;
-                        theme.color = themeLoader.item.selectedLink;
-                        themePopup.close();
+                        themePopup.closeThemes();
+                    }
+                }
+            }
+
+            Rectangle {
+                id: fullscreenRect
+                width: parent.width
+                height: 24
+                color: themeLoader.item.popupBackgroundColor
+                Text {
+                    id: fullscreen
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: {
+                        if(dropdown.mainWindow.fullScreen)
+                            qsTr("FullScreen");
+                        else qsTr("Windowed");
+                    }
+                    font.family: "Verdana"
+                    font.pixelSize: 13
+                    color: themeLoader.item.selectedLink
+                    verticalAlignment: Text.AlignVCenter
+                }
+                MouseArea {
+                    id: fullscreenMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    enabled: true
+                    onClicked: {
+                        dropdown.mainWindow.toggleFullScreen();
+                    }
+                    onEntered: {
+                        fullscreenRect.color = themeLoader.item.popupHighlightColor;
+                        fullscreen.color = themeLoader.item.linkColor;
+                        themePopup.closeThemes();
+                    }
+
+                    onExited: {
+                        fullscreen.color = themeLoader.item.selectedLink;
+                        fullscreenRect.color = themeLoader.item.popupBackgroundColor;
                     }
                 }
             }
 
             Rectangle {
                 id: compactRect
-                width: menuPopup.width
-                anchors.left: parent.left
-                anchors.leftMargin: -12
+                width: parent.width
                 height: 24
                 color: themeLoader.item.popupBackgroundColor
                 Row {
@@ -395,6 +525,7 @@ Item {
                         width: 14
                         height: 14
                         enabled: dropdown.mainWindow.loadedThemes
+                        checked: dropdown.mainWindow.compact
 
                         indicator: Rectangle {
                             width: 14
@@ -408,13 +539,6 @@ Item {
                                 color: themeLoader.item.checkBoxCheckColor
                                 font.pixelSize: 12
                             }
-                        }
-
-                        onCheckedChanged: {
-                            dropdown.mainWindow.compact = compactCheckBox.checked;
-                        }
-                        Component.onCompleted: {
-                            compactCheckBox.checked = dropdown.mainWindow.compact;
                         }
                     }
 
@@ -432,14 +556,12 @@ Item {
                     anchors.fill: parent
                     hoverEnabled: true
                     onClicked: {
-                        compactCheckBox.checked = !compactCheckBox.checked
+                        dropdown.mainWindow.compact = !dropdown.mainWindow.compact
                     }
                     onEntered: {
                         compactRect.color = themeLoader.item.popupHighlightColor;
                         compactMode.color = themeLoader.item.linkColor;
-                        themeRect.color = themeLoader.item.popupBackgroundColor;
-                        theme.color = themeLoader.item.selectedLink;
-                        themePopup.close();
+                        themePopup.closeThemes();
                     }
 
                     onExited: {
@@ -452,9 +574,7 @@ Item {
 
             Rectangle {
                 id: themeRect
-                width: menuPopup.width
-                anchors.left: parent.left
-                anchors.leftMargin: -12
+                width: parent.width
                 height: 24
                 color: themeLoader.item.popupBackgroundColor
                 Text {
@@ -490,10 +610,10 @@ Item {
             Rectangle {
                 id: sep2
                 height: 5
-                width: parent.width + 12
+                width: parent.width - 20
                 color: themeLoader.item.popupBackgroundColor
                 anchors.left: parent.left
-                anchors.leftMargin: -6
+                anchors.leftMargin: 10
 
                 Rectangle {
                     id: sep21
@@ -510,18 +630,14 @@ Item {
                     anchors.fill: parent
                     hoverEnabled: true
                     onEntered: {
-                        themeRect.color = themeLoader.item.popupBackgroundColor;
-                        theme.color = themeLoader.item.selectedLink;
-                        themePopup.close();
+                       themePopup.closeThemes();
                     }
                 }
             }
 
             Rectangle {
                 id: bannerRect
-                width: menuPopup.width
-                anchors.left: parent.left
-                anchors.leftMargin: -12
+                width: parent.width
                 height: 24
                 color: themeLoader.item.popupBackgroundColor
                 Row {
@@ -563,13 +679,12 @@ Item {
                                     dropdown.mainWindow.bannerPopup.onClosing.connect(function() {
                                         dropdown.mainWindow.bannerPopup = null;
                                         checked = false;
+                                        bannerFSRect.bannerMode = false;
                                     });
 
                                     dropdown.mainWindow.bannerPopup.onVisibilityChanged.connect(function() {
                                         if(dropdown.mainWindow.bannerPopup)
-                                        {
-                                            fullscreenCheckBox.checked = (dropdown.mainWindow.bannerPopup.visibility === Window.Windowed ? false : true)
-                                        }
+                                            bannerFSRect.bannerMode = (dropdown.mainWindow.bannerPopup.visibility !== Window.Windowed ? true : false)
                                     });
                                 }
                             }
@@ -589,13 +704,14 @@ Item {
                             }
                         }
                         Component.onCompleted: {
+                            checked = UserInfoModel.banner;
                             if (checked && !dropdown.mainWindow.bannerPopup)
                                 openBanner();
                         }
                     }
 
                     Text {
-                        id: bannerMode
+                        id: bannerEn
                         text: qsTr("Enable Banner")
                         font.family: "Verdana"
                         font.pixelSize: 13
@@ -612,94 +728,78 @@ Item {
                     }
                     onEntered: {
                         bannerRect.color = themeLoader.item.popupHighlightColor;
-                        bannerMode.color = themeLoader.item.linkColor;
-                        themeRect.color = themeLoader.item.popupBackgroundColor;
-                        theme.color = themeLoader.item.selectedLink;
-                        themePopup.close();
+                        bannerEn.color = themeLoader.item.linkColor;
+                        themePopup.closeThemes();
                     }
 
                     onExited: {
                         bannerRect.color = themeLoader.item.popupBackgroundColor;
-                        bannerMode.color = themeLoader.item.selectedLink;
+                        bannerEn.color = themeLoader.item.selectedLink;
                     }
                 }
             }
 
             Rectangle {
-                id: fullscreenRect
-                width: menuPopup.width
-                anchors.left: parent.left
-                anchors.leftMargin: -12
+                id: bannerFSRect
+                width: parent.width
                 height: 24
                 color: themeLoader.item.popupBackgroundColor
-                Row {
-                    spacing: 4
+                property bool bannerMode: false
+                Text {
+                    id: bannerFS
                     anchors.left: parent.left
                     anchors.leftMargin: 10
                     anchors.verticalCenter: parent.verticalCenter
-
-                    CheckBox {
-                        id: fullscreenCheckBox
-                        width: 14
-                        height: 14
-
-                        indicator: Rectangle {
-                            width: 14
-                            height: 14
-                            radius: 2
-                            color: fullscreenCheckBox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedColor;
-                            border.color: fullscreenCheckBox.checked ? themeLoader.item.checkBoxCheckedBorderColor : themeLoader.item.checkBoxCheckedBorderColor
-                            Text {
-                                anchors.centerIn: parent
-                                text: fullscreenCheckBox.checked ? "\u2713" : ""
-                                color: themeLoader.item.checkBoxCheckColor
-                                font.pixelSize: 12
-                            }
-                        }
-
-                        onCheckedChanged: {
-                            if (checked && dropdown.mainWindow.bannerPopup)
-                                dropdown.mainWindow.bannerPopup.visibility = Window.FullScreen;
-                            else if (!checked && dropdown.mainWindow.bannerPopup)
-                                dropdown.mainWindow.bannerPopup.visibility = Window.Windowed;
-                        }
+                    text: {
+                        if(bannerFSRect.bannerMode)
+                            qsTr("FullScreen Banner");
+                        else qsTr("Windowed Banner");
                     }
-
-                    Text {
-                        id: fullscreenMode
-                        text: qsTr("FullScreen Banner")
-                        font.family: "Verdana"
-                        font.pixelSize: 13
-                        color: themeLoader.item.selectedLink
-                        verticalAlignment: Text.AlignVCenter
+                    font.family: "Verdana"
+                    font.pixelSize: 13
+                    color: themeLoader.item.selectedLink
+                    verticalAlignment: Text.AlignVCenter
+                    onColorChanged: {
+                        bannerFSMouse.checkEnabled();
                     }
                 }
                 MouseArea {
-                    id: fullscreenMouseArea
+                    id: bannerFSMouse
                     anchors.fill: parent
                     hoverEnabled: true
-                    enabled: dropdown.mainWindow.bannerPopup
+                    function checkEnabled() {
+                        if(dropdown.mainWindow.bannerPopup)
+                        {
+                            bannerFS.color = themeLoader.item.selectedLink;
+                            return true;
+                        }
+                        else
+                        {
+                            bannerFS.color = themeLoader.item.popupItemDisabled
+                            return false;
+                        }
+                    }
+
+                    enabled: {
+                        checkEnabled();
+                    }
+
                     onClicked: {
-                        fullscreenCheckBox.checked = !fullscreenCheckBox.checked
+                        if(bannerFSRect.bannerMode)
+                            dropdown.mainWindow.bannerPopup.visibility = Window.Windowed;
+                        else
+                            dropdown.mainWindow.bannerPopup.visibility = Window.FullScreen;
                     }
                     onEntered: {
-                        fullscreenRect.color = themeLoader.item.popupHighlightColor;
-                        fullscreenMode.color = themeLoader.item.linkColor;
-                        themeRect.color = themeLoader.item.popupBackgroundColor;
-                        theme.color = themeLoader.item.selectedLink;
-                        themePopup.close();
+                        bannerFS.color = themeLoader.item.linkColor;
+                        bannerFSRect.color = themeLoader.item.popupHighlightColor;
+                        themePopup.closeThemes();
                     }
 
                     onExited: {
-                        fullscreenRect.color = themeLoader.item.popupBackgroundColor;
+                        bannerFSRect.color = themeLoader.item.popupBackgroundColor;
                         if(enabled)
-                            fullscreenMode.color = themeLoader.item.selectedLink;
-                    }
-                    onEnabledChanged: {
-                        if(enabled)
-                            fullscreenMode.color = themeLoader.item.selectedLink;
-                        else
-                            fullscreenMode.color = themeLoader.item.popupItemDisabled;
+                            bannerFS.color = themeLoader.item.selectedLink;
                     }
                 }
             }
@@ -707,10 +807,10 @@ Item {
             Rectangle {
                 id: sep3
                 height: 5
-                width: parent.width + 12
+                width: parent.width - 20
                 color: themeLoader.item.popupBackgroundColor
                 anchors.left: parent.left
-                anchors.leftMargin: -6
+                anchors.leftMargin: 10
 
                 Rectangle {
                     id: sep31
@@ -727,18 +827,14 @@ Item {
                     anchors.fill: parent
                     hoverEnabled: true
                     onEntered: {
-                        themeRect.color = themeLoader.item.popupBackgroundColor;
-                        theme.color = themeLoader.item.selectedLink;
-                        themePopup.close();
+                        themePopup.closeThemes();
                     }
                 }
             }
 
             Rectangle {
                 id: ignoreRect
-                width: menuPopup.width
-                anchors.left: parent.left
-                anchors.leftMargin: -12
+                width: parent.width
                 height: 24
                 color: themeLoader.item.popupBackgroundColor
                 Row {
@@ -799,9 +895,7 @@ Item {
                     onEntered: {
                         ignoreRect.color = themeLoader.item.popupHighlightColor;
                         ignore.color = themeLoader.item.linkColor;
-                        themeRect.color = themeLoader.item.popupBackgroundColor;
-                        theme.color = themeLoader.item.selectedLink;
-                        themePopup.close();
+                        themePopup.closeThemes();
                     }
 
                     onExited: {
@@ -815,9 +909,7 @@ Item {
 
             Rectangle {
                 id: signoutRect
-                width: menuPopup.width
-                anchors.left: parent.left
-                anchors.leftMargin: -12
+                width: parent.width
                 height: 24
                 color: themeLoader.item.popupBackgroundColor
                 Text {
@@ -841,9 +933,7 @@ Item {
                     onEntered: {
                         signoutRect.color = themeLoader.item.popupHighlightColor;
                         signout.color = themeLoader.item.linkColor;
-                        themeRect.color = themeLoader.item.popupBackgroundColor;
-                        theme.color = themeLoader.item.selectedLink;
-                        themePopup.close();
+                        themePopup.closeThemes();
                     }
 
                     onExited: {
@@ -853,7 +943,6 @@ Item {
                     }
                 }
             }
-
         }
     }
     MouseArea {
@@ -861,9 +950,9 @@ Item {
         id: popupContainer
         x: 0
         y: 0
-        width: 800
+        width: 0
         height: 0
-        z: 19
+        z: 119
         enabled: false
         onEntered: {
             enabled = false;
