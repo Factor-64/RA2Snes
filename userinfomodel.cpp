@@ -70,6 +70,16 @@ bool UserInfoModel::banner() const
     return m_userInfo.banner;
 }
 
+bool UserInfoModel::icons() const
+{
+    return m_userInfo.icons;
+}
+
+bool UserInfoModel::iconspopup() const
+{
+    return m_userInfo.iconspopup;
+}
+
 void UserInfoModel::username(const QString& u)
 {
     m_userInfo.username = u;
@@ -156,6 +166,16 @@ void UserInfoModel::ingamehooks(const bool& n)
 void UserInfoModel::banner(const bool& b)
 {
     m_userInfo.banner = b;
+}
+
+void UserInfoModel::icons(const bool& i)
+{
+    m_userInfo.icons = i;
+}
+
+void UserInfoModel::iconspopup(const bool& ip)
+{
+    m_userInfo.iconspopup = ip;
 }
 
 void UserInfoModel::clearUser() {

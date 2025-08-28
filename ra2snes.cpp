@@ -518,13 +518,15 @@ QString ra2snes::xorEncryptDecrypt(const QString &token, const QString &key) {
     return result;
 }
 
-void ra2snes::saveUISettings(const int& w, const int& h, const bool& c, const bool& b)
+void ra2snes::saveUISettings(const int& w, const int& h, const bool& c, const bool& b, const bool& i, const bool& ip)
 {
     UserInfoModel* user = raclient->getUserInfoModel();
     user->width(w);
     user->height(h);
     user->compact(c);
     user->banner(b);
+    user->icons(i);
+    user->iconspopup(ip);
     createSettingsFile();
 }
 
@@ -546,6 +548,8 @@ void ra2snes::createSettingsFile()
         settings.setValue("Auto", user->autohardcore());
         settings.setValue("Compact", user->compact());
         settings.setValue("Banner", user->banner());
+        settings.setValue("Icons", user->icons());
+        settings.setValue("PopoutIcons", user->iconspopup());
         settings.setValue("Theme", m_theme);
         settings.setValue("IgnoreUpdates", m_ignore);
 
@@ -588,6 +592,8 @@ void ra2snes::loadSettings() {
         bool comp = settings.value("Compact").toBool();
         bool igno = settings.value("IgnoreUpdates").toBool();
         bool ban = settings.value("Banner").toBool();
+        bool ic = settings.value("Icons").toBool();
+        bool ip = settings.value("PopoutIcons").toBool();
         QString theme = settings.value("Theme").toString();
 
         UserInfoModel* user = raclient->getUserInfoModel();
@@ -597,6 +603,8 @@ void ra2snes::loadSettings() {
         user->height(height);
         user->compact(comp);
         user->banner(ban);
+        user->icons(ic);
+        user->iconspopup(ip);
         setConsole(console_v);
         setTheme(theme);
 
@@ -645,7 +653,7 @@ void ra2snes::initVars()
     raclient->clearGame();
     raclient->setHardcore(true);
     raclient->setAutoHardcore(false);
-    saveUISettings(600, 600, false, false);
+    saveUISettings(600, 600, false, false, true, false);
 }
 
 void ra2snes::changeMode()

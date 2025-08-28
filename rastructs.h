@@ -74,6 +74,8 @@ struct UserInfo {
     bool compact;
     bool ingamehooks;
     bool banner;
+    bool icons;
+    bool iconspopup;
 };
 
 struct GameInfo {

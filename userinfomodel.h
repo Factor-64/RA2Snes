@@ -16,6 +16,8 @@ class UserInfoModel : public QObject {
     Q_PROPERTY(bool autohardcore READ autohardcore NOTIFY dataChanged)
     Q_PROPERTY(bool compact READ compact CONSTANT)
     Q_PROPERTY(bool banner READ banner CONSTANT)
+    Q_PROPERTY(bool icons READ icons CONSTANT)
+    Q_PROPERTY(bool iconspopup READ iconspopup CONSTANT)
 
 public:
     static UserInfoModel* instance() {
@@ -40,6 +42,8 @@ public:
     bool compact() const;
     bool ingamehooks() const;
     bool banner() const;
+    bool icons() const;
+    bool iconspopup() const;
 
     void username(const QString& u);
     void token(const QString& t);
@@ -57,6 +61,8 @@ public:
     void compact(const bool& c);
     void ingamehooks(const bool& n);
     void banner(const bool& n);
+    void icons(const bool& i);
+    void iconspopup(const bool& ip);
 
 signals:
     void dataChanged();

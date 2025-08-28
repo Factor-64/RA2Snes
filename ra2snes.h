@@ -56,7 +56,7 @@ public:
 public slots:
     void signIn(const QString &username, const QString &password, const bool& remember);
     void signOut();
-    void saveUISettings(const int& w, const int& h, const bool& c, const bool& b);
+    void saveUISettings(const int& w, const int& h, const bool& c, const bool& b, const bool& i, const bool& ip);
     void changeMode();
     void autoChange(const bool& ac);
     void refreshRAData();

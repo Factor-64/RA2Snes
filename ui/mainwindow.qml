@@ -67,10 +67,7 @@ ApplicationWindow {
     Shortcut {
         sequence: "Ctrl+R"
         onActivated: {
-            let r = (mainGroup.rotation + 90) % 360
-            mainWindow.isSideways = (r === 90 || r === 270);
-            mainGroup.rotation = r;
-
+            mainGroup.scale = 1
         }
     }
 
@@ -78,10 +75,11 @@ ApplicationWindow {
     property int windowHeight: height
     property bool setupFinished: false
     property bool loadedThemes: false
-    property bool isSideways: false
+    property bool allowIcons: UserInfoModel.icons
     property bool compact: UserInfoModel.compact
     property int errorHeight: 0
     property var bannerPopup: null
+    property var iconsPopup: null
     property string baseDir: {
         if(Ra2snes.appDirPath[0] === "/")
             "file://" + Ra2snes.appDirPath;
@@ -139,6 +137,8 @@ ApplicationWindow {
             }
             if(mainWindow.bannerPopup)
                 mainWindow.bannerPopup.themeSource = source;
+            if(mainWindow.iconsPopup)
+                mainWindow.iconsPopup.themeSource = source;
         }
         active: true
         Component.onCompleted: {
@@ -350,6 +350,7 @@ ApplicationWindow {
 
                 PropertyAnimation { target: seq.targetItem; property: "opacity"; to: 0; duration: 200 }
                 ScriptAction { script: seq.targetItem.destroy() }
+                onFinished: challenges.runNextRemoval();
             }
 
             property var activeIcons: {}
@@ -411,7 +412,7 @@ ApplicationWindow {
 
                             Timer {
                                 objectName: "timer${currentCount}"
-                                interval: 60000
+                                interval: 30000
                                 repeat: false
                                 running: true
                                 onTriggered: {
@@ -443,12 +444,24 @@ ApplicationWindow {
                 if (imageItem)
                     activeIcons[sourceUrl] = currentCount;
             }
+
+            property var removalQueue: []
+
             function removeChallengeIcon(index) {
                 const child = challenges.children[index];
                 if (!child) return;
-                seq.targetItem = child;
+                removalQueue.push(child);
+                if (!seq.running)
+                    runNextRemoval();
+                return;
+            }
+
+            function runNextRemoval() {
+                if (removalQueue.length === 0) return;
+                seq.targetItem = removalQueue.shift();
                 seq.start();
             }
+
             function removeAllChallengeIcons() {
                 for(var i = 0; i < challenges.children.length; i++)
                 {
@@ -466,11 +479,10 @@ ApplicationWindow {
                 if (timer)
                 {
                     if(value === total)
-                        timer.interval = 30000;
+                        timer.interval = 15000;
                     timer.restart();
                 }
             }
-
         }
     }
 
@@ -495,26 +507,35 @@ ApplicationWindow {
     Connections {
         target: AchievementModel
         function onPrimedChanged(badgeUrl) {
-            challenges.addChallengeIcons(badgeUrl, 0, 0);
+            if(mainWindow.allowIcons)
+                challenges.addChallengeIcons(badgeUrl, 0, 0);
         }
     }
 
     Connections {
         target: AchievementModel
         function onValueChanged(badgeUrl, value, total) {
-            challenges.addChallengeIcons(badgeUrl, value, total);
+            if(mainWindow.allowIcons)
+                challenges.addChallengeIcons(badgeUrl, value, total);
         }
     }
 
     onClosing: {
         let b = false
+        let i = false
         if(mainWindow.bannerPopup)
         {
             b = true;
             mainWindow.bannerPopup.close();
             mainWindow.bannerPopup = null;
         }
-        Ra2snes.saveUISettings(windowWidth, windowHeight, compact, b);
+        if(mainWindow.iconsPopup)
+        {
+            i = true;
+            mainWindow.iconsPopup.close();
+            mainWindow.iconsPopup = null;
+        }
+        Ra2snes.saveUISettings(windowWidth, windowHeight, compact, b, mainWindow.allowIcons, i);
     }
 
     Component.onCompleted: {
@@ -531,6 +552,11 @@ ApplicationWindow {
         )
         if(errorLoader.item)
             errorLoader.item.updateMessage();
+    }
+
+    onAllowIconsChanged: {
+        if(!mainWindow.allowIcons)
+            hud.visible = false;
     }
 }
 //Pumpkin
