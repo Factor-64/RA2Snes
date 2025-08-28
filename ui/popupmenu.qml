@@ -68,19 +68,19 @@ Item {
                 case 1:
                     return 32;
                 case 1.25:
-                    return 55;
+                    return 63;
                 case 1.50:
-                    return 71.5;
+                    return 82;
                 case 1.75:
-                    return 83;
+                    return 99;
                 case 2:
-                    return 91.5;
+                    return 108;
                 case 0.75:
-                    return -8;
+                    return -21;
                 case 0.5:
-                    return -87.5;
+                    return -130;
                 case 0.25:
-                    return -327;
+                    return -445;
             }
         }
         z: 121
@@ -146,15 +146,15 @@ Item {
                     case 1.25:
                         return themeRect.y + 6.5;
                     case 1.50:
-                        return themeRect.y + 13.5;
+                        return themeRect.y + 13;
                     case 1.75:
                         return themeRect.y + 18.5;
                     case 2:
                         return themeRect.y + 22;
                     case 0.75:
-                        return themeRect.y - 21;
+                        return themeRect.y - 22;
                     case 0.5:
-                        return themeRect.y - 57;
+                        return themeRect.y - 56;
                     case 0.25:
                         return themeRect.y - 160;
                 }
@@ -469,47 +469,6 @@ Item {
             }
 
             Rectangle {
-                id: fullscreenRect
-                width: parent.width
-                height: 24
-                color: themeLoader.item.popupBackgroundColor
-                Text {
-                    id: fullscreen
-                    anchors.left: parent.left
-                    anchors.leftMargin: 10
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: {
-                        if(dropdown.mainWindow.fullScreen)
-                            qsTr("FullScreen");
-                        else qsTr("Windowed");
-                    }
-                    font.family: "Verdana"
-                    font.pixelSize: 13
-                    color: themeLoader.item.selectedLink
-                    verticalAlignment: Text.AlignVCenter
-                }
-                MouseArea {
-                    id: fullscreenMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    enabled: true
-                    onClicked: {
-                        dropdown.mainWindow.toggleFullScreen();
-                    }
-                    onEntered: {
-                        fullscreenRect.color = themeLoader.item.popupHighlightColor;
-                        fullscreen.color = themeLoader.item.linkColor;
-                        themePopup.closeThemes();
-                    }
-
-                    onExited: {
-                        fullscreen.color = themeLoader.item.selectedLink;
-                        fullscreenRect.color = themeLoader.item.popupBackgroundColor;
-                    }
-                }
-            }
-
-            Rectangle {
                 id: compactRect
                 width: parent.width
                 height: 24
@@ -573,6 +532,47 @@ Item {
             }
 
             Rectangle {
+                id: fullscreenRect
+                width: parent.width
+                height: 24
+                color: themeLoader.item.popupBackgroundColor
+                Text {
+                    id: fullscreen
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: {
+                        if(dropdown.mainWindow.fullScreen)
+                            qsTr("FullScreen");
+                        else qsTr("Windowed");
+                    }
+                    font.family: "Verdana"
+                    font.pixelSize: 13
+                    color: themeLoader.item.selectedLink
+                    verticalAlignment: Text.AlignVCenter
+                }
+                MouseArea {
+                    id: fullscreenMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    enabled: true
+                    onClicked: {
+                        dropdown.mainWindow.toggleFullScreen();
+                    }
+                    onEntered: {
+                        fullscreenRect.color = themeLoader.item.popupHighlightColor;
+                        fullscreen.color = themeLoader.item.linkColor;
+                        themePopup.closeThemes();
+                    }
+
+                    onExited: {
+                        fullscreen.color = themeLoader.item.selectedLink;
+                        fullscreenRect.color = themeLoader.item.popupBackgroundColor;
+                    }
+                }
+            }
+
+            Rectangle {
                 id: themeRect
                 width: parent.width
                 height: 24
@@ -617,6 +617,264 @@ Item {
 
                 Rectangle {
                     id: sep21
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.top
+                    anchors.topMargin: 2
+                    anchors.bottomMargin: 2
+                    height: 1
+                    width: parent.width
+                    color: themeLoader.item.popupLineColor
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: {
+                       themePopup.closeThemes();
+                    }
+                }
+            }
+
+            Rectangle {
+                id: iconsRect
+                width: parent.width
+                height: 24
+                color: themeLoader.item.popupBackgroundColor
+                Row {
+                    spacing: 4
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    CheckBox {
+                        id: iconsCheckBox
+                        width: 14
+                        height: 14
+                        checked: dropdown.mainWindow.allowIcons
+
+                        indicator: Rectangle {
+                            width: 14
+                            height: 14
+                            radius: 2
+                            color: iconsCheckBox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedColor;
+                            border.color: iconsCheckBox.checked ? themeLoader.item.checkBoxCheckedBorderColor : themeLoader.item.checkBoxCheckedBorderColor
+                            Text {
+                                anchors.centerIn: parent
+                                text: iconsCheckBox.checked ? "\u2713" : ""
+                                color: themeLoader.item.checkBoxCheckColor
+                                font.pixelSize: 12
+                            }
+                        }
+                    }
+
+                    Text {
+                        id: iconsMode
+                        text: qsTr("Window Icons")
+                        font.family: "Verdana"
+                        font.pixelSize: 13
+                        color: themeLoader.item.selectedLink
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
+                MouseArea {
+                    id: iconsMouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        dropdown.mainWindow.allowIcons = !dropdown.mainWindow.allowIcons
+                    }
+                    onEntered: {
+                        iconsRect.color = themeLoader.item.popupHighlightColor;
+                        iconsMode.color = themeLoader.item.linkColor;
+                        themePopup.closeThemes();
+                    }
+
+                    onExited: {
+                        iconsRect.color = themeLoader.item.popupBackgroundColor;
+                        if(enabled)
+                            iconsMode.color = themeLoader.item.selectedLink;
+                    }
+                }
+            }
+
+            Rectangle {
+                id: iconBannerRect
+                width: parent.width
+                height: 24
+                color: themeLoader.item.popupBackgroundColor
+                Row {
+                    spacing: 4
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    CheckBox {
+                        id: iconBannerCheckBox
+                        width: 14
+                        height: 14
+
+                        indicator: Rectangle {
+                            width: 14
+                            height: 14
+                            radius: 2
+                            color: iconBannerCheckBox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedColor;
+                            border.color: iconBannerCheckBox.checked ? themeLoader.item.checkBoxCheckedBorderColor : themeLoader.item.checkBoxCheckedBorderColor
+                            Text {
+                                anchors.centerIn: parent
+                                text: iconBannerCheckBox.checked ? "\u2713" : ""
+                                color: themeLoader.item.checkBoxCheckColor
+                                font.pixelSize: 12
+                            }
+                        }
+                        function openBanner() {
+                            if (dropdown.mainWindow.iconsPopup)
+                                return;
+
+                            var component = Qt.createComponent("./icons.qml");
+
+                            function createPopup() {
+                                if (component.status === Component.Ready) {
+                                    dropdown.mainWindow.iconsPopup = component.createObject(null);
+                                    dropdown.mainWindow.iconsPopup.visible = true;
+                                    dropdown.mainWindow.iconsPopup.themeSource = themeLoader.source;
+
+                                    dropdown.mainWindow.iconsPopup.onClosing.connect(function() {
+                                        dropdown.mainWindow.iconsPopup = null;
+                                        checked = false;
+                                    });
+
+                                    dropdown.mainWindow.iconsPopup.onVisibilityChanged.connect(function() {
+                                        if(dropdown.mainWindow.iconsPopup)
+                                            iconBannerFSRect.iconsMode = (dropdown.mainWindow.iconsPopup.visibility !== Window.Windowed ? true : false)
+                                    });
+                                }
+                            }
+
+                            if (component.status === Component.Loading)
+                                component.statusChanged.connect(createPopup);
+                            else
+                                createPopup();
+                        }
+
+                        onCheckedChanged: {
+                            if (checked && !dropdown.mainWindow.iconsPopup)
+                                openBanner();
+                            else if (!checked && dropdown.mainWindow.iconsPopup) {
+                                dropdown.mainWindow.iconsPopup.close();
+                                dropdown.mainWindow.iconsPopup = null;
+                            }
+                        }
+                        Component.onCompleted: {
+                            checked = UserInfoModel.iconspopup;
+                            if (checked && !dropdown.mainWindow.iconsPopup)
+                                openBanner();
+                        }
+                    }
+
+                    Text {
+                        id: iconBannerEn
+                        text: qsTr("Popout Icons")
+                        font.family: "Verdana"
+                        font.pixelSize: 13
+                        color: themeLoader.item.selectedLink
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
+                MouseArea {
+                    id: iconBannerMouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        iconBannerCheckBox.checked = !iconBannerCheckBox.checked
+                    }
+                    onEntered: {
+                        iconBannerRect.color = themeLoader.item.popupHighlightColor;
+                        iconBannerEn.color = themeLoader.item.linkColor;
+                        themePopup.closeThemes();
+                    }
+
+                    onExited: {
+                        iconBannerRect.color = themeLoader.item.popupBackgroundColor;
+                        iconBannerEn.color = themeLoader.item.selectedLink;
+                    }
+                }
+            }
+
+            Rectangle {
+                id: iconBannerFSRect
+                width: parent.width
+                height: 24
+                color: themeLoader.item.popupBackgroundColor
+                property bool iconsMode: false
+                Text {
+                    id: iconBannerFS
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: {
+                        if(iconBannerFSRect.iconsMode)
+                            qsTr("FullScreen Popout");
+                        else qsTr("Windowed Popout");
+                    }
+                    font.family: "Verdana"
+                    font.pixelSize: 13
+                    color: themeLoader.item.selectedLink
+                    verticalAlignment: Text.AlignVCenter
+                    onColorChanged: {
+                        iconBannerFSMouse.checkEnabled();
+                    }
+                }
+                MouseArea {
+                    id: iconBannerFSMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    function checkEnabled() {
+                        if(dropdown.mainWindow.iconsPopup)
+                        {
+                            iconBannerFS.color = themeLoader.item.selectedLink;
+                            return true;
+                        }
+                        else
+                        {
+                            iconBannerFS.color = themeLoader.item.popupItemDisabled
+                            return false;
+                        }
+                    }
+
+                    enabled: {
+                        checkEnabled();
+                    }
+
+                    onClicked: {
+                        if(iconBannerFSRect.iconsMode)
+                            dropdown.mainWindow.iconsPopup.visibility = Window.Windowed;
+                        else
+                            dropdown.mainWindow.iconsPopup.visibility = Window.FullScreen;
+                    }
+                    onEntered: {
+                        iconBannerFS.color = themeLoader.item.linkColor;
+                        iconBannerFSRect.color = themeLoader.item.popupHighlightColor;
+                        themePopup.closeThemes();
+                    }
+
+                    onExited: {
+                        iconBannerFSRect.color = themeLoader.item.popupBackgroundColor;
+                        if(enabled)
+                            iconBannerFS.color = themeLoader.item.selectedLink;
+                    }
+                }
+            }
+
+            Rectangle {
+                id: sep4
+                height: 5
+                width: parent.width - 20
+                color: themeLoader.item.popupBackgroundColor
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+
+                Rectangle {
+                    id: sep41
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
                     anchors.topMargin: 2
