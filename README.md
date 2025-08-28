@@ -1,6 +1,6 @@
 # RA2Snes
 
-RA2Snes is a program built using Qt 6.9.1 in C++ and C that bridges the QUsb2Snes webserver & rcheevos client to allow unlocking Achievements on real Super Nintendo Hardware through the SD2Snes USB port.
+RA2Snes is a program built using Qt 6.9 in C++ and C that bridges the QUsb2Snes webserver & rcheevos client to allow unlocking Achievements on real Super Nintendo Hardware through the SD2Snes USB port.
 
 ## Installation 
 
