@@ -741,6 +741,7 @@ void ra2snes::setAppDirPath(const QString &appDirPath)
     loadSettings();
     if(!m_ignore)
         checkForUpdate();
+    //postTelemetryData();
 }
 
 QString ra2snes::appDirPath() const
@@ -866,6 +867,8 @@ void ra2snes::postTelemetryData()
 {
     QNetworkAccessManager *tempNetworkManager = new QNetworkAccessManager(this);
     connect(tempNetworkManager, &QNetworkAccessManager::finished, this, [this, tempNetworkManager](QNetworkReply *reply) {
+        QJsonObject jsonObject = QJsonDocument::fromJson(reply->readAll()).object();
+        qDebug() << jsonObject;
         reply->deleteLater();
         tempNetworkManager->deleteLater();
     });
@@ -875,13 +878,13 @@ void ra2snes::postTelemetryData()
 
 
     QJsonObject jsonObj;
+    jsonObj["name"] = RA2SNES_REPO_NAME;
     jsonObj["os"] = os;
-    jsonObj["devices"] = QJsonArray::fromStringList(QStringList());
     jsonObj["version"] = version;
     jsonObj["os_details"] = fullOsVersion;
     QByteArray toSend = QJsonDocument(jsonObj).toJson();
     QNetworkRequest req;
-    req.setUrl(QUrl("https://telemetry.nyo.fr/api/rpc/add_qusb2snes_usage"));
+    req.setUrl(QUrl("https://telemetry.nyo.fr/api/rpc/add_generic_usage"));
     //req.setUrl(QUrl(telemetryTestUrl));
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     //sDebug() << req.rawHeaderList();
