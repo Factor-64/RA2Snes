@@ -542,7 +542,7 @@ Item {
                     anchors.leftMargin: 10
                     anchors.verticalCenter: parent.verticalCenter
                     text: {
-                        if(dropdown.mainWindow.fullScreen)
+                        if(!dropdown.mainWindow.fullScreen)
                             qsTr("FullScreen");
                         else qsTr("Windowed");
                     }
@@ -812,7 +812,7 @@ Item {
                     anchors.leftMargin: 10
                     anchors.verticalCenter: parent.verticalCenter
                     text: {
-                        if(iconBannerFSRect.iconsMode)
+                        if(!iconBannerFSRect.iconsMode)
                             qsTr("FullScreen Popout");
                         else qsTr("Windowed Popout");
                     }
@@ -1009,7 +1009,7 @@ Item {
                     anchors.leftMargin: 10
                     anchors.verticalCenter: parent.verticalCenter
                     text: {
-                        if(bannerFSRect.bannerMode)
+                        if(!bannerFSRect.bannerMode)
                             qsTr("FullScreen Banner");
                         else qsTr("Windowed Banner");
                     }
