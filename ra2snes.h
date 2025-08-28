@@ -123,6 +123,7 @@ private:
     void setCurrentConsole();
     void checkForUpdate();
     void initVars();
+    void postTelemetryData();
     QTimer* waitTimer;
     QElapsedTimer* frameTimer;
     unsigned int programTime;

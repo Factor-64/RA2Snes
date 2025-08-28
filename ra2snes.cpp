@@ -272,7 +272,8 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
     if(framesPassed < 1)
         framesPassed = 1;
     //qDebug() << "Frames: " << framesPassed;
-    reader->processFrames(usb2snes->getBinaryData(), framesPassed);
+    QByteArray data = usb2snes->getBinaryData();
+    reader->processFrames(data, framesPassed);
     //qDebug() << usb2snes->getBinaryData();
 }
 
@@ -859,6 +860,33 @@ void ra2snes::ignoreUpdates(bool i)
 {
     m_ignore = i;
     emit ignoreChanged();
+}
+
+void ra2snes::postTelemetryData()
+{
+    QNetworkAccessManager *tempNetworkManager = new QNetworkAccessManager(this);
+    connect(tempNetworkManager, &QNetworkAccessManager::finished, this, [this, tempNetworkManager](QNetworkReply *reply) {
+        reply->deleteLater();
+        tempNetworkManager->deleteLater();
+    });
+    QString os = QSysInfo::productType();
+    QString fullOsVersion = QSysInfo::prettyProductName();
+    QString version = m_version;
+
+
+    QJsonObject jsonObj;
+    jsonObj["os"] = os;
+    jsonObj["devices"] = QJsonArray::fromStringList(QStringList());
+    jsonObj["version"] = version;
+    jsonObj["os_details"] = fullOsVersion;
+    QByteArray toSend = QJsonDocument(jsonObj).toJson();
+    QNetworkRequest req;
+    req.setUrl(QUrl("https://telemetry.nyo.fr/api/rpc/add_qusb2snes_usage"));
+    //req.setUrl(QUrl(telemetryTestUrl));
+    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    //sDebug() << req.rawHeaderList();
+    //sInfo() << toSend;
+    tempNetworkManager->post(req, toSend);
 }
 
 ra2snes::~ra2snes()

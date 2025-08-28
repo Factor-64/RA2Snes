@@ -1,5 +1,6 @@
 #include "memoryreader.h"
 #include "rc_internal.h"
+#include <QElapsedTimer>
 //#include <QDebug>
 
 MemoryReader::MemoryReader(QObject *parent) : QObject(parent) {
@@ -14,6 +15,7 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
     achievementTriggers.clear();
     //leaderboardTriggers.clear();
     rpState = 0;
+    currentRead = 0;
     mem_richpresence = nullptr;
 
     QMap<unsigned int, unsigned int> uniqueAddresses;
@@ -301,6 +303,7 @@ void MemoryReader::decrementAddressCounts(rc_memrefs_t& memrefs)
             }
         }
     }
+    oldMemory.clear();
     switch(type)
     {
     case 1:
@@ -312,8 +315,70 @@ void MemoryReader::decrementAddressCounts(rc_memrefs_t& memrefs)
     }
 }
 
-void MemoryReader::processFrames(const QByteArray& data, unsigned int& frames)
+void MemoryReader::checkMemoryConsistency(QByteArray &data)
 {
+    const int frameCount = oldMemory.size();
+    const int size = data.size();
+
+    if (std::all_of(oldMemory.begin(), oldMemory.end(),
+                    [&](const QByteArray &m){ return m == data; }))
+        return;
+
+    for (int x = 0; x < size; x++)
+    {
+        int matchCount = 0;
+        std::array<int, 256> counts{};
+
+        const auto &constOldMemory = oldMemory;
+        for (const auto &frame : constOldMemory)
+        {
+            const quint8 value = static_cast<quint8>(frame[x]);
+            counts[value]++;
+            if (frame[x] == data[x])
+                matchCount++;
+        }
+
+        const int majority = (frameCount / 2) + 1;
+
+        if (matchCount < majority)
+        {
+            quint8 bestValue = 0;
+            int bestCount = 0;
+            for (int b = 0; b < 256; b++)
+            {
+                if (counts[b] > bestCount)
+                {
+                    bestCount = counts[b];
+                    bestValue = static_cast<quint8>(b);
+                }
+            }
+            if (bestCount >= majority)
+            {
+                //qDebug() << "Changing" << unsigned(data[x]) << x << "to" << bestValue;
+                data[x] = static_cast<char>(bestValue);
+            }
+        }
+    }
+}
+
+void MemoryReader::processFrames(QByteArray& data, unsigned int& frames)
+{
+    //QElapsedTimer timer;
+    //timer.start();
+    /*QByteArray oldData = data;
+    constexpr int MaxFrames = 3;
+
+    currentRead = (currentRead + 1) % MaxFrames;
+
+    if (oldMemory.size() >= MaxFrames)
+    {
+        checkMemoryConsistency(data);
+        oldMemory[currentRead] = oldData;
+        //qDebug() << "Replacing" << currentRead;
+    }
+    else
+        oldMemory.append(data);*/
+
     memory_t mem;
     mem.ram = reinterpret_cast<uint8_t*>(const_cast<char*>(data.constData()));
     mem.size = data.size();
@@ -390,4 +455,9 @@ void MemoryReader::processFrames(const QByteArray& data, unsigned int& frames)
 
         frames--;
     }
+    /*qint64 elapsedNs = timer.nsecsElapsed(); // nanoseconds
+    qint64 elapsedUs = elapsedNs / 1000;     // microseconds
+    qint64 elapsedMs = elapsedUs / 1000;     // milliseconds
+
+    qDebug() << "Elapsed:" << elapsedUs << "µs (" << elapsedMs << "ms)";*/
 }

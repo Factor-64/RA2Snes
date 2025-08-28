@@ -93,9 +93,9 @@ ApplicationWindow {
             function addChallengeIcons(sourceUrl, value, total) {
                 if (!activeIcons)
                     activeIcons = {};
-                const type = (total === 0)
+                const type = (total === 0 && value === 0)
                 const has = activeIcons.hasOwnProperty(sourceUrl);
-                if(has && (type || value === 0))
+                if(has && type)
                 {
                     removeChallengeIcon(activeIcons[sourceUrl]);
                     delete activeIcons[sourceUrl];
@@ -104,6 +104,10 @@ ApplicationWindow {
                 else if(has)
                 {
                     updateScore(activeIcons[sourceUrl], value, total);
+                    return;
+                }
+                else if(!has && value === total)
+                {
                     return;
                 }
                 const currentCount = challenges.children.length;
