@@ -49,7 +49,7 @@ ApplicationWindow {
     }
 
     Shortcut {
-        sequence: "Ctrl+="
+        sequences: ["Ctrl+=","Ctrl++"]
         onActivated: {
             if(mainGroup.scale < 2)
                 mainGroup.scale += 0.25
@@ -65,7 +65,7 @@ ApplicationWindow {
     }
 
     Shortcut {
-        sequence: "Ctrl+R"
+        sequence: "Ctrl+0"
         onActivated: {
             mainGroup.scale = 1
         }
@@ -357,9 +357,9 @@ ApplicationWindow {
             function addChallengeIcons(sourceUrl, value, total) {
                 if (!activeIcons)
                     activeIcons = {};
-                const type = (total === 0)
+                const type = (total === 0 && value === 0)
                 const has = activeIcons.hasOwnProperty(sourceUrl);
-                if(has && (type || value === 0))
+                if(has && type)
                 {
                     removeChallengeIcon(activeIcons[sourceUrl]);
                     delete activeIcons[sourceUrl];
@@ -368,6 +368,10 @@ ApplicationWindow {
                 else if(has)
                 {
                     updateScore(activeIcons[sourceUrl], value, total);
+                    return;
+                }
+                else if(!has && value === total)
+                {
                     return;
                 }
                 const currentCount = challenges.children.length;
