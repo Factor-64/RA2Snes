@@ -26,18 +26,12 @@
     git clone https://github.com/Factor-64/RA2Snes.git --recursive
     ```
 1) Install Dependencies
-   #### For Debian-based distros
     ```
    sudo apt-get install -y build-essential cmake git qt6-tools-dev qt6-websockets-dev \
         qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts \
         qml6-module-qtquick-templates qml6-module-qtquick-window qt6-declarative-dev \
         qml6-module-qtqml-workerscript qml6-module-qtmultimedia qml6-module-qt-labs-folderlistmodel \
         qml6-module-qt5compat-graphicaleffects libqt6svg6 libqt6websockets6 libqt6qml6 libqt6gui6
-    ```
-    #### For NixOS:
-    ```
-    cd RA2Snes
-    nix-shell --pure .
     ```
 4) Compile rcheevos
     ```
