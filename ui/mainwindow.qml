@@ -342,6 +342,7 @@ ApplicationWindow {
             anchors.rightMargin: 20
             anchors.right: parent.right
             anchors.bottom: parent.bottom
+            anchors.bottomMargin: 10
             z: 100
             layoutDirection: Qt.RightToLeft
             SequentialAnimation {
@@ -354,33 +355,60 @@ ApplicationWindow {
             }
 
             property var activeIcons: {}
-            function addChallengeIcons(sourceUrl, value, total) {
+            property var iconsType: [2,2,2,2]
+
+            /*function printActiveIcons()
+            {
+                for (let key in activeIcons)
+                    console.log(key, activeIcons[key]);
+            }*/
+
+            function addChallengeIcons(sourceUrl, value, total)
+            {
                 if (!activeIcons)
                     activeIcons = {};
-                const type = (total === 0 && value === 0)
-                const has = activeIcons.hasOwnProperty(sourceUrl);
-                if(has && type)
-                {
-                    removeChallengeIcon(activeIcons[sourceUrl]);
-                    delete activeIcons[sourceUrl];
-                    return;
-                }
-                else if(has)
-                {
-                    updateScore(activeIcons[sourceUrl], value, total);
-                    return;
-                }
-                else if(!has && value === total)
-                {
-                    return;
-                }
                 const currentCount = challenges.children.length;
+                //type 0 = primed, type 1 = score
+                const type = (total === 0 && value === 0)
                 if(currentCount === 4)
-                    return;
+                {
+                    if(type)
+                        return;
+                    var index = 5;
+                    for(var i = 0; i < 4; i++)
+                    {
+                        if(iconsType[i] === 1)
+                            index = i;
+                    }
+                    if(index === 5)
+                        return;
+                    removeChallengeIcon(index);
+                }
+                else
+                {
+                    const complete = (total === value);
+                    const has = activeIcons.hasOwnProperty(sourceUrl);
+                    //console.log(sourceUrl, value, total, has, type, complete);
+                    if(has)
+                    {
+                        if(type)
+                        {
+                            removeChallengeIcon(activeIcons[sourceUrl]);
+                            return;
+                        }
+                        else
+                        {
+                            updateScore(activeIcons[sourceUrl], value, total);
+                            return;
+                        }
+                    }
+                    else if(!type && complete)
+                        return;
+                }
+                iconsType[currentCount] = type;
                 var imageCode;
                 if(type)
                 {
-
                     imageCode = `
                         import QtQuick
                         Column {
@@ -391,6 +419,11 @@ ApplicationWindow {
                                 running: true
                                 PropertyAnimation { target: wrapper${currentCount}; property: "opacity"; to: 1; duration: 200 }
                             }
+
+                            Item {
+                                height: 16
+                            }
+
                             Image {
                                 source: "${sourceUrl}"
                                 width: 64
@@ -416,11 +449,11 @@ ApplicationWindow {
 
                             Timer {
                                 objectName: "timer${currentCount}"
-                                interval: 30000
+                                interval: 15000
                                 repeat: false
                                 running: true
                                 onTriggered: {
-                                    challenges.removeChallengeIcon(${currentCount})
+                                    challenges.removeChallengeIcon(${currentCount});
                                 }
                             }
 
@@ -433,12 +466,15 @@ ApplicationWindow {
                                 color: themeLoader.item.progressBarColor
                                 anchors.horizontalCenter: parent.horizontalCenter
                             }
+
                             Image {
                                 source: "${sourceUrl}"
                                 width: 64
                                 height: 64
                                 smooth: false
                                 fillMode: Image.PreserveAspectFit
+                                cache: true
+                                asynchronous: true
                             }
                         }
                     `;
@@ -451,7 +487,18 @@ ApplicationWindow {
 
             property var removalQueue: []
 
-            function removeChallengeIcon(index) {
+            function removeChallengeIcon(index)
+            {
+                for (let key in activeIcons)
+                {
+                    if(activeIcons[key] === index)
+                    {
+                        delete activeIcons[key];
+                        break;
+                    }
+                }
+                iconsType[index] = 2;
+                //printActiveIcons();
                 const child = challenges.children[index];
                 if (!child) return;
                 removalQueue.push(child);
@@ -460,13 +507,15 @@ ApplicationWindow {
                 return;
             }
 
-            function runNextRemoval() {
+            function runNextRemoval()
+            {
                 if (removalQueue.length === 0) return;
                 seq.targetItem = removalQueue.shift();
                 seq.start();
             }
 
-            function removeAllChallengeIcons() {
+            function removeAllChallengeIcons()
+            {
                 for(var i = 0; i < challenges.children.length; i++)
                 {
                     const child = challenges.children[i];
@@ -475,7 +524,9 @@ ApplicationWindow {
                     seq.start();
                 }
             }
-            function updateScore(index, value, total) {
+
+            function updateScore(index, value, total)
+            {
                 const child = challenges.children[index];
                 const label = child.children.find(item => item.objectName === `icon${index}`);
                 if (label) label.text = `${value}/${total}`;
@@ -483,7 +534,7 @@ ApplicationWindow {
                 if (timer)
                 {
                     if(value === total)
-                        timer.interval = 15000;
+                        timer.interval = 10000;
                     timer.restart();
                 }
             }
@@ -562,5 +613,15 @@ ApplicationWindow {
         if(!mainWindow.allowIcons)
             hud.visible = false;
     }
+
+    /*onSetupFinishedChanged: {
+        console.log("Start");
+        for(var i = 25; i < (25+4); i++)
+        {
+            let a = AchievementModel.get(i);
+            console.log(a.title);
+            challenges.addChallengeIcons(a.badgeUrl, a.value, a.target);
+        }
+    }*/
 }
 //Pumpkin
