@@ -52,7 +52,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        brew install cmake qt
+        brew install qt
         brew update
 
     - name: Build rcheevos
