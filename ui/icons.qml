@@ -77,10 +77,7 @@ ApplicationWindow {
             height: 84
             spacing: 8
             width: 280
-            anchors.rightMargin: 20
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 10
+            anchors.centerIn: parent
             z: 100
             layoutDirection: Qt.RightToLeft
 
