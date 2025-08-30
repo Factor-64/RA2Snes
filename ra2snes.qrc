@@ -27,6 +27,7 @@
         <file>ui/images/ra-icon.svg</file>
         <file>ui/images/sfc.svg</file>
         <file>ui/banner.qml</file>
+        <file>ui/Icon.qml</file>
         <file>ui/icons.qml</file>
     </qresource>
 </RCC>
