@@ -41,7 +41,6 @@ ApplicationWindow {
     }
 
     property string themeSource: "./themes/Dark.qml"
-    property var achievementQueue: []
     Loader {
         id: themeLoader
         source: icons.themeSource
@@ -98,7 +97,7 @@ ApplicationWindow {
                 {
                     child = challenges.children[i];
                     if (!child) continue;
-                    else if (child.sourceUrl === sourceUrl)
+                    if (String(child.sourceUrl) === String(sourceUrl))
                         return child;
                 }
                 return null;
@@ -117,7 +116,7 @@ ApplicationWindow {
                 if (!seq.running) runNextRemoval();
             }
 
-            function findNotPrimeAndRemove()
+            function findNotPrime()
             {
                 var child = null;
                 for (let i = 0; i < challenges.children.length; i++)
@@ -125,21 +124,21 @@ ApplicationWindow {
                     child = challenges.children[i];
                     if (!child) return;
                     else if (child.type === 1)
-                        break;
+                        return child;
                 }
-                removeChallengeIcon(child);
+                return null;
             }
 
             function addChallengeIcons(sourceUrl, value, total)
             {
-                const type = (total === 0 && value === 0) ? 0 : 1;
+                const type = (total === 0) ? 0 : 1;
                 var currentCount = challenges.children.length;
                 const complete = (total === value);
                 const child = findChild(sourceUrl);
 
                 if (child)
                 {
-                    if (type === 0 || value === 0)
+                    if (value === 0)
                     {
                         removeChallengeIcon(child);
                         return;
@@ -155,6 +154,7 @@ ApplicationWindow {
                         return;
                     }
                 }
+                //console.log(sourceUrl, value, total, complete, child);
 
                 if (type === 1)
                 {
@@ -165,7 +165,9 @@ ApplicationWindow {
                 if (currentCount === 4)
                 {
                     if(type === 1) return;
-                    findNotPrimeAndRemove();
+                    const notprime = findNotPrime();
+                    if(!notprime) return;
+                    removeChallengeIcon(notprime);
                 }
 
                 const icon = challengeIconComponent.createObject(challenges, {
