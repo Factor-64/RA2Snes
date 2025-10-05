@@ -15,7 +15,7 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
     achievementTriggers.clear();
     //leaderboardTriggers.clear();
     rpState = 0;
-    currentRead = 0;
+    //currentRead = 0;
     mem_richpresence = nullptr;
 
     QMap<unsigned int, unsigned int> uniqueAddresses;
@@ -124,30 +124,42 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
             }
         }
     }*/
+    //unsigned int total = 0;
     for(auto it = uniqueAddresses.begin(); it != uniqueAddresses.end(); ++it)
-        uniqueMemoryAddresses.append(qMakePair(it.key(), it.value()));
-
-    //qDebug() << uniqueAddresses;
-    for (int i = 0; i < uniqueMemoryAddresses.size() - 1; i++)
     {
-        auto& current = uniqueMemoryAddresses[i];
-        auto& next = uniqueMemoryAddresses[i + 1];
+        uniqueMemoryAddresses.append(qMakePair(it.key(), it.value()));
+        //total += it.value();
+    }
 
-        int gap = next.first - (current.first + current.second);
+    //qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size() << total;
+    for (int i = 0; i + 1 < uniqueMemoryAddresses.size(); )
+    {
+        auto &current = uniqueMemoryAddresses[i];
+        auto &next    = uniqueMemoryAddresses[i + 1];
 
-        if (gap < 0)
-            gap = 0;
+        unsigned int currentEnd = current.first + current.second;
+        unsigned int gap        = (next.first > currentEnd) ? (next.first - currentEnd) : 0;
 
-        int total_size = current.second + next.second + gap;
-        if (total_size <= 255)
+        unsigned int totalSize  = current.second + gap + next.second;
+
+        if (totalSize <= 255)
         {
-            current.second = total_size;
-            uniqueMemoryAddresses.remove(i + 1);
-            i--;
+            current.second = totalSize;
+            uniqueMemoryAddresses.removeAt(i + 1);
+        }
+        else
+        {
+            ++i;
         }
     }
-    //qDebug() << uniqueMemoryAddresses;
-    //qDebug() << uniqueAddresses.size() << uniqueMemoryAddresses.size();
+
+    /*total = 0;
+    for (int i = 0; i < uniqueMemoryAddresses.size(); ++i)
+    {
+        total += uniqueMemoryAddresses[i].second;
+    }
+    qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size() << total;*/
+
     remapTriggerAddresses(false);
 }
 
@@ -289,7 +301,7 @@ void MemoryReader::decrementAddressCounts(rc_memrefs_t& memrefs)
             if(--count < 1)
             {
                 auto last = uniqueMemoryAddresses.end();
-                last--;
+                --last;
                 if(it != last)
                     type = 1;
                 else
@@ -303,7 +315,7 @@ void MemoryReader::decrementAddressCounts(rc_memrefs_t& memrefs)
             }
         }
     }
-    oldMemory.clear();
+    //oldMemory.clear();
     switch(type)
     {
     case 1:
@@ -315,7 +327,7 @@ void MemoryReader::decrementAddressCounts(rc_memrefs_t& memrefs)
     }
 }
 
-void MemoryReader::checkMemoryConsistency(QByteArray &data)
+/*void MemoryReader::checkMemoryConsistency(QByteArray &data, unsigned int& frames)
 {
     const int frameCount = oldMemory.size();
     const int size = data.size();
@@ -324,27 +336,32 @@ void MemoryReader::checkMemoryConsistency(QByteArray &data)
                     [&](const QByteArray &m){ return m == data; }))
         return;
 
-    for (int x = 0; x < size; x++)
+    for (int x = 0; x < size; ++x)
     {
         int matchCount = 0;
         std::array<int, 256> counts{};
 
-        const auto &constOldMemory = oldMemory;
-        for (const auto &frame : constOldMemory)
+        const quint8 dataValue = static_cast<quint8>(data[x]);
+        const quint8 upValue   = static_cast<quint8>(dataValue + frames);
+        const quint8 downValue = static_cast<quint8>(dataValue - frames);
+
+        for (const auto &frame : std::as_const(oldMemory))
         {
             const quint8 value = static_cast<quint8>(frame[x]);
             counts[value]++;
-            if (frame[x] == data[x])
-                matchCount++;
+
+            if (value == dataValue || value == upValue || value == downValue)
+                ++matchCount;
         }
 
-        const int majority = (frameCount / 2) + 1;
+        const unsigned int majority = (frameCount / 2) + 1;
+        //qDebug() << "Majority" << majority;
 
         if (matchCount < majority)
         {
             quint8 bestValue = 0;
             int bestCount = 0;
-            for (int b = 0; b < 256; b++)
+            for (int b = 0; b < 256; ++b)
             {
                 if (counts[b] > bestCount)
                 {
@@ -359,26 +376,25 @@ void MemoryReader::checkMemoryConsistency(QByteArray &data)
             }
         }
     }
-}
+}*/
 
 void MemoryReader::processFrames(QByteArray& data, unsigned int& frames)
 {
     //QElapsedTimer timer;
     //timer.start();
-    /*QByteArray oldData = data;
-    constexpr int MaxFrames = 3;
-
-    currentRead = (currentRead + 1) % MaxFrames;
+    /*constexpr int MaxFrames = 60;
 
     if (oldMemory.size() >= MaxFrames)
     {
-        checkMemoryConsistency(data);
+        auto oldData = data;
+        checkMemoryConsistency(data, frames);
         oldMemory[currentRead] = oldData;
+        currentRead = (currentRead + 1) % MaxFrames;
         //qDebug() << "Replacing" << currentRead;
     }
     else
-        oldMemory.append(data);*/
-
+        oldMemory.append(data);
+    */
     memory_t mem;
     mem.ram = reinterpret_cast<uint8_t*>(const_cast<char*>(data.constData()));
     mem.size = data.size();
@@ -405,7 +421,6 @@ void MemoryReader::processFrames(QByteArray& data, unsigned int& frames)
 
             int old_state = trigger->state;
             uint32_t old_measured_value = trigger->measured_value;
-
             int new_state = rc_evaluate_trigger(trigger, peek, &mem, nullptr);
 
             if (trigger->measured_value != old_measured_value &&
@@ -423,7 +438,7 @@ void MemoryReader::processFrames(QByteArray& data, unsigned int& frames)
             }
 
             if (new_state == old_state) {
-                it++;
+                ++it;
                 continue;
             }
 
@@ -450,10 +465,10 @@ void MemoryReader::processFrames(QByteArray& data, unsigned int& frames)
                 break;
             }
 
-            it++;
+            ++it;
         }
 
-        frames--;
+        --frames;
     }
     /*qint64 elapsedNs = timer.nsecsElapsed(); // nanoseconds
     qint64 elapsedUs = elapsedNs / 1000;     // microseconds

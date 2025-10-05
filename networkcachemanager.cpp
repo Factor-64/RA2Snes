@@ -13,7 +13,7 @@ NetworkCacheManager::NetworkCacheManager(const QString &appDirPath)
 QNetworkAccessManager *NetworkCacheManager::create(QObject *parent) {
     QNetworkAccessManager *manager = new QNetworkAccessManager(parent);
 
-    QString cacheDir = m_appDirPath + "/cache";  // Customize as needed
+    QString cacheDir = m_appDirPath + QDir::separator() + "cache";
 
     QDir dir;
 

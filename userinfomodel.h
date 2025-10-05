@@ -18,6 +18,7 @@ class UserInfoModel : public QObject {
     Q_PROPERTY(bool banner READ banner CONSTANT)
     Q_PROPERTY(bool icons READ icons CONSTANT)
     Q_PROPERTY(bool iconspopup READ iconspopup CONSTANT)
+    Q_PROPERTY(QString theme READ theme CONSTANT)
 
 public:
     static UserInfoModel* instance() {
@@ -44,6 +45,7 @@ public:
     bool banner() const;
     bool icons() const;
     bool iconspopup() const;
+    QString theme() const;
 
     void username(const QString& u);
     void token(const QString& t);
@@ -63,6 +65,7 @@ public:
     void banner(const bool& n);
     void icons(const bool& i);
     void iconspopup(const bool& ip);
+    void theme(const QString& t);
 
 signals:
     void dataChanged();

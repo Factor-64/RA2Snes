@@ -12,6 +12,7 @@ ApplicationWindow {
     minimumHeight: 600
     visible: true
     title: "RA2Snes - v" + Ra2snes.version
+    property var currentTheme: UserInfoModel.theme
     property var themes: ["Dark", "Black", "Light"]
     property string baseDir: {
         if(Ra2snes.appDirPath[0] === "/")
@@ -60,7 +61,7 @@ ApplicationWindow {
             if(themeLoader.item === null)
             {
                 themeLoader.source = "./themes/Dark.qml";
-                Ra2snes.setTheme("Dark");
+                window.currentTheme = "Dark";
             }
         }
         active: true
@@ -72,9 +73,9 @@ ApplicationWindow {
     function setupTheme()
     {
         var defaultThemes = window.themes.slice(0, 3);
-        if(defaultThemes.indexOf(Ra2snes.theme) < 0)
-            themeLoader.source = (window.themeDir + "/" + Ra2snes.theme + ".qml");
-        else themeLoader.source = ("./themes/" + Ra2snes.theme + ".qml");
+        if(defaultThemes.indexOf(window.currentTheme) < 0)
+            themeLoader.source = (window.themeDir + "/" + window.currentTheme + ".qml");
+        else themeLoader.source = ("./themes/" + window.currentTheme + ".qml");
     }
 
     Material.theme: themeLoader.item.darkScrollBar ? Material.Dark : Material.Light

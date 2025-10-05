@@ -78,6 +78,7 @@ ApplicationWindow {
     property bool allowIcons: UserInfoModel.icons
     property bool compact: UserInfoModel.compact
     property int errorHeight: 0
+    property var currentTheme: UserInfoModel.theme
     property var bannerPopup: null
     property var iconsPopup: null
     property string baseDir: {
@@ -132,7 +133,7 @@ ApplicationWindow {
             if(themeLoader.item === null)
             {
                 themeLoader.source = "./themes/Dark.qml";
-                Ra2snes.setTheme("Dark");
+                mainWindow.currentTheme = "Dark";
                 themeListTimer.restart();
             }
             if(mainWindow.bannerPopup)
@@ -149,9 +150,9 @@ ApplicationWindow {
     function setupTheme()
     {
         var defaultThemes = mainWindow.themes.slice(0, 3);
-        if(defaultThemes.indexOf(Ra2snes.theme) < 0)
-            themeLoader.source = (mainWindow.themeDir + "/" + Ra2snes.theme + ".qml");
-        else themeLoader.source = ("./themes/" + Ra2snes.theme + ".qml");
+        if(defaultThemes.indexOf(mainWindow.currentTheme) < 0)
+            themeLoader.source = (mainWindow.themeDir + "/" + mainWindow.currentTheme + ".qml");
+        else themeLoader.source = ("./themes/" + mainWindow.currentTheme + ".qml");
     }
 
     color: themeLoader.item.backgroundColor
@@ -515,7 +516,7 @@ ApplicationWindow {
             mainWindow.iconsPopup.close();
             mainWindow.iconsPopup = null;
         }
-        Ra2snes.saveUISettings(windowWidth, windowHeight, compact, b, mainWindow.allowIcons, i);
+        Ra2snes.saveUISettings(windowWidth, windowHeight, compact, b, mainWindow.allowIcons, i, mainWindow.currentTheme);
     }
 
     Component.onCompleted: {

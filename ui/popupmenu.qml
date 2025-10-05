@@ -234,7 +234,7 @@ Item {
                             }
                         }
                         onClicked: {
-                            Ra2snes.setTheme(themeName.text);
+                            dropdown.mainWindow.currentTheme = themeName.text;
                             dropdown.mainWindow.setupTheme();
                             resetColors(popupColumn, false);
                             resetColors(themesList, false);
@@ -582,7 +582,7 @@ Item {
                     anchors.left: parent.left
                     anchors.leftMargin: 10
                     anchors.verticalCenter: parent.verticalCenter
-                    text: qsTr("Theme: ") + Ra2snes.theme;
+                    text: qsTr("Theme: ") + dropdown.mainWindow.currentTheme;
                     font.family: "Verdana"
                     font.pixelSize: 13
                     color: themeLoader.item.selectedLink

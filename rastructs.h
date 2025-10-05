@@ -76,6 +76,7 @@ struct UserInfo {
     bool banner;
     bool icons;
     bool iconspopup;
+    QString theme;
 };
 
 struct GameInfo {
