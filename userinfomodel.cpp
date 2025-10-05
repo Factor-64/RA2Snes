@@ -80,6 +80,11 @@ bool UserInfoModel::iconspopup() const
     return m_userInfo.iconspopup;
 }
 
+QString UserInfoModel::theme() const
+{
+    return m_userInfo.theme;
+}
+
 void UserInfoModel::username(const QString& u)
 {
     m_userInfo.username = u;
@@ -176,6 +181,11 @@ void UserInfoModel::icons(const bool& i)
 void UserInfoModel::iconspopup(const bool& ip)
 {
     m_userInfo.iconspopup = ip;
+}
+
+void UserInfoModel::theme(const QString& t)
+{
+    m_userInfo.theme = t;
 }
 
 void UserInfoModel::clearUser() {

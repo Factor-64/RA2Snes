@@ -49,7 +49,8 @@ public:
         GettingInfo,
         GettingConfig,
         GettingRomType,
-        GettingRamSize
+        GettingRamSize,
+        GettingNMIData
     };
     enum sd2snesState {
         sd2menu,
@@ -142,6 +143,10 @@ public:
     unsigned int            getRomTypeData();
     unsigned int            getRamSizeData();
     void                    clearBinaryData();
+    void                    setReciever();
+    void                    unsetReciever();
+    void                    getNMIData();
+    void                    setNMIDataSize(unsigned int size);
 
 signals:
     void    stateChanged();
@@ -158,16 +163,16 @@ signals:
     void    getAddressGet(QByteArray data);
     void    getAddressDataReceived();
     void    getAddressesDataReceived();
-    void    resetOccurred(QByteArray data);
     void    deviceListDone(QStringList listDevice);
     void    infoDone(Usb2Snes::DeviceInfo info);
     void    lsDone(QList<Usb2Snes::FileInfo> filesInfo);
-    void    doFrame();
     void    getConfigDataReceived();
     void    gotServerVersion();
     void    getRomTypeDataReceived();
     void    getRamSizeDataReceived();
     void    retryRomType();
+    void    recieverDataReceived();
+    void    getNMIDataReceived();
 
 private slots:
     void    onWebSocketConnected();
@@ -197,6 +202,7 @@ private:
     QMetaEnum       metaCommands;
     unsigned int    romType;
     unsigned int    ramSize;
+    unsigned int    nmiDataSize;
 
     QByteArray      fileDataToSend;
 
