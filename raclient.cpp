@@ -399,7 +399,7 @@ void RAClient::handleAwardAchievementResponse(const QJsonObject& jsonObject)
     if(!achievement_model->getAchievements().isEmpty())
     {
         const auto& ach_list = achievement_model->getAchievements();
-        for(int i = 0; i < ach_list.size(); i++)
+        for(int i = 0; i < ach_list.size(); ++i)
         {
             auto& achievement = ach_list[i];
             if(achievement.id == jsonObject["AchievementID"].toInt())
@@ -503,7 +503,7 @@ void RAClient::handlePatchResponse(const QJsonObject& jsonObject)
             info.target = 0;
             info.percent = 0;
             if(info.type == "missable")
-                missables++;
+                ++missables;
             total += info.points;
             achievement_model->appendAchievement(info);
         }
@@ -547,13 +547,13 @@ void RAClient::handleStartSessionResponse(const QJsonObject& jsonObject)
     else
         unlock_data = jsonObject["Unlocks"].toArray();
     int complete = unlock_data.count();
-    for (int i = 0; i < unlock_data.size(); i++)
+    for (int i = 0; i < unlock_data.size(); ++i)
     {
         QJsonObject unlock = unlock_data[i].toObject();
         if(unlock["ID"].toInt() != 101000001)
         {
             const auto& ach_list = achievement_model->getAchievements();
-            for(int i = 0; i < ach_list.size(); i++)
+            for(int i = 0; i < ach_list.size(); ++i)
             {
                 auto& achievement = ach_list[i];
                 if(achievement.type == "progression")
@@ -567,7 +567,7 @@ void RAClient::handleStartSessionResponse(const QJsonObject& jsonObject)
                 }
             }
         }
-        else complete--;
+        else --complete;
     }
     gameinfo_model->completion_count(complete);
     if(!isGameMastered())
@@ -581,13 +581,13 @@ bool RAClient::isGameBeaten()
     //qDebug() << winMap;
     if(progressionMap.empty() || achievement_model->rowCount() < 1)
         return false;
-    for(auto it = progressionMap.constBegin(); it != progressionMap.constEnd(); it++) {
+    for(auto it = progressionMap.constBegin(); it != progressionMap.constEnd(); ++it) {
         if(!it.value()) {
             gameinfo_model->beaten(false);
             return false;
         }
     }
-    for(auto it = winMap.constBegin(); it != winMap.constEnd(); it++) {
+    for(auto it = winMap.constBegin(); it != winMap.constEnd(); ++it) {
         if(it.value()) {
             gameinfo_model->beaten(true);
             return true;

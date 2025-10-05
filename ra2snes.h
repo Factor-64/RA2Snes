@@ -14,7 +14,6 @@ class ra2snes : public QObject
     Q_OBJECT
     Q_PROPERTY(QString console READ console WRITE setConsole NOTIFY consoleChanged)
     Q_PROPERTY(QString appDirPath READ appDirPath CONSTANT)
-    Q_PROPERTY(QString theme READ theme WRITE setTheme NOTIFY themeChanged)
     Q_PROPERTY(QString version READ version CONSTANT)
     Q_PROPERTY(QString latestVersion READ latestVersion NOTIFY newUpdate)
     Q_PROPERTY(bool ignore READ ignore WRITE ignoreUpdates NOTIFY ignoreChanged)
@@ -33,7 +32,9 @@ public:
         NoChecksNeeded,
         GetRamSize,
         GetRomType,
-        GetFirmware
+        GetFirmware,
+        SetupNMIData,
+        GetNMIData
     };
     Q_ENUM(Task)
 
@@ -56,11 +57,10 @@ public:
 public slots:
     void signIn(const QString &username, const QString &password, const bool& remember);
     void signOut();
-    void saveUISettings(const int& w, const int& h, const bool& c, const bool& b, const bool& i, const bool& ip);
+    void saveUISettings(const int& w, const int& h, const bool& c, const bool& b, const bool& i, const bool& ip, const QString t);
     void changeMode();
     void autoChange(const bool& ac);
     void refreshRAData();
-    void setTheme(const QString& theme);
     void beginUpdate();
     void ignoreUpdates(bool i);
 
@@ -94,6 +94,7 @@ private:
     bool loggedin;
     bool m_gameLoaded;
     bool m_loadingGame;
+    bool m_customFirmware;
     bool remember_me;
     bool m_ignore;
     bool isGB;
@@ -103,7 +104,6 @@ private:
     Task doThisTaskNext;
     QList<QPair<unsigned int, unsigned int>> uniqueMemoryAddresses;
     QString m_appDirPath;
-    QString m_theme;
     QString m_latestVersion;
     QString downloadUrl;
     QString richText;
@@ -119,11 +119,13 @@ private:
     void onUsb2SnesGetAddressesDataReceived();
     void onUsb2SnesGetConfigDataReceived();
     void onUsb2SnesGetFileDataReceived();
+    void onUsb2SnesGetNMIDataReceived();
     void onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos);
     void setCurrentConsole();
     void checkForUpdate();
     void initVars();
     void postTelemetryData();
+    void updateRichText(const QString& rt);
     QTimer* waitTimer;
     QElapsedTimer* frameTimer;
     unsigned int programTime;

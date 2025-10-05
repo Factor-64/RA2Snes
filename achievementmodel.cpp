@@ -128,7 +128,7 @@ void AchievementModel::setUnlockedState(const unsigned int& i, const bool& unloc
 }
 
 void AchievementModel::primeAchievement(const unsigned int& id, const bool& p) {
-    for (int i = 0; i < m_achievements.size(); i++) {
+    for (int i = 0; i < m_achievements.size(); ++i) {
         if (m_achievements[i].id == id) {
             m_achievements[i].primed = p;
             QModelIndex index = createIndex(i, 0);
@@ -140,7 +140,7 @@ void AchievementModel::primeAchievement(const unsigned int& id, const bool& p) {
 }
 
 void AchievementModel::updateAchievementValue(const unsigned int& id, const int& value) {
-    for (int i = 0; i < m_achievements.size(); i++) {
+    for (int i = 0; i < m_achievements.size(); ++i) {
         if (m_achievements[i].id == id) {
             m_achievements[i].value = value;
             QModelIndex index = createIndex(i, 0);
@@ -153,7 +153,7 @@ void AchievementModel::updateAchievementValue(const unsigned int& id, const int&
 }
 
 void AchievementModel::updateAchievementPercent(const unsigned int& id, const int& percent) {
-    for (int i = 0; i < m_achievements.size(); i++) {
+    for (int i = 0; i < m_achievements.size(); ++i) {
         if (m_achievements[i].id == id) {
             m_achievements[i].percent = percent;
             QModelIndex index = createIndex(i, 0);
@@ -164,7 +164,7 @@ void AchievementModel::updateAchievementPercent(const unsigned int& id, const in
 }
 
 void AchievementModel::updateAchievementTarget(const unsigned int& id, const int& target) {
-    for (int i = 0; i < m_achievements.size(); i++) {
+    for (int i = 0; i < m_achievements.size(); ++i) {
         if (m_achievements[i].id == id) {
             m_achievements[i].target = target;
             QModelIndex index = createIndex(i, 0);
