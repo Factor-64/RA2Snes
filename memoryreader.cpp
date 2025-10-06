@@ -6,7 +6,7 @@
 MemoryReader::MemoryReader(QObject *parent) : QObject(parent) {
 }
 
-void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, const QList<LeaderboardInfo>& leaderboards, const QString& richPresence, const unsigned int& ramSize)
+void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, const QList<LeaderboardInfo>& leaderboards, const QString& richPresence, const unsigned int& ramSize, const bool& customFirmware)
 {
     uniqueMemoryAddresses.clear();
     for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it) {
@@ -132,6 +132,8 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
     }
 
     //qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size() << total;
+    unsigned int blockSize = 255;// + customFirmware;
+    //qDebug() << blockSize;
     for (int i = 0; i + 1 < uniqueMemoryAddresses.size(); )
     {
         auto &current = uniqueMemoryAddresses[i];
@@ -142,7 +144,7 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
 
         unsigned int totalSize  = current.second + gap + next.second;
 
-        if (totalSize <= 255)
+        if (totalSize <= blockSize)
         {
             current.second = totalSize;
             uniqueMemoryAddresses.removeAt(i + 1);
@@ -159,6 +161,7 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
         total += uniqueMemoryAddresses[i].second;
     }
     qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size() << total;*/
+    //qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size();
 
     remapTriggerAddresses(false);
 }
