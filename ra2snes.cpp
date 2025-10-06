@@ -145,7 +145,7 @@ ra2snes::ra2snes(QObject *parent)
         emit achievementModelReady();
         emit enableModeSwitching();
         //qDebug() << "INIT TRIGGERS";
-        reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getLeaderboards(), raclient->getRichPresence(), usb2snes->getRamSizeData());
+        reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getLeaderboards(), raclient->getRichPresence(), usb2snes->getRamSizeData(), m_customFirmware);
     });
 
     connect(reader, &MemoryReader::finishedMemorySetup, this, [=] {
@@ -318,6 +318,7 @@ void ra2snes::onUsb2SnesGetNMIDataReceived()
     vgetTime = frameTimer->restart();
     //qDebug() << "Got NMI Data!";
     QByteArray data = usb2snes->getBinaryData();
+    //qDebug() << data;
     // Extra data that tell me the state of sd2snes
     // checks[0] is 0 if patched 1 if not
     // checks[1] is 1 if in game 0 if in menu
@@ -416,23 +417,21 @@ void ra2snes::onUsb2SnesStateChanged()
         {
             case SetupNMIData: {
                 QByteArray out;
-                unsigned int size;
+                unsigned int size = 0;
                 const auto addresses = reader->getUniqueMemoryAddresses();
                 for (const auto &pair : addresses)
                 {
                     quint32 val24 = pair.first & 0xFFFFFFu;
 
-                    if (val24 >> 16)
-                        out.append(static_cast<char>((val24 >> 16) & 0xFF));
-                    if ((val24 >> 8) & 0xFF || (val24 >> 16))
-                        out.append(static_cast<char>((val24 >> 8) & 0xFF));
+                    out.append(static_cast<char>((val24 >> 16) & 0xFF));
+                    out.append(static_cast<char>((val24 >> 8) & 0xFF));
 
                     out.append(static_cast<char>(val24 & 0xFF));
-
-                    out.append(static_cast<char>(pair.second));
+                    out.append(static_cast<char>(pair.second & 0xFF));
                     size += pair.second;
+                    //qDebug() << pair.second;
                 }
-
+                //qDebug() << size;
                 usb2snes->setNMIDataSize(size);
                 usb2snes->setAddress(0x2C0C, out, Usb2Snes::CMD);
                 out.clear();
