@@ -50,7 +50,8 @@ public:
         GettingConfig,
         GettingRomType,
         GettingRamSize,
-        GettingNMIData
+        GettingNMIData,
+        SettingUpVectors
     };
     enum sd2snesState {
         sd2menu,
@@ -147,6 +148,7 @@ public:
     void                    unsetReciever();
     void                    getNMIData();
     void                    setNMIDataSize(unsigned int size);
+    void                    setupNMIVectors();
 
 signals:
     void    stateChanged();

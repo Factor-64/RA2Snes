@@ -23,6 +23,7 @@ ra2snes::ra2snes(QObject *parent)
     downloadUrl = "";
     m_appDirPath = "";
     richText = "";
+    resetCount = 0;
     initVars();
     crashTimer = new QTimer(this);
     richTimer = new QTimer(this);
@@ -63,14 +64,11 @@ ra2snes::ra2snes(QObject *parent)
             crashTimer->stop();
         if(richTimer->isActive())
             richTimer->stop();
-        if(m_currentGame != "NA")
-        {
-            m_currentGame = "NA";
-            raclient->clearAchievements();
-            raclient->clearGame();
-            setCurrentConsole();
-            emit clearedAchievements();
-        }
+        raclient->clearAchievements();
+        raclient->clearGame();
+        setCurrentConsole();
+        emit clearedAchievements();
+        updateRichText("");
         //qDebug() << "Disconnected, trying to reconnect in 1 sec";
         emit displayMessage("QUsb2Snes/SNI Not Connected", true);
         QTimer::singleShot(1000, this, [=] {
@@ -93,14 +91,11 @@ ra2snes::ra2snes(QObject *parent)
         {
             if(crashTimer->isActive())
                 crashTimer->stop();
-            if(m_currentGame != "NA")
-            {
-                m_currentGame = "NA";
-                raclient->clearAchievements();
-                raclient->clearGame();
-                setCurrentConsole();
-                emit clearedAchievements();
-            }
+            raclient->clearAchievements();
+            raclient->clearGame();
+            setCurrentConsole();
+            emit clearedAchievements();
+            updateRichText("");
             emit displayMessage("Console Not Connected", true);
             QTimer::singleShot(1000, this, [=] {
                 raclient->sendQueuedRequest();
@@ -216,9 +211,9 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
         if (m_currentGame.contains("m3nu.bin") || m_currentGame.contains("menu.bin") || lreset || m_currentGame.isEmpty())
         {
             doThisTaskNext = GetConsoleConfig;
+            setCurrentConsole();
             if(lreset || change)
             {
-                setCurrentConsole();
                 updateRichText("");
                 m_gameLoaded = false;
                 raclient->setPatched(false);
@@ -299,10 +294,14 @@ void ra2snes::onUsb2SnesGetAddressDataReceived()
     if (data.size() == 4)
     {
         if(data[1] != '\x00' && data[3] != '\x00')
+        {
             patched = true;
+        }
     }
     else if (data[0] != (char)0x60)
+    {
         patched = true;
+    }
     if (patched)
     {
         raclient->setPatched(true);
@@ -318,29 +317,44 @@ void ra2snes::onUsb2SnesGetNMIDataReceived()
     vgetTime = frameTimer->restart();
     //qDebug() << "Got NMI Data!";
     QByteArray data = usb2snes->getBinaryData();
-    //qDebug() << data;
     // Extra data that tell me the state of sd2snes
-    // checks[0] is 0 if patched 1 if not
-    // checks[1] is 1 if in game 0 if in menu
-    /*const QByteArray checks = data.last(2);
-    data.chop(2);
-    if(checks[0] == 2 && checks[1] == 2)
+    // checks[0] is 1 if in game 0 if in menu
+    // checks[1] is 1 if resetting 0 if not
+    // checks[2] is 1 if patched 0 if not
+    const QByteArray checks = data.last(3);
+    data.chop(3);
+    //qDebug() << data;
+    qDebug() << checks;
+    if(checks[0] == 0)
     {
+        reader->resetRuntimeData();
         doThisTaskNext = GetConsoleInfo;
         return;
     }
-    if(checks[0] == 0)
-        doThisTaskNext = GetConsoleInfo;
-    if(checks[1] == 0 && raclient->getHardcore())
+    if(checks[2] && raclient->getHardcore())
     {
         raclient->setPatched(true);
         changeMode();
-    }*/
-    unsigned int framesPassed = std::round(std::abs((vgetTime + programTime) * 0.0600988138974405));
-    if(framesPassed < 1)
-        framesPassed = 1;
-    //qDebug() << "Frames: " << framesPassed;
-    reader->processFrames(data, framesPassed);
+    }
+    if(checks[1])
+    {
+        //qDebug() << "RESET!";
+        resetCount++;
+        reader->resetRuntimeData();
+        if(resetCount >= 10)
+        {
+            doThisTaskNext = NoChecksNeeded;
+        }
+    }
+    else
+    {
+        resetCount = 0;
+        unsigned int framesPassed = std::round(std::abs((vgetTime + programTime) * 0.0600988138974405));
+        if(framesPassed < 1)
+            framesPassed = 1;
+        //qDebug() << "Frames: " << framesPassed;
+        reader->processFrames(data, framesPassed);
+    }
 }
 
 void ra2snes::onLoginSuccess(bool r)
@@ -418,7 +432,7 @@ void ra2snes::onUsb2SnesStateChanged()
             case SetupNMIData: {
                 QByteArray out;
                 unsigned int size = 0;
-                const auto addresses = reader->getUniqueMemoryAddresses();
+                const auto addresses = uniqueMemoryAddresses;
                 for (const auto &pair : addresses)
                 {
                     quint32 val24 = pair.first & 0xFFFFFFu;
@@ -427,6 +441,7 @@ void ra2snes::onUsb2SnesStateChanged()
                     out.append(static_cast<char>((val24 >> 8) & 0xFF));
 
                     out.append(static_cast<char>(val24 & 0xFF));
+
                     out.append(static_cast<char>(pair.second & 0xFF));
                     size += pair.second;
                     //qDebug() << pair.second;
@@ -435,7 +450,7 @@ void ra2snes::onUsb2SnesStateChanged()
                 usb2snes->setNMIDataSize(size);
                 usb2snes->setAddress(0x2C0C, out, Usb2Snes::CMD);
                 out.clear();
-                out.append(uniqueMemoryAddresses.size());
+                out.append(addresses.size());
                 usb2snes->setAddress(0x2C0B, out, Usb2Snes::CMD);
 
                 const QByteArray nmiHook = QByteArray::fromHex(
@@ -445,7 +460,7 @@ void ra2snes::onUsb2SnesStateChanged()
                 );
                 usb2snes->setAddress(0x2C00, nmiHook, Usb2Snes::CMD);
                 doThisTaskNext = GetNMIData;
-                usb2snes->isPatchedROM();
+                usb2snes->setupNMIVectors();
                 break;
             }
             case GetNMIData:
@@ -460,7 +475,6 @@ void ra2snes::onUsb2SnesStateChanged()
                 //qDebug() << "PT" << programTime << "VT" << vgetTime;
                 if(programTime + vgetTime > 15)
                 {
-                    doThisTaskNext = GetConsoleInfo;
                     frameTimer->restart();
                     usb2snes->getNMIData();
                 }
@@ -478,10 +492,7 @@ void ra2snes::onUsb2SnesStateChanged()
                 break;
             case CheckPatched:
                 //qDebug() << "check patch";
-                if(m_customFirmware)
-                    doThisTaskNext = GetNMIData;
-                else
-                    doThisTaskNext = GetConsoleAddresses;
+                doThisTaskNext = GetConsoleAddresses;
                 if(raclient->getHardcore())
                 {
                     usb2snes->isPatchedROM();
@@ -489,11 +500,6 @@ void ra2snes::onUsb2SnesStateChanged()
                 }
                 else if(!m_gameLoaded)
                     break;
-                else if(m_customFirmware)
-                {
-                    onUsb2SnesStateChanged();
-                    return;
-                }
             case GetConsoleAddresses:
                 //qDebug() << "get addresses";
                 doThisTaskNext = CheckPatched;
@@ -595,8 +601,10 @@ void ra2snes::setCurrentConsole()
         }
         if(m_console == "SNES")
         {
-
-            raclient->setTitle(("SD2SNES " + usb2snes->firmwareString() + " Menu"), "https://avatars.githubusercontent.com/u/238664?v=4", "https://sd2snes.de/blog/");
+            QString menu = "SD2SNES Menu";
+            if(!usb2snes->firmwareString().isEmpty())
+                menu = ("SD2SNES " + usb2snes->firmwareString() + " Menu");
+            raclient->setTitle(menu, "https://avatars.githubusercontent.com/u/238664?v=4", "https://sd2snes.de/blog/");
             raclient->setHash("https://github.com/mrehkopf/sd2snes");
             if(isGB)
             {
@@ -812,11 +820,7 @@ void ra2snes::changeMode()
     }
     if(m_gameLoaded)
     {
-        if(user->patched())
-            doThisTaskNext = GetConsoleInfo;
-        else
-            reset = true;
-        onUsb2SnesStateChanged();
+        reset = true;
     }
     else if(!m_gameLoaded)
     {

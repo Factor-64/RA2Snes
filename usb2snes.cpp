@@ -256,8 +256,6 @@ void Usb2Snes::onWebSocketBinaryReceived(QByteArray message)
         //sDebug() << "<<B" << message.toHex('-') << message;
     //else
         //sDebug() << "<<B" << "Received " << message.size() << " byte of data " << buffer.size() << requestedBinaryReadSize;
-    //if(m_state == GettingNMIData)
-        //sDebug() << "<<B" << message.toHex('-');
 
     if ((unsigned int) buffer.size() == requestedBinaryReadSize)
     {
@@ -459,9 +457,18 @@ void Usb2Snes::getNMIData()
     sendRequest(GetAddress, QStringList() << QString::number(0xFFFFFF, 16) << QString::number(nmiDataSize, 16));
 }
 
+void Usb2Snes::setupNMIVectors()
+{
+    m_istate = IBusy;
+    binaryDataSent = 0;
+    requestedBinaryReadSize = 1;
+    changeState(SettingUpVectors);
+    sendRequest(GetAddress, QStringList() << QString::number(0xFFFFFE, 16) << QString::number(1, 16));
+}
+
 void Usb2Snes::setNMIDataSize(unsigned int size)
 {
-    nmiDataSize = size;
+    nmiDataSize = size + 3;
 }
 
 void Usb2Snes::setAddress(unsigned int addr, QByteArray data, Space space)
