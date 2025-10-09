@@ -1,5 +1,6 @@
 #include "memoryreader.h"
 #include "rc_internal.h"
+#include "rc_runtime_types.h"
 #include <QElapsedTimer>
 //#include <QDebug>
 
@@ -12,6 +13,9 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
     for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it) {
         free(it.value());
     }
+    if(mem_richpresence != nullptr)
+        free(mem_richpresence);
+
     achievementTriggers.clear();
     //leaderboardTriggers.clear();
     rpState = 0;
@@ -132,7 +136,7 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
     }
 
     //qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size() << total;
-    unsigned int blockSize = 255;// + customFirmware;
+    unsigned int blockSize = 255 + customFirmware;
     //qDebug() << blockSize;
     for (int i = 0; i + 1 < uniqueMemoryAddresses.size(); )
     {
@@ -478,4 +482,16 @@ void MemoryReader::processFrames(QByteArray& data, unsigned int& frames)
     qint64 elapsedMs = elapsedUs / 1000;     // milliseconds
 
     qDebug() << "Elapsed:" << elapsedUs << "µs (" << elapsedMs << "ms)";*/
+}
+
+void MemoryReader::resetRuntimeData()
+{
+    for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it)
+    {
+        auto* entry = it.value();
+        rc_trigger_t* trigger = &entry->trigger;
+        rc_reset_trigger(trigger);
+    }
+
+    rc_reset_richpresence(&mem_richpresence->richpresence);
 }
