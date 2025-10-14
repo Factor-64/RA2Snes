@@ -18,6 +18,7 @@ jobs:
           host: 'windows'
           target: 'desktop'
           arch: 'win64_msvc2022_64'
+          modules: 'qtwebsockets'
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.0.2
