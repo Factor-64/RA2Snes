@@ -6,7 +6,10 @@
 #include <QTimer>
 #include <QThreadPool>
 #include <QPointer>
+extern "C" {
 #include "miniz/miniz.h"
+}
+
 
 Updater::Updater(QWidget *parent)
     : QWidget(parent),
