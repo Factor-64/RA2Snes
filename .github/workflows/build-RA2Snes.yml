@@ -20,14 +20,6 @@ jobs:
         qml6-module-qtqml-workerscript qml6-module-qtmultimedia qml6-module-qt-labs-folderlistmodel \
         qml6-module-qt5compat-graphicaleffects libqt6svg6
 
-    - name: Build rcheevos
-      run: make ARCH=x64 BUILD=c89 HAVE_HASH=0 CFLAGS='-Wno-unused-but-set-variable -DRC_DISABLE_LUA' test
-      working-directory: rcheevos/test
-
-    - name: Build miniz
-      run: gcc -c miniz.c -o miniz.o
-      working-directory: miniz
-
     - name: Configure CMake
       run: cmake -S . -B build -DCMAKE_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt6
 
@@ -54,15 +46,7 @@ jobs:
       run: |
         brew install qt
         brew update
-
-    - name: Build rcheevos
-      run: make ARCH=x64 BUILD=c89 HAVE_HASH=0 CFLAGS='-Wno-unused-but-set-variable -DRC_DISABLE_LUA' test
-      working-directory: rcheevos/test
-
-    - name: Build miniz
-      run: gcc -c miniz.c -o miniz.o
-      working-directory: miniz
-
+        
     - name: Configure CMake
       run: |
         cmake -S . -B build -DCMAKE_PREFIX_PATH="$(brew --prefix qt)/lib/cmake/Qt6"
