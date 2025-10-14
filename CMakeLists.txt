@@ -80,7 +80,6 @@ set(PROJECT_SOURCES
     memoryreader.h
     rastructs.h
     ra2snes.qrc
-    ra2snes.rc
     achievementmodel.cpp
     achievementmodel.h
     achievementsortfilterproxymodel.cpp
@@ -93,6 +92,10 @@ set(PROJECT_SOURCES
     networkcachemanager.cpp
     networkcachemanager.h
 )
+
+if(WIN32)
+    set(PROJECT_SOURCES ${PROJECT_SOURCES} ${CMAKE_SOURCE_DIR}/ra2snes.rc)
+endif()
 
 add_library(miniz STATIC miniz/miniz.c)
 target_include_directories(miniz PUBLIC ${CMAKE_SOURCE_DIR}/miniz)
