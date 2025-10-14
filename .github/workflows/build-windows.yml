@@ -20,13 +20,17 @@ jobs:
           arch: 'win64_mingw'
           modules: 'qtwebsockets'
 
-      - name: Set up MSYS2 / MinGW
+      - name: Set up MSYS2 / MinGW64
         uses: msys2/setup-msys2@v2
         with:
+          msystem: MINGW64
           update: true
           install: >-
+            git
             mingw-w64-x86_64-gcc
-            make
+            mingw-w64-x86_64-make
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
 
       - name: Build rcheevos
         shell: msys2 {0}
@@ -43,12 +47,12 @@ jobs:
           cd ..
 
       - name: Configure CMake
-        shell: bash
+        shell: msys2 {0}
         run: |
           cmake -S . -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
 
       - name: Build project
-        shell: bash
+        shell: msys2 {0}
         run: cmake --build build --config Release
 
       - name: Upload Windows Build Artifacts
