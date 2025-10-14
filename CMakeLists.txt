@@ -54,7 +54,16 @@ target_include_directories(rcheevos PUBLIC
 set_source_files_properties(${RCHEEVOS_SOURCES} PROPERTIES
     COMPILE_FLAGS "-Wall -Werror -Wextra -Wshadow -pedantic -fno-signed-char -std=c99 -Wno-unused-but-set-variable"
 )
+
 target_compile_definitions(rcheevos PRIVATE RC_DISABLE_LUA)
+
+if(UNIX AND NOT APPLE)
+    target_compile_options(rcheevos PRIVATE -Wno-error=implicit-function-declaration -Wno-long-long)
+endif()
+
+if(MSVC)
+    target_compile_options(rcheevos PRIVATE /W4 /WX)
+endif()
 
 set(PROJECT_SOURCES
     ${UI_FILES}
