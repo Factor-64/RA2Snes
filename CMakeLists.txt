@@ -51,20 +51,21 @@ target_include_directories(rcheevos PUBLIC
     ${CMAKE_SOURCE_DIR}/rcheevos/src/rapi
 )
 
-set_source_files_properties(${RCHEEVOS_SOURCES} PROPERTIES
-    COMPILE_FLAGS "-Wall -Werror -Wextra -Wshadow -pedantic -fno-signed-char -std=c99 -Wno-unused-but-set-variable"
-)
-
 target_compile_definitions(rcheevos PRIVATE RC_DISABLE_LUA)
 
-if(UNIX AND NOT APPLE)
-    target_compile_definitions(rcheevos PRIVATE _POSIX_C_SOURCE=200809L)
-    target_compile_options(rcheevos PRIVATE -Wno-error=implicit-function-declaration -Wno-long-long)
-endif()
-
+# --- Compiler-specific flags for rcheevos ---
 if(MSVC)
+    # MSVC: warning level 4, treat warnings as errors
     target_compile_options(rcheevos PRIVATE /W4 /WX)
+else()
+    # GCC/Clang: strict flags, but allow POSIX functions and long long
+    set_source_files_properties(${RCHEEVOS_SOURCES} PROPERTIES
+        COMPILE_FLAGS "-Wall -Wextra -Wshadow -pedantic -fno-signed-char -std=c99 -Wno-unused-but-set-variable"
+    )
+    target_compile_options(rcheevos PRIVATE -Werror -Wno-long-long -Wno-error=implicit-function-declaration)
+    target_compile_definitions(rcheevos PRIVATE _POSIX_C_SOURCE=200809L)
 endif()
+# --------------------------------------------
 
 set(PROJECT_SOURCES
     ${UI_FILES}
