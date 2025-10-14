@@ -56,9 +56,9 @@ set(PROJECT_SOURCES
         version.h
         networkcachemanager.cpp
         networkcachemanager.h
-)
 
-set(MINIZ_OBJ_PATH ${CMAKE_SOURCE_DIR}/miniz/miniz.o)
+
+)
 
 add_executable(updater
   updater_main.cpp
@@ -68,17 +68,18 @@ add_executable(updater
   miniz/miniz.h
 )
 
-target_link_libraries(updater PRIVATE ${MINIZ_OBJ_PATH})
 target_link_libraries(updater PRIVATE Qt${QT_VERSION_MAJOR}::Core)
 target_link_libraries(updater PRIVATE Qt${QT_VERSION_MAJOR}::Network)
 target_link_libraries(updater PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
 target_include_directories(updater PRIVATE
     ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/miniz
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(ra2snes
+
+qt_add_executable(ra2snes
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
     )
@@ -113,7 +114,6 @@ target_include_directories(ra2snes PRIVATE
 if(${QT_VERSION} VERSION_LESS 6.1.0)
   set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.ra2snes)
 endif()
-
 set_target_properties(ra2snes PROPERTIES
     ${BUNDLE_ID_OPTION}
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
@@ -126,17 +126,12 @@ set_target_properties(updater PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-if(MINGW)
-    set_target_properties(ra2snes PROPERTIES WIN32_EXECUTABLE FALSE)
-    set_target_properties(updater PROPERTIES WIN32_EXECUTABLE FALSE)
-endif()
-
 install(TARGETS ra2snes updater
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-if(QT_VERSION_MAJOR EQUAL 6 AND NOT MINGW)
+if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(ra2snes)
 endif()
