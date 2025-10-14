@@ -58,6 +58,7 @@ set_source_files_properties(${RCHEEVOS_SOURCES} PROPERTIES
 target_compile_definitions(rcheevos PRIVATE RC_DISABLE_LUA)
 
 if(UNIX AND NOT APPLE)
+    target_compile_definitions(rcheevos PRIVATE _POSIX_C_SOURCE=200809L)
     target_compile_options(rcheevos PRIVATE -Wno-error=implicit-function-declaration -Wno-long-long)
 endif()
 
@@ -97,7 +98,6 @@ set(PROJECT_SOURCES
 add_library(miniz STATIC miniz/miniz.c)
 target_include_directories(miniz PUBLIC ${CMAKE_SOURCE_DIR}/miniz)
 
-# Updater executable (C++), links miniz
 add_executable(updater
   updater_main.cpp
   updater.cpp
@@ -113,7 +113,6 @@ target_include_directories(updater PRIVATE
     ${CMAKE_SOURCE_DIR}/include
 )
 
-# ---- Main app (Qt) ----
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(ra2snes
         MANUAL_FINALIZATION
