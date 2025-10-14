@@ -23,18 +23,6 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.0.2
 
-      - name: Build rcheevos (MSVC)
-        run: msbuild.exe rcheevos-test.sln -t:rcheevos-test -p:Configuration=Release -p:Platform=x64
-        working-directory: rcheevos/test
-
-      - name: Build miniz
-        shell: cmd
-        run: |
-          cd miniz
-          cl /c miniz.c /Feminz.obj
-          lib miniz.obj /OUT:miniz.lib
-          cd ..
-
       - name: Configure CMake (MSVC)
         run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
 
