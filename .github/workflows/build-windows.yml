@@ -19,12 +19,12 @@ jobs:
           target: 'desktop'
           arch: 'win64_msvc2022_64'
 
-      - name: Build rcheevos
-        run: |
-          cd rcheevos/test
-          cmake -S . -B build -G "Visual Studio 17 2022" -A x64
-          cmake --build build --config Release
-          cd ../..
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Build rcheevos (MSVC)
+        run: msbuild.exe rcheevos-test.sln -t:rcheevos-test -p:Configuration=Release -p:Platform=x64
+        working-directory: rcheevos/test
 
       - name: Build miniz
         run: |
