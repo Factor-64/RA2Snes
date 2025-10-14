@@ -67,7 +67,7 @@ jobs:
         name: macos-build
         path: |
           build/ra2snes.dmg
-  windows-msvc:
+  windows-x64:
     runs-on: windows-latest
     steps:
       - name: Checkout
