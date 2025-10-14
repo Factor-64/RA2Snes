@@ -18,7 +18,7 @@ jobs:
           echo "Available architectures for Qt 6.9.1:"
           python -m aqt list-qt windows desktop 6.9.1
           echo "Available modules for Qt 6.9.1 win64_msvc2019_64:"
-          python -m aqt list-qt windows desktop --modules 6.9.1 win64_msvc2019_64
+          python -m aqt list-qt windows desktop 6.9.1 win64_msvc2019_64 --modules
 
       - name: Install Qt 6.9.1 (MSVC)
         uses: jurplel/install-qt-action@v3
