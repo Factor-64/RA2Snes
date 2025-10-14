@@ -27,9 +27,12 @@ jobs:
         working-directory: rcheevos/test
 
       - name: Build miniz
+        shell: cmd
         run: |
+          call "%VSINSTALLDIR%\VC\Auxiliary\Build\vcvars64.bat"
           cd miniz
           cl /c miniz.c /Feminz.obj
+          lib miniz.obj /OUT:miniz.lib
           cd ..
 
       - name: Configure CMake (MSVC)
