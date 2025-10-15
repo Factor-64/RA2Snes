@@ -73,7 +73,7 @@ ra2snes::ra2snes(QObject *parent)
         emit displayMessage("QUsb2Snes/SNI Not Connected", true);
         QTimer::singleShot(1000, this, [=] {
             raclient->sendQueuedRequest();
-            usb2snes->connect();
+            usb2snes->reconnect();
         });
     });
 
@@ -187,7 +187,7 @@ ra2snes::ra2snes(QObject *parent)
         updateRichText(status);
     });
 
-    QTimer::singleShot(0, this, [=] { usb2snes->connect(); });
+    QTimer::singleShot(0, this, [=] { usb2snes->reconnect(); });
 }
 
 void ra2snes::signIn(const QString &username, const QString &password, const bool& remember)
