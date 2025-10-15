@@ -106,7 +106,7 @@ public:
     };
     Q_ENUM(Usb2SnesCommand)
 
-    Usb2Snes(bool autoAttach = true);
+    explicit Usb2Snes(bool autoAttach = true, QObject *parent = nullptr);
     void                    usePort(QString port);
     QString                 port();
     QString                 getRomName();
