@@ -34,12 +34,12 @@ private:
     QList<QPair<unsigned int, unsigned int>> uniqueMemoryAddresses;
     //QList<QByteArray> oldMemory;
     QMap<unsigned int, rc_trigger_with_memrefs_t*> achievementTriggers;
-    QMap<unsigned int, rc_lboard_t*> leaderboardTriggers;
+    //QMap<unsigned int, rc_lboard_t*> leaderboardTriggers;
     QMap<unsigned int, unsigned int> uniqueMemoryAddressesCounts;
     QMap<unsigned int, unsigned int> addressMap;
     rc_richpresence_with_memrefs_t* mem_richpresence;
     int rpState;
-    int currentRead;
+    //int currentRead;
 };
 
 
