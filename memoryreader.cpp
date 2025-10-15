@@ -5,6 +5,12 @@
 //#include <QDebug>
 
 MemoryReader::MemoryReader(QObject *parent) : QObject(parent) {
+    mem_richpresence = nullptr;
+    rpState = 0;
+    uniqueMemoryAddresses.clear();
+    uniqueMemoryAddressesCounts.clear();
+    addressMap.clear();
+    achievementTriggers.clear();
 }
 
 void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, const QList<LeaderboardInfo>& leaderboards, const QString& richPresence, const unsigned int& ramSize, const bool& customFirmware)
