@@ -6,7 +6,7 @@ Column {
     property int mode: 0 // 0 = primed, 1 = score
     property int value: 0
     property int total: 0
-    signal expired(Icon child)
+    signal expired()
 
     SequentialAnimation on opacity {
         running: true
@@ -49,7 +49,7 @@ Column {
         onTriggered:
         {
             interval = 20000;
-            root.expired(root);
+            root.fadeOutAndRemove();
         }
     }
 
@@ -61,4 +61,16 @@ Column {
             expiryTimer.restart();
         }
     }
+
+    SequentialAnimation {
+        id: fadeOutAnim
+        running: false
+        PropertyAnimation { target: root; property: "opacity"; to: 0; duration: 200 }
+        ScriptAction { script: root.expired() }
+    }
+
+    function fadeOutAndRemove() {
+        fadeOutAnim.start()
+    }
+
 }
