@@ -69,6 +69,7 @@ ra2snes::ra2snes(QObject *parent)
         setCurrentConsole();
         emit clearedAchievements();
         updateRichText("");
+        doThisTaskNext = None;
         //qDebug() << "Disconnected, trying to reconnect in 1 sec";
         emit displayMessage("QUsb2Snes/SNI Not Connected", true);
         QTimer::singleShot(1000, this, [=] {
@@ -317,7 +318,7 @@ void ra2snes::onUsb2SnesGetNMIDataReceived()
     const QByteArray checks = data.last(3);
     data.chop(3);
     //qDebug() << data;
-    qDebug() << checks;
+    //qDebug() << checks;
     if(checks[0] == 0)
     {
         reader->resetRuntimeData();
