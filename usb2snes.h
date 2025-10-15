@@ -18,11 +18,7 @@
 #define USB2SNES_H
 
 #include <QObject>
-#include <QWebSocket>
-#include <QWebSocketServer>
-#include <QVersionNumber>
-#include <QTimer>
-#include <QMetaEnum>
+#include <QtWebSockets/QtWebSockets>
 
 
 #define USB2SNESLEGACYURL "ws://localhost:8080/"
@@ -106,11 +102,11 @@ public:
     };
     Q_ENUM(Usb2SnesCommand)
 
-    explicit Usb2Snes(bool autoAttach = true, QObject *parent = nullptr);
+    Usb2Snes(bool autoAttach = true);
     void                    usePort(QString port);
     QString                 port();
     QString                 getRomName();
-    void                    reconnect();
+    void                    connect();
     void                    close();
     void                    setAppName(QString name);
     void                    attach(QString deviceName);

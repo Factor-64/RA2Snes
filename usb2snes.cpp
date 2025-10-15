@@ -16,18 +16,11 @@
 
 #include "usb2snes.h"
 #include <QUrl>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QFile>
-#include <QEventLoop>
-#include <QDebug>
-#include <QLoggingCategory>
 
 Q_LOGGING_CATEGORY(log_Usb2snes, "USB2SNES")
 #define sDebug() qCDebug(log_Usb2snes)
 
-Usb2Snes::Usb2Snes(bool autoAttach, QObject *parent) : QObject(parent)
+Usb2Snes::Usb2Snes(bool autoAttach) : QObject()
 {
     m_state = None;
     m_istate = INone;
@@ -56,7 +49,7 @@ QString Usb2Snes::port()
     return m_port;
 }
 
-void Usb2Snes::reconnect()
+void Usb2Snes::connect()
 {
     if (m_state == None)
         m_webSocket.open(QUrl(USB2SNESURL));
