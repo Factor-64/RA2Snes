@@ -13,7 +13,7 @@
 ra2snes::ra2snes(QObject *parent)
     : QObject(parent)
 {
-    usb2snes = new Usb2Snes(false, this);
+    usb2snes = new Usb2Snes(false);
     reader = new MemoryReader(this);
     raclient = RAClient::instance();
     reset = false;
@@ -32,7 +32,7 @@ ra2snes::ra2snes(QObject *parent)
     crashTimer->setSingleShot(true);
     richTimer->setSingleShot(true);
 
-    connect(crashTimer, &QTimer::timeout, this, [this]() {
+    connect(crashTimer, &QTimer::timeout, this, [=]() {
         emit displayMessage("SD2Snes Firmware is unresponsive. Please power cycle the console.", true);
         if(raclient->sendQueuedRequest())
             crashTimer->start(1000);
@@ -40,18 +40,18 @@ ra2snes::ra2snes(QObject *parent)
             crashTimer->start(5000);
     });
 
-    connect(richTimer, &QTimer::timeout, this, [this]() {
+    connect(richTimer, &QTimer::timeout, this, [=]() {
         if(!richText.isEmpty())
             raclient->ping(richText);
         richTimer->start(120000);
     });
 
-    connect(waitTimer, &QTimer::timeout, this, [this]() {
+    connect(waitTimer, &QTimer::timeout, this, [=]() {
         //qDebug() << "ELAPSED" << frameTimer->elapsed();
         onUsb2SnesStateChanged();
     });
 
-    connect(usb2snes, &Usb2Snes::connected, this, [this]() {
+    connect(usb2snes, &Usb2Snes::connected, this, [=]() {
         usb2snes->setAppName("RA2Snes");
         //qDebug() << "Connected to usb2snes server, trying to find a suitable device";
         raclient->clearAchievements();
@@ -59,7 +59,7 @@ ra2snes::ra2snes(QObject *parent)
         emit displayMessage("QUsb2Snes/SNI Connected", false);
     });
 
-    connect(usb2snes, &Usb2Snes::disconnected, this, [this]() {
+    connect(usb2snes, &Usb2Snes::disconnected, this, [=]() {
         if(crashTimer->isActive())
             crashTimer->stop();
         if(richTimer->isActive())
@@ -71,13 +71,13 @@ ra2snes::ra2snes(QObject *parent)
         updateRichText("");
         //qDebug() << "Disconnected, trying to reconnect in 1 sec";
         emit displayMessage("QUsb2Snes/SNI Not Connected", true);
-        QTimer::singleShot(1000, usb2snes, [this] {
+        QTimer::singleShot(1000, this, [=] {
             raclient->sendQueuedRequest();
-            usb2snes->reconnect();
+            usb2snes->connect();
         });
     });
 
-    connect(usb2snes, &Usb2Snes::deviceListDone, this, [this] (QStringList devices) {
+    connect(usb2snes, &Usb2Snes::deviceListDone, this, [=] (QStringList devices) {
         if (!devices.empty())
         {
             //qDebug() << "Getting device list";
@@ -97,7 +97,7 @@ ra2snes::ra2snes(QObject *parent)
             emit clearedAchievements();
             updateRichText("");
             emit displayMessage("Console Not Connected", true);
-            QTimer::singleShot(1000, this, [this] {
+            QTimer::singleShot(1000, this, [=] {
                 raclient->sendQueuedRequest();
                 if (usb2snes->state() == Usb2Snes::Connected)
                     usb2snes->deviceList();
@@ -106,20 +106,20 @@ ra2snes::ra2snes(QObject *parent)
     });
 
     connect(usb2snes, &Usb2Snes::stateChanged, this, &ra2snes::onUsb2SnesStateChanged);
-    connect(usb2snes, &Usb2Snes::gotServerVersion, this, [this] {usb2snes->infos(); });
+    connect(usb2snes, &Usb2Snes::gotServerVersion, this, [=] {usb2snes->infos(); });
     connect(usb2snes, &Usb2Snes::infoDone, this, &ra2snes::onUsb2SnesInfoDone);
     connect(usb2snes, &Usb2Snes::getFileDataReceived, this, &ra2snes::onUsb2SnesGetFileDataReceived);
     connect(usb2snes, &Usb2Snes::getConfigDataReceived, this, &ra2snes::onUsb2SnesGetConfigDataReceived);
     connect(usb2snes, &Usb2Snes::getAddressesDataReceived, this, &ra2snes::onUsb2SnesGetAddressesDataReceived);
     connect(usb2snes, &Usb2Snes::getAddressDataReceived, this, &ra2snes::onUsb2SnesGetAddressDataReceived);
-    connect(usb2snes, &Usb2Snes::getRomTypeDataReceived, this, [this] { doThisTaskNext = GetRamSize; });
-    connect(usb2snes, &Usb2Snes::retryRomType, this, [this] { doThisTaskNext = GetRomType; });
+    connect(usb2snes, &Usb2Snes::getRomTypeDataReceived, this, [=] { doThisTaskNext = GetRamSize; });
+    connect(usb2snes, &Usb2Snes::retryRomType, this, [=] { doThisTaskNext = GetRomType; });
     connect(usb2snes, &Usb2Snes::getNMIDataReceived, this, &ra2snes::onUsb2SnesGetNMIDataReceived);
 
     connect(raclient, &RAClient::loginSuccess, this, &ra2snes::onLoginSuccess);
     connect(raclient, &RAClient::requestFailed, this, &ra2snes::onRequestFailed);
     connect(raclient, &RAClient::requestError, this, &ra2snes::onRequestError);
-    connect(raclient, &RAClient::gotGameID, this, [this] (const int& id){
+    connect(raclient, &RAClient::gotGameID, this, [=] (const int& id){
         m_gameLoaded = true;
         m_loadingGame = false;
         emit displayMessage("Game Loaded", false);
@@ -127,23 +127,23 @@ ra2snes::ra2snes(QObject *parent)
         raclient->getAchievements(id);
     });
 
-    connect(raclient, &RAClient::finishedGameSetup, this, [this] {
+    connect(raclient, &RAClient::finishedGameSetup, this, [=] {
         //qDebug() << "GETTING UNLOCKS";
         raclient->getUnlocks();
     });
 
-    connect(raclient, &RAClient::finishedUnlockSetup, this, [this] {
+    connect(raclient, &RAClient::finishedUnlockSetup, this, [=] {
         //qDebug() << "STARTING SESSION";
         raclient->startSession();
     });
-    connect(raclient, &RAClient::sessionStarted, this, [this] {
+    connect(raclient, &RAClient::sessionStarted, this, [=] {
         emit achievementModelReady();
         emit enableModeSwitching();
         //qDebug() << "INIT TRIGGERS";
         reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getLeaderboards(), raclient->getRichPresence(), usb2snes->getRamSizeData(), m_customFirmware);
     });
 
-    connect(reader, &MemoryReader::finishedMemorySetup, this, [this] {
+    connect(reader, &MemoryReader::finishedMemorySetup, this, [=] {
         //qDebug() << "FINISHING UP";
         uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
         //qDebug() << "Unique Addresses:" << uniqueMemoryAddresses;
@@ -170,24 +170,24 @@ ra2snes::ra2snes(QObject *parent)
         usb2snes->infos();
     });
 
-    connect(reader, &MemoryReader::achievementUnlocked, this, [this](const unsigned int& id, const QDateTime& time) {
+    connect(reader, &MemoryReader::achievementUnlocked, this, [=](const unsigned int& id, const QDateTime& time) {
         //qDebug() << id << time;
         raclient->awardAchievement(id, time);
     });
 
-    connect(reader, &MemoryReader::updateAchievementInfo, this, [this](const unsigned int& id, const AchievementInfoType& infotype, const int& value) {
+    connect(reader, &MemoryReader::updateAchievementInfo, this, [=](const unsigned int& id, const AchievementInfoType& infotype, const int& value) {
         raclient->setAchievementInfo(id, infotype, value);
     });
 
-    connect(reader, &MemoryReader::modifiedAddresses, this, [this] {
+    connect(reader, &MemoryReader::modifiedAddresses, this, [=] {
         updateAddresses = true;
     });
 
-    connect(reader, &MemoryReader::updateRichPresence, this, [this](const QString& status) {
+    connect(reader, &MemoryReader::updateRichPresence, this, [=](const QString& status) {
         updateRichText(status);
     });
 
-    QTimer::singleShot(0, this, [this] { usb2snes->reconnect(); });
+    QTimer::singleShot(0, this, [=] { usb2snes->connect(); });
 }
 
 void ra2snes::signIn(const QString &username, const QString &password, const bool& remember)
@@ -359,7 +359,7 @@ void ra2snes::onLoginSuccess(bool r)
     if(!r)
     {
         emit loginSuccess();
-        QTimer::singleShot(1000, this, [this] {
+        QTimer::singleShot(1000, this, [=] {
             if(downloadUrl != "")
                 emit newUpdate();
         });
@@ -726,12 +726,12 @@ void ra2snes::loadSettings() {
             raclient->loginToken(username, xorEncryptDecrypt(token, time));
         }
         else
-            QTimer::singleShot(0, this, [this] { emit signedOut(); });
+            QTimer::singleShot(0, this, [=] { emit signedOut(); });
     }
     else
     {
         createSettingsFile();
-        QTimer::singleShot(0, this, [this] { emit signedOut(); });
+        QTimer::singleShot(0, this, [=] { emit signedOut(); });
     }
     setCurrentConsole();
 }
