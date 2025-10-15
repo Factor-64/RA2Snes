@@ -56,7 +56,7 @@ QString Usb2Snes::port()
     return m_port;
 }
 
-void Usb2Snes::connect()
+void Usb2Snes::reconnect()
 {
     if (m_state == None)
         m_webSocket.open(QUrl(USB2SNESURL));
