@@ -200,29 +200,22 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
 {
     if (!infos.flags.contains("NO_FILE_CMD"))
     {
-        QString game = infos.romPlaying.remove(QChar('\u0000')).replace("?", " ");
-        bool change = game != m_currentGame;
-        bool lreset = doThisTaskNext == Reset;
-        if(change)
-            m_currentGame = game;
+        m_currentGame = infos.romPlaying.remove(QChar('\u0000')).replace("?", " ");
         if(infos.firmwareVersion.contains("2025"))
             m_customFirmware = true;
         //qDebug() << m_currentGame << infos.firmwareVersion;
-        if (m_currentGame.contains("m3nu.bin") || m_currentGame.contains("menu.bin") || lreset || m_currentGame.isEmpty())
+        if (m_currentGame.contains("m3nu.bin") || m_currentGame.contains("menu.bin") || doThisTaskNext == Reset || m_currentGame.isEmpty())
         {
             doThisTaskNext = GetConsoleConfig;
             setCurrentConsole();
-            if(lreset || change)
-            {
-                updateRichText("");
-                m_gameLoaded = false;
-                raclient->setPatched(false);
-                raclient->clearAchievements();
-                emit clearedAchievements();
-                raclient->clearGame();
-                if(richTimer->isActive())
-                    richTimer->stop();
-            }
+            updateRichText("");
+            m_gameLoaded = false;
+            raclient->setPatched(false);
+            raclient->clearAchievements();
+            emit clearedAchievements();
+            raclient->clearGame();
+            if(richTimer->isActive())
+                richTimer->stop();
         }
         else if (!m_gameLoaded && loggedin && !m_loadingGame)
         {
