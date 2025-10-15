@@ -18,7 +18,11 @@
 #define USB2SNES_H
 
 #include <QObject>
-#include <QtWebSockets/QtWebSockets>
+#include <QWebSocket>
+#include <QWebSocketServer>
+#include <QVersionNumber>
+#include <QTimer>
+#include <QMetaEnum>
 
 
 #define USB2SNESLEGACYURL "ws://localhost:8080/"
