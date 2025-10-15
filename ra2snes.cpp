@@ -321,7 +321,7 @@ void ra2snes::onUsb2SnesGetNMIDataReceived()
     if(checks[0] == 0)
     {
         reader->resetRuntimeData();
-        doThisTaskNext = GetConsoleInfo;
+        reset = true;
         return;
     }
     if(checks[2] && raclient->getHardcore())
