@@ -110,7 +110,7 @@ public:
     void                    usePort(QString port);
     QString                 port();
     QString                 getRomName();
-    void                    connect();
+    void                    reconnect();
     void                    close();
     void                    setAppName(QString name);
     void                    attach(QString deviceName);
