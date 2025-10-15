@@ -502,7 +502,7 @@ void ra2snes::onUsb2SnesStateChanged()
                     break;
             case GetConsoleAddresses:
                 //qDebug() << "get addresses";
-                doThisTaskNext = CheckPatched;
+                doThisTaskNext = GetConsoleInfo;
                 if(updateAddresses)
                 {
                     uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
@@ -601,10 +601,7 @@ void ra2snes::setCurrentConsole()
         }
         if(m_console == "SNES")
         {
-            QString menu = "SD2SNES Menu";
-            if(!usb2snes->firmwareString().isEmpty())
-                menu = ("SD2SNES " + usb2snes->firmwareString() + " Menu");
-            raclient->setTitle(menu, "https://avatars.githubusercontent.com/u/238664?v=4", "https://sd2snes.de/blog/");
+            raclient->setTitle("SD2SNES Menu", "https://avatars.githubusercontent.com/u/238664?v=4", "https://sd2snes.de/blog/");
             raclient->setHash("https://github.com/mrehkopf/sd2snes");
             if(isGB)
             {
