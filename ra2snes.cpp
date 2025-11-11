@@ -416,7 +416,7 @@ void ra2snes::onUsb2SnesStateChanged()
     //qDebug() << "Reset? " << reset;
     if(crashTimer->isActive())
         crashTimer->stop();
-    crashTimer->start(10000);
+    crashTimer->start(20000);
     if(usb2snes->state() == Usb2Snes::Ready)
     {
         if(reset)
