@@ -253,11 +253,11 @@ void Usb2Snes::onWebSocketBinaryReceived(QByteArray message)
     if ((unsigned int) buffer.size() > requestedBinaryReadSize)
         buffer.clear();
     buffer.append(message);
-    //if (message.size() < 100)
-        //sDebug() << "<<B" << message.toHex('-') << message;
-    //else
-        //sDebug() << "<<B" << "Received " << message.size() << " byte of data " << buffer.size() << requestedBinaryReadSize;
-
+    /*if (message.size() < 100)
+        sDebug() << "<<B" << message.toHex('-') << message;
+    else
+        sDebug() << "<<B" << "Received " << message.size() << " byte of data " << buffer.size() << requestedBinaryReadSize;
+    */
     if ((unsigned int) buffer.size() == requestedBinaryReadSize)
     {
         lastBinaryMessage = buffer;
@@ -456,6 +456,30 @@ void Usb2Snes::getNMIData()
     requestedBinaryReadSize = nmiDataSize;
     changeState(GettingNMIData);
     sendRequest(GetAddress, QStringList() << QString::number(0xFFFFFF, 16) << QString::number(nmiDataSize, 16));
+    // We can only send 8 addresses at a time
+    /*m_istate = IBusy;
+    changeState(GettingAddresses);
+    requestedBinaryReadSize = 0;
+    unsigned int total_size = 0;
+    QStringList operands;
+    unsigned int remaining = nmiDataSize;
+    unsigned int offset = 0;
+    while (remaining > 0)
+    {
+        unsigned int size = (remaining >= 255) ? 255 : remaining;
+        operands.append(QString::number(0xFFFFFF - offset, 16));
+        operands.append(QString::number(size, 16));
+        if (operands.size() == 16)
+        {
+            sendRequest(GetAddress, operands);
+            operands.clear();
+        }
+        remaining -= size;
+        ++offset;
+    }
+    if(operands.isEmpty() == false)
+        sendRequest(GetAddress, operands);
+    requestedBinaryReadSize = total_size;*/
 }
 
 void Usb2Snes::setupNMIVectors()

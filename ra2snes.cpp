@@ -318,11 +318,11 @@ void ra2snes::onUsb2SnesGetNMIDataReceived()
     const QByteArray checks = data.last(3);
     data.chop(3);
     //qDebug() << data;
-    //qDebug() << checks;
+    qDebug() << checks;
     if(checks[0] == 0)
     {
+        resetCount = 0;
         reader->resetRuntimeData();
-        reset = true;
         return;
     }
     if(checks[2] && raclient->getHardcore())
@@ -337,7 +337,12 @@ void ra2snes::onUsb2SnesGetNMIDataReceived()
         reader->resetRuntimeData();
         if(resetCount >= 10)
         {
-            doThisTaskNext = NoChecksNeeded;
+            doThisTaskNext = None;
+            usb2snes->menu();
+            QTimer::singleShot(1000, this, [=] {
+                reset = true;
+                onUsb2SnesStateChanged();
+            });
         }
     }
     else
