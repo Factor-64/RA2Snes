@@ -322,12 +322,18 @@ void ra2snes::onUsb2SnesGetNMIDataReceived()
     if(checks[0] == 0)
     {
         resetCount = 0;
+        reset = true;
         reader->resetRuntimeData();
         return;
     }
-    if(checks[2] && raclient->getHardcore())
+    bool hc = raclient->getHardcore();
+    if(checks[2] && hc)
     {
         raclient->setPatched(true);
+        changeMode();
+    }
+    else if(raclient->getAutoHardcore() && !hc)
+    {
         changeMode();
     }
     if(checks[1])
@@ -777,52 +783,57 @@ void ra2snes::changeMode()
     //qDebug() << "Changing Mode";
     UserInfoModel* user = raclient->getUserInfoModel();
     QString reason = "Hardcore Disabled: ";
-    bool needsChange = false;
+    bool needsSoftcore = false;
+    bool oldStatus = user->hardcore();
     //qDebug() << alreadySoftcore;
-    if(user->cheats()) {
+    if(user->cheats())
+    {
         reason += QString("Cheats Enabled");
-        needsChange = true;
+        needsSoftcore = true;
     }
-    if(user->savestates()) {
+    if(user->savestates())
+    {
         if(isGB)
-            reason += (QString(needsChange ? ", " : "") + "Super Game Boy SaveStates Enabled");
+            reason += (QString(needsSoftcore ? ", " : "") + "Super Game Boy SaveStates Enabled");
         else
-            reason += (QString(needsChange ? ", " : "") + "SaveStates Enabled");
-        needsChange = true;
+            reason += (QString(needsSoftcore ? ", " : "") + "SaveStates Enabled");
+        needsSoftcore = true;
     }
-    if(user->patched()) {
-        reason += (QString(needsChange ? ", " : "") + "ROM Patched");
-        needsChange = true;
+    if(user->patched())
+    {
+        reason += (QString(needsSoftcore ? ", " : "") + "ROM Patched");
+        needsSoftcore = true;
     }
     if(user->ingamehooks())
     {
-        reason += (QString(needsChange ? ", " : "") + "InGameHooks Enabled");
-        needsChange = true;
+        reason += (QString(needsSoftcore ? ", " : "") + "InGameHooks Enabled");
+        needsSoftcore = true;
     }
-    if(!needsChange)
+    if(needsSoftcore)
     {
+        user->hardcore(false);
+        emit displayMessage(reason, true);
+    }
+    else
+    {
+
         if(user->autohardcore())
         {
             user->hardcore(true);
             emit displayMessage("Hardcore Enabled", false);
         }
         else
+        {
             user->hardcore(!user->hardcore());
+            needsSoftcore = user->hardcore();
+            reason = (QString(needsSoftcore ? "Hardcore" : "Softcore") + " Enabled");
+            emit displayMessage(reason, needsSoftcore);
+        }
     }
-    else
-    {
-        user->hardcore(false);
-        emit displayMessage(reason, true);
-    }
-    if(m_gameLoaded)
-    {
+    if(oldStatus != user->hardcore() && m_gameLoaded)
         reset = true;
-    }
-    else if(!m_gameLoaded)
-    {
-        //qDebug() << "Enabling Mode Switching";
+    else
         emit enableModeSwitching();
-    }
 }
 
 void ra2snes::autoChange(const bool& ac)
