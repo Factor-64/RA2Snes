@@ -202,7 +202,7 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
     if (!infos.flags.contains("NO_FILE_CMD"))
     {
         m_currentGame = infos.romPlaying.remove(QChar('\u0000')).replace("?", " ");
-        if(infos.firmwareVersion.contains("2025"))
+        if(infos.firmwareVersion.contains("2025") || infos.firmwareVersion.contains("2026"))
             m_customFirmware = true;
         //qDebug() << m_currentGame << infos.firmwareVersion;
         if (m_currentGame.contains("m3nu.bin") || m_currentGame.contains("menu.bin") || doThisTaskNext == Reset || m_currentGame.isEmpty())
@@ -427,7 +427,7 @@ void ra2snes::onUsb2SnesStateChanged()
     //qDebug() << "Reset? " << reset;
     if(crashTimer->isActive())
         crashTimer->stop();
-    crashTimer->start(20000);
+    crashTimer->start(30000);
     if(usb2snes->state() == Usb2Snes::Ready)
     {
         if(reset)
