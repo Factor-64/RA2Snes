@@ -42,7 +42,7 @@ ApplicationWindow {
     }
 
     Shortcut {
-        sequence: StandardKey.Cancel
+        sequence: [StandardKey.Cancel]
         onActivated: {
             mainWindow.toggleFullScreen();
         }
@@ -115,7 +115,7 @@ ApplicationWindow {
         {
             for(var i = 0; i < themeModel.count; i++)
             {
-                var fullString = themeModel.get(i, "fileURL").toString();
+                var fullString = String(themeModel.get(i, "fileURL"));
                 var start = fullString.lastIndexOf("/") + 1;
                 var end = fullString.lastIndexOf(".");
                 var theme = fullString.substring(start, end)
@@ -224,7 +224,7 @@ ApplicationWindow {
             {
                 var now = new Date().getTime();
                 var randomIndex = Math.floor(Math.random() * now % model.count);
-                var fileUrl = model.get(randomIndex, "fileURL").toString();
+                var fileUrl = String(model.get(randomIndex, "fileURL"));
                 if (unlockSound.mediaStatus === MediaPlayer.NoMedia)
                     unlockSound.source = fileUrl;
                 else

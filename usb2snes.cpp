@@ -153,7 +153,7 @@ void Usb2Snes::onWebSocketTextReceived(QString message)
             if (!results.isEmpty())
             {
                 m_firmwareString = results.at(0);
-                qDebug() << m_firmwareString;
+                //sDebug() << m_firmwareString;
                 if (m_firmwareString.right(3) == "gsu")
                     m_firmwareVersion = QVersionNumber(7);
                 else
@@ -493,7 +493,7 @@ void Usb2Snes::setupNMIVectors()
 
 void Usb2Snes::setNMIDataSize(unsigned int size)
 {
-    nmiDataSize = size + 3;
+    nmiDataSize = size;
 }
 
 void Usb2Snes::setAddress(unsigned int addr, QByteArray data, Space space)

@@ -120,7 +120,7 @@ ra2snes::ra2snes(QObject *parent)
     connect(raclient, &RAClient::loginSuccess, this, &ra2snes::onLoginSuccess);
     connect(raclient, &RAClient::requestFailed, this, &ra2snes::onRequestFailed);
     connect(raclient, &RAClient::requestError, this, &ra2snes::onRequestError);
-    connect(raclient, &RAClient::gotGameID, this, [=] (const int& id){
+    connect(raclient, &RAClient::gotGameID, this, [=] (const int& id) {
         m_gameLoaded = true;
         m_loadingGame = false;
         emit displayMessage("Game Loaded", false);
@@ -203,11 +203,22 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
     {
         m_currentGame = infos.romPlaying.remove(QChar('\u0000')).replace("?", " ");
         if(infos.firmwareVersion.contains("2025") || infos.firmwareVersion.contains("2026"))
+        {
+            if(!m_customFirmware)
+                emit displayMessage("Custom firmware detected", false);
             m_customFirmware = true;
+        }
+        else
+        {
+            m_customFirmware = false;
+        }
         //qDebug() << m_currentGame << infos.firmwareVersion;
         if (m_currentGame.contains("m3nu.bin") || m_currentGame.contains("menu.bin") || doThisTaskNext == Reset || m_currentGame.isEmpty())
         {
-            doThisTaskNext = GetConsoleConfig;
+            if(infos.firmwareVersion.isEmpty())
+                doThisTaskNext = GetFirmware;
+            else
+                doThisTaskNext = GetConsoleConfig;
             setCurrentConsole();
             updateRichText("");
             m_gameLoaded = false;
@@ -310,15 +321,16 @@ void ra2snes::onUsb2SnesGetNMIDataReceived()
 {
     vgetTime = frameTimer->restart();
     //qDebug() << "Got NMI Data!";
-    QByteArray data = usb2snes->getBinaryData();
+    QByteArray data = usb2snes->getBinaryData().mid(512);
     // Extra data that tell me the state of sd2snes
     // checks[0] is 1 if in game 0 if in menu
     // checks[1] is 1 if resetting 0 if not
     // checks[2] is 1 if patched 0 if not
     const QByteArray checks = data.last(3);
     data.chop(3);
+
     //qDebug() << data;
-    qDebug() << checks;
+    //qDebug() << checks;
     if(checks[0] == 0)
     {
         resetCount = 0;
@@ -436,23 +448,23 @@ void ra2snes::onUsb2SnesStateChanged()
         {
             case SetupNMIData: {
                 QByteArray out;
-                unsigned int size = 0;
                 const auto addresses = uniqueMemoryAddresses;
+                unsigned int data_size = 515;
+
                 for (const auto &pair : addresses)
                 {
-                    quint32 val24 = pair.first & 0xFFFFFFu;
+                    quint32 addr24 = pair.first & 0xFFFFFFu;
+                    quint8  len    = pair.second & 0xFF;
 
-                    out.append(static_cast<char>((val24 >> 16) & 0xFF));
-                    out.append(static_cast<char>((val24 >> 8) & 0xFF));
+                    out.append(char((addr24 >> 16) & 0xFF));
+                    out.append(char((addr24 >> 8)  & 0xFF));
+                    out.append(char(addr24 & 0xFF));
+                    out.append(char(len));
 
-                    out.append(static_cast<char>(val24 & 0xFF));
-
-                    out.append(static_cast<char>(pair.second & 0xFF));
-                    size += pair.second;
-                    //qDebug() << pair.second;
+                    data_size += len;
                 }
-                //qDebug() << size;
-                usb2snes->setNMIDataSize(size);
+                //qDebug() << data_size;
+                usb2snes->setNMIDataSize(data_size);
                 usb2snes->setAddress(0x2C0C, out, Usb2Snes::CMD);
                 out.clear();
                 out.append(addresses.size());
@@ -537,6 +549,9 @@ void ra2snes::onUsb2SnesStateChanged()
                 else
                     doThisTaskNext = GetConsoleConfig;
                 usb2snes->infos();
+                break;
+            case GetFirmware:
+                usb2snes->infos(true);
                 break;
             case Reset:
                 reset = false;
@@ -986,7 +1001,7 @@ void ra2snes::postTelemetryData()
     QNetworkAccessManager *tempNetworkManager = new QNetworkAccessManager(this);
     connect(tempNetworkManager, &QNetworkAccessManager::finished, this, [this, tempNetworkManager](QNetworkReply *reply) {
         QJsonObject jsonObject = QJsonDocument::fromJson(reply->readAll()).object();
-        qDebug() << jsonObject;
+        //qDebug() << jsonObject;
         reply->deleteLater();
         tempNetworkManager->deleteLater();
     });

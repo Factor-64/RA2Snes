@@ -44,7 +44,7 @@ ApplicationWindow {
         {
             for(var i = 0; i < themeModel.count; i++)
             {
-                var fullString = themeModel.get(i, "fileURL").toString();
+                var fullString = String(themeModel.get(i, "fileURL"));
                 var start = fullString.lastIndexOf("/") + 1;
                 var end = fullString.lastIndexOf(".");
                 var theme = fullString.substring(start, end)
