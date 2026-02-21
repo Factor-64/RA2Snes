@@ -202,7 +202,7 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
     if (!infos.flags.contains("NO_FILE_CMD"))
     {
         m_currentGame = infos.romPlaying.remove(QChar('\u0000')).replace("?", " ");
-        if(infos.firmwareVersion.contains("2025") || infos.firmwareVersion.contains("2026"))
+        if(infos.firmwareVersion.contains("RA2SNES"))
         {
             if(!m_customFirmware)
                 emit displayMessage("Custom firmware detected", false);

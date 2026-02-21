@@ -16,6 +16,7 @@ Column {
     // Spacer for primed mode
     Item {
         height: root.mode === 0 ? 16 : 0
+        width: 1
     }
 
     // Score label (only in score mode)
