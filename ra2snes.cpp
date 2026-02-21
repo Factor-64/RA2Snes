@@ -23,7 +23,6 @@ ra2snes::ra2snes(QObject *parent)
     downloadUrl = "";
     m_appDirPath = "";
     richText = "";
-    resetCount = 0;
     initVars();
     crashTimer = new QTimer(this);
     richTimer = new QTimer(this);
@@ -333,7 +332,6 @@ void ra2snes::onUsb2SnesGetNMIDataReceived()
     //qDebug() << checks;
     if(checks[0] == 0)
     {
-        resetCount = 0;
         reset = true;
         reader->resetRuntimeData();
         return;
@@ -351,21 +349,15 @@ void ra2snes::onUsb2SnesGetNMIDataReceived()
     if(checks[1])
     {
         //qDebug() << "RESET!";
-        resetCount++;
+        doThisTaskNext = None;
         reader->resetRuntimeData();
-        if(resetCount >= 10)
-        {
-            doThisTaskNext = None;
-            usb2snes->menu();
-            QTimer::singleShot(1000, this, [=] {
-                reset = true;
-                onUsb2SnesStateChanged();
-            });
-        }
+        QTimer::singleShot(500, this, [=] {
+            doThisTaskNext = GetNMIData;
+            onUsb2SnesStateChanged();
+        });
     }
     else
     {
-        resetCount = 0;
         unsigned int framesPassed = std::round(std::abs((vgetTime + programTime) * 0.0600988138974405));
         if(framesPassed < 1)
             framesPassed = 1;
