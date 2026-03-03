@@ -80,7 +80,7 @@ private:
     void handlePatchResponse(const QJsonObject& jsonObject);
     void handleUnlocksResponse(const QJsonObject& jsonObject);
     void handleStartSessionResponse(const QJsonObject& jsonObject);
-    void handlePingResponse(const QJsonObject& jsonObject);
+    //void handlePingResponse(const QJsonObject& jsonObject);
     QString latestRequest;
     bool warning;
     bool m_refresh;

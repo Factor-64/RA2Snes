@@ -32,11 +32,14 @@ ra2snes::ra2snes(QObject *parent)
     richTimer->setSingleShot(true);
 
     connect(crashTimer, &QTimer::timeout, this, [=]() {
-        emit displayMessage("SD2Snes Firmware is unresponsive. Please power cycle the console.", true);
-        if(raclient->sendQueuedRequest())
-            crashTimer->start(1000);
+        if(doThisTaskNext == GetNMIData)
+            emit displayMessage("Currently waiting on data from SD2Snes! Please wait.", false);
         else
-            crashTimer->start(5000);
+            emit displayMessage("SD2Snes Firmware is unresponsive. Please power cycle the console.", true);
+        if(raclient->sendQueuedRequest())
+            crashTimer->start(3000);
+        else
+            crashTimer->start(10000);
     });
 
     connect(richTimer, &QTimer::timeout, this, [=]() {
@@ -114,7 +117,6 @@ ra2snes::ra2snes(QObject *parent)
     connect(usb2snes, &Usb2Snes::getAddressDataReceived, this, &ra2snes::onUsb2SnesGetAddressDataReceived);
     connect(usb2snes, &Usb2Snes::getRomTypeDataReceived, this, [=] { doThisTaskNext = GetRamSize; });
     connect(usb2snes, &Usb2Snes::retryRomType, this, [=] { doThisTaskNext = GetRomType; });
-    connect(usb2snes, &Usb2Snes::getNMIDataReceived, this, &ra2snes::onUsb2SnesGetNMIDataReceived);
 
     connect(raclient, &RAClient::loginSuccess, this, &ra2snes::onLoginSuccess);
     connect(raclient, &RAClient::requestFailed, this, &ra2snes::onRequestFailed);
@@ -280,11 +282,53 @@ void ra2snes::onUsb2SnesGetConfigDataReceived()
 void ra2snes::onUsb2SnesGetAddressesDataReceived()
 {
     vgetTime = frameTimer->restart();
+    QByteArray data = usb2snes->getBinaryData();
+    if(m_customFirmware)
+    {
+        // Extra data that tell me the state of sd2snes
+        // checks[0] is 1 if in game 0 if in menu
+        // checks[1] is 1 if resetting 0 if not
+        // checks[2] is 1 if patched 0 if not
+        const QByteArray checks = data.last(3);
+        data.chop(3);
+
+        qDebug() << data.size();
+        qDebug() << checks;
+        //qDebug() << data.toHex(' ');
+        //doThisTaskNext = None;
+        //return;
+        if(checks[0] == 0)
+        {
+            reset = true;
+            reader->resetRuntimeData();
+            return;
+        }
+        bool hc = raclient->getHardcore();
+        if(checks[2] && hc)
+        {
+            raclient->setPatched(true);
+            changeMode();
+        }
+        else if(raclient->getAutoHardcore() && !hc)
+        {
+            changeMode();
+        }
+        if(checks[1])
+        {
+            //qDebug() << "RESET!";
+            doThisTaskNext = None;
+            reader->resetRuntimeData();
+            QTimer::singleShot(500, this, [=] {
+                doThisTaskNext = GetNMIData;
+                onUsb2SnesStateChanged();
+            });
+            return;
+        }
+    }
     unsigned int framesPassed = std::round(std::abs((vgetTime + programTime) * 0.0600988138974405));
     if(framesPassed < 1)
         framesPassed = 1;
-    //qDebug() << "Frames: " << framesPassed;
-    QByteArray data = usb2snes->getBinaryData();
+    qDebug() << "Frames: " << framesPassed;
     reader->processFrames(data, framesPassed);
     //qDebug() << usb2snes->getBinaryData();
 }
@@ -314,56 +358,6 @@ void ra2snes::onUsb2SnesGetAddressDataReceived()
     else
         raclient->setPatched(false);
     //qDebug() << "Finished Patch Check";
-}
-
-void ra2snes::onUsb2SnesGetNMIDataReceived()
-{
-    vgetTime = frameTimer->restart();
-    //qDebug() << "Got NMI Data!";
-    QByteArray data = usb2snes->getBinaryData().mid(512);
-    // Extra data that tell me the state of sd2snes
-    // checks[0] is 1 if in game 0 if in menu
-    // checks[1] is 1 if resetting 0 if not
-    // checks[2] is 1 if patched 0 if not
-    const QByteArray checks = data.last(3);
-    data.chop(3);
-
-    //qDebug() << data;
-    //qDebug() << checks;
-    if(checks[0] == 0)
-    {
-        reset = true;
-        reader->resetRuntimeData();
-        return;
-    }
-    bool hc = raclient->getHardcore();
-    if(checks[2] && hc)
-    {
-        raclient->setPatched(true);
-        changeMode();
-    }
-    else if(raclient->getAutoHardcore() && !hc)
-    {
-        changeMode();
-    }
-    if(checks[1])
-    {
-        //qDebug() << "RESET!";
-        doThisTaskNext = None;
-        reader->resetRuntimeData();
-        QTimer::singleShot(500, this, [=] {
-            doThisTaskNext = GetNMIData;
-            onUsb2SnesStateChanged();
-        });
-    }
-    else
-    {
-        unsigned int framesPassed = std::round(std::abs((vgetTime + programTime) * 0.0600988138974405));
-        if(framesPassed < 1)
-            framesPassed = 1;
-        //qDebug() << "Frames: " << framesPassed;
-        reader->processFrames(data, framesPassed);
-    }
 }
 
 void ra2snes::onLoginSuccess(bool r)
@@ -431,7 +425,7 @@ void ra2snes::onUsb2SnesStateChanged()
     //qDebug() << "Reset? " << reset;
     if(crashTimer->isActive())
         crashTimer->stop();
-    crashTimer->start(30000);
+    crashTimer->start(20000);
     if(usb2snes->state() == Usb2Snes::Ready)
     {
         if(reset)
@@ -439,43 +433,25 @@ void ra2snes::onUsb2SnesStateChanged()
         switch(doThisTaskNext)
         {
             case SetupNMIData: {
-                QByteArray out;
-                const auto addresses = uniqueMemoryAddresses;
-                unsigned int data_size = 515;
-
-                for (const auto &pair : addresses)
-                {
-                    quint32 addr24 = pair.first & 0xFFFFFFu;
-                    quint8  len    = pair.second & 0xFF;
-
-                    out.append(char((addr24 >> 16) & 0xFF));
-                    out.append(char((addr24 >> 8)  & 0xFF));
-                    out.append(char(addr24 & 0xFF));
-                    out.append(char(len));
-
-                    data_size += len;
-                }
-                //qDebug() << data_size;
-                usb2snes->setNMIDataSize(data_size);
-                usb2snes->setAddress(0x2C0C, out, Usb2Snes::CMD);
-                out.clear();
-                out.append(addresses.size());
-                usb2snes->setAddress(0x2C0B, out, Usb2Snes::CMD);
-
-                const QByteArray nmiHook = QByteArray::fromHex(
-                    "08E220"     // PHP; SEP #$20
-                    "EE0A2C"     // INC $2C0A
-                    "286CEAFF"   // PLP; JMP ($FFEA)
-                );
-                usb2snes->setAddress(0x2C00, nmiHook, Usb2Snes::CMD);
+                emit displayMessage("Setting up SD2SNES for NMI Data. This may take a while.", false);
+                doThisTaskNext = SetupNMIData2;
+                usb2snes->setNMIHook();
+                usb2snes->setVectorsSize(uniqueMemoryAddresses.size());
+                break;
+            }
+            case SetupNMIData2: {
                 doThisTaskNext = GetNMIData;
-                usb2snes->setupNMIVectors();
+                usb2snes->setupNMIVectors(uniqueMemoryAddresses);
+                usb2snes->getNMIData();
+                //doThisTaskNext = None;
+                //return;
                 break;
             }
             case GetNMIData:
                 if(updateAddresses)
                 {
                     updateAddresses = false;
+                    uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
                     doThisTaskNext = SetupNMIData;
                     onUsb2SnesStateChanged();
                     return;
@@ -992,7 +968,7 @@ void ra2snes::postTelemetryData()
 {
     QNetworkAccessManager *tempNetworkManager = new QNetworkAccessManager(this);
     connect(tempNetworkManager, &QNetworkAccessManager::finished, this, [this, tempNetworkManager](QNetworkReply *reply) {
-        QJsonObject jsonObject = QJsonDocument::fromJson(reply->readAll()).object();
+        //QJsonObject jsonObject = QJsonDocument::fromJson(reply->readAll()).object();
         //qDebug() << jsonObject;
         reply->deleteLater();
         tempNetworkManager->deleteLater();

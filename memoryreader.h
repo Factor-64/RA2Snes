@@ -31,6 +31,7 @@ private:
     void decrementAddressCounts(rc_memrefs_t& memrefs);
     //void checkMemoryConsistency(QByteArray& data, unsigned int& frames);
     void remapTriggerAddresses(bool modified);
+    void mergeAddresses(const unsigned int blockSize);
     QList<QPair<unsigned int, unsigned int>> uniqueMemoryAddresses;
     //QList<QByteArray> oldMemory;
     QMap<unsigned int, rc_trigger_with_memrefs_t*> achievementTriggers;

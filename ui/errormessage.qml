@@ -26,7 +26,8 @@ Item {
             outer.mainWindow.errorHeight = height;
         }
 
-        function showRichPresence() {
+        function showRichPresence()
+        {
             if(errorMessage.color == themeLoader.item.basicTextColor && outer.mainWindow.compact)
             {
                 errorMessage.color = themeLoader.item.basicTextColor;
@@ -60,7 +61,7 @@ Item {
 
         Timer {
             id: fadeOutTimer
-            interval: 5000
+            interval: 10000
             running: false
             repeat: false
             onTriggered: {
@@ -68,7 +69,8 @@ Item {
             }
         }
 
-        function showErrorMessage(error, iserror) {
+        function showErrorMessage(error, iserror)
+        {
             errorMessage.font.pixelSize = 13;
             if(iserror)
                 errorMessage.color = themeLoader.item.errorMessageTextColor;
@@ -89,7 +91,8 @@ Item {
 
         Connections {
             target: Ra2snes
-            function onDisplayMessage(error, iserror) {
+            function onDisplayMessage(error, iserror)
+            {
                 errorMessage.showErrorMessage(error, iserror);
             }
         }

@@ -50,8 +50,7 @@ public:
         GettingConfig,
         GettingRomType,
         GettingRamSize,
-        GettingNMIData,
-        SettingUpVectors
+        SettingVectorSize
     };
     enum sd2snesState {
         sd2menu,
@@ -147,8 +146,9 @@ public:
     void                    setReciever();
     void                    unsetReciever();
     void                    getNMIData();
-    void                    setNMIDataSize(unsigned int size);
-    void                    setupNMIVectors();
+    void                    setupNMIVectors(const QList<QPair<unsigned int, unsigned int>> addresses);
+    void                    setNMIHook();
+    void                    setVectorsSize(const unsigned int size);
 
 signals:
     void    stateChanged();
@@ -193,6 +193,7 @@ private:
     QVersionNumber  m_firmwareVersion;
     QString         m_firmwareString;
     QVersionNumber  m_serverVersion;
+    QString         m_serverString;
     InternalState   m_istate;
     QStringList     m_deviceList;
     int             m_fileSize;
@@ -204,7 +205,6 @@ private:
     QMetaEnum       metaCommands;
     unsigned int    romType;
     unsigned int    ramSize;
-    unsigned int    nmiDataSize;
 
     QByteArray      fileDataToSend;
 
@@ -214,6 +214,8 @@ private:
     void            changeState(State s);
     void            startSyncCall();
     void            endSyncCall();
+
+    QList<QPair<unsigned int, unsigned int>> m_nmiVectors;
 
     QStringList     getJsonResults(QString json);
 

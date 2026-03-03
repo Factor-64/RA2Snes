@@ -34,6 +34,7 @@ public:
         GetRomType,
         GetFirmware,
         SetupNMIData,
+        SetupNMIData2,
         GetNMIData
     };
     Q_ENUM(Task)
@@ -130,6 +131,7 @@ private:
     QElapsedTimer* frameTimer;
     unsigned int programTime;
     unsigned int vgetTime;
+    unsigned int nmiWarmingSize;
 };
 
 #endif // RA2SNES_H

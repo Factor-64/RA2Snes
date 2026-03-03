@@ -114,36 +114,43 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
         }
     }
 
-    /*if(!leaderboards.empty())
-    {
-        for(const LeaderboardInfo& leaderboard : leaderboards)
-        {
-            QByteArray data = leaderboard.mem_addr.toLocal8Bit();
-            const char* mem_addr = data.constData();
-            rc_lboard_t* lboard;
-            size_t lboard_size = rc_lboard_size(mem_addr);
-            void* lboard_buffer = malloc(lboard_size);
-            lboard = rc_parse_lboard(lboard_buffer, mem_addr, NULL, 0);
-            rc_memref_t* nextref = lboard->memrefs;
-            leaderboardTriggers[leaderboard.id] = lboard;
-            while(nextref != nullptr)
-            {
-                if(uniqueAddresses[nextref->address] < nextref->value.size + 1)
-                    uniqueAddresses[nextref->address] = nextref->value.size + 1;
-                nextref = nextref->next;
-            }
-        }
-    }*/
     //unsigned int total = 0;
     for(auto it = uniqueAddresses.begin(); it != uniqueAddresses.end(); ++it)
     {
         uniqueMemoryAddresses.append(qMakePair(it.key(), it.value()));
         //total += it.value();
     }
-
+    //qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size();
     //qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size() << total;
-    unsigned int blockSize = 255 + customFirmware;
-    //qDebug() << blockSize;
+    //qDebug() << uniqueMemoryAddresses.size() << total;
+
+    if(customFirmware)
+    {
+        unsigned int amount = 4;
+        while(uniqueMemoryAddresses.size() > 255)
+        {
+            mergeAddresses(amount);
+            amount += 4;
+        }
+    }
+    else
+    {
+        mergeAddresses(255);
+    }
+
+    /*total = 0;
+    for (int i = 0; i < uniqueMemoryAddresses.size(); ++i)
+    {
+        total += uniqueMemoryAddresses[i].second;
+    }*/
+    //qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size() << total;
+    //qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size();
+    //qDebug() << uniqueMemoryAddresses.size() << total;
+    remapTriggerAddresses(false);
+}
+
+void MemoryReader::mergeAddresses(unsigned int blockSize)
+{
     for (int i = 0; i + 1 < uniqueMemoryAddresses.size(); )
     {
         auto &current = uniqueMemoryAddresses[i];
@@ -164,16 +171,6 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
             ++i;
         }
     }
-
-    /*total = 0;
-    for (int i = 0; i < uniqueMemoryAddresses.size(); ++i)
-    {
-        total += uniqueMemoryAddresses[i].second;
-    }*/
-    //qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size() << total;
-    //qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size();
-
-    remapTriggerAddresses(false);
 }
 
 void MemoryReader::remapTriggerAddresses(bool modified)
@@ -340,74 +337,8 @@ void MemoryReader::decrementAddressCounts(rc_memrefs_t& memrefs)
     }
 }
 
-/*void MemoryReader::checkMemoryConsistency(QByteArray &data, unsigned int& frames)
-{
-    const int frameCount = oldMemory.size();
-    const int size = data.size();
-
-    if (std::all_of(oldMemory.begin(), oldMemory.end(),
-                    [&](const QByteArray &m){ return m == data; }))
-        return;
-
-    for (int x = 0; x < size; ++x)
-    {
-        int matchCount = 0;
-        std::array<int, 256> counts{};
-
-        const quint8 dataValue = static_cast<quint8>(data[x]);
-        const quint8 upValue   = static_cast<quint8>(dataValue + frames);
-        const quint8 downValue = static_cast<quint8>(dataValue - frames);
-
-        for (const auto &frame : std::as_const(oldMemory))
-        {
-            const quint8 value = static_cast<quint8>(frame[x]);
-            counts[value]++;
-
-            if (value == dataValue || value == upValue || value == downValue)
-                ++matchCount;
-        }
-
-        const unsigned int majority = (frameCount / 2) + 1;
-        //qDebug() << "Majority" << majority;
-
-        if (matchCount < majority)
-        {
-            quint8 bestValue = 0;
-            int bestCount = 0;
-            for (int b = 0; b < 256; ++b)
-            {
-                if (counts[b] > bestCount)
-                {
-                    bestCount = counts[b];
-                    bestValue = static_cast<quint8>(b);
-                }
-            }
-            if (bestCount >= majority)
-            {
-                //qDebug() << "Changing" << unsigned(data[x]) << x << "to" << bestValue;
-                data[x] = static_cast<char>(bestValue);
-            }
-        }
-    }
-}*/
-
 void MemoryReader::processFrames(QByteArray& data, unsigned int& frames)
 {
-    //QElapsedTimer timer;
-    //timer.start();
-    /*constexpr int MaxFrames = 60;
-
-    if (oldMemory.size() >= MaxFrames)
-    {
-        auto oldData = data;
-        checkMemoryConsistency(data, frames);
-        oldMemory[currentRead] = oldData;
-        currentRead = (currentRead + 1) % MaxFrames;
-        //qDebug() << "Replacing" << currentRead;
-    }
-    else
-        oldMemory.append(data);
-    */
     memory_t mem;
     mem.ram = reinterpret_cast<uint8_t*>(const_cast<char*>(data.constData()));
     mem.size = data.size();
@@ -483,11 +414,6 @@ void MemoryReader::processFrames(QByteArray& data, unsigned int& frames)
 
         --frames;
     }
-    /*qint64 elapsedNs = timer.nsecsElapsed(); // nanoseconds
-    qint64 elapsedUs = elapsedNs / 1000;     // microseconds
-    qint64 elapsedMs = elapsedUs / 1000;     // milliseconds
-
-    qDebug() << "Elapsed:" << elapsedUs << "µs (" << elapsedMs << "ms)";*/
 }
 
 void MemoryReader::resetRuntimeData()

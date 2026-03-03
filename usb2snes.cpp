@@ -33,7 +33,6 @@ Usb2Snes::Usb2Snes(bool autoAttach) : QObject()
     m_istate = INone;
     romType = 0x7FD5;
     ramSize = 0;
-    nmiDataSize = 0;
 
     QObject::connect(&m_webSocket, &QWebSocket::textMessageReceived, this, &Usb2Snes::onWebSocketTextReceived);
     QObject::connect(&m_webSocket, &QWebSocket::connected, this, &Usb2Snes::onWebSocketConnected);
@@ -181,8 +180,9 @@ void Usb2Snes::onWebSocketTextReceived(QString message)
             QStringList results = getJsonResults(message);
             if (!results.isEmpty())
             {
+                m_serverString = results.at(0);
                 m_serverVersion = QVersionNumber::fromString(results.at(0));
-                //sDebug() << m_serverVersion;
+                //sDebug() << m_serverString;
                 emit gotServerVersion();
             }
             m_istate = IReady;
@@ -253,7 +253,7 @@ void Usb2Snes::onWebSocketBinaryReceived(QByteArray message)
     if ((unsigned int) buffer.size() > requestedBinaryReadSize)
         buffer.clear();
     buffer.append(message);
-    /*if (message.size() < 100)
+    /*if (message.size() < 256)
         sDebug() << "<<B" << message.toHex('-') << message;
     else
         sDebug() << "<<B" << "Received " << message.size() << " byte of data " << buffer.size() << requestedBinaryReadSize;
@@ -264,10 +264,6 @@ void Usb2Snes::onWebSocketBinaryReceived(QByteArray message)
         emit binaryMessageReceived();
         switch(m_state)
         {
-            case GettingNMIData: {
-                emit getNMIDataReceived();
-                break;
-            }
             case GettingAddresses: {
                 emit getAddressesDataReceived();
                 break;
@@ -391,7 +387,8 @@ void Usb2Snes::getAddress(unsigned int addr, unsigned int size, Space space)
     m_istate = IBusy;
     binaryDataSent = 0;
     requestedBinaryReadSize = size;
-    changeState(GettingAddress);
+    if(m_state != SettingVectorSize)
+        changeState(GettingAddress);
     sendRequest(GetAddress, QStringList() << QString::number(addr, 16) << QString::number(size, 16), space);
 }
 
@@ -451,49 +448,60 @@ void Usb2Snes::isPatchedROM()
 
 void Usb2Snes::getNMIData()
 {
-    m_istate = IBusy;
+    getAddresses(m_nmiVectors);
+    //m_istate = IBusy;
+    //binaryDataSent = 0;
+    //requestedBinaryReadSize = nmiDataSize;
+    //changeState(GettingNMIData);
+    //sendRequest(GetAddress, QStringList() << QString::number(0xFFFFFF, 16) << QString::number(nmiDataSize, 16));
+}
+
+void Usb2Snes::setNMIHook()
+{
+    const QByteArray nmiHook = QByteArray::fromHex(
+        "08E220"     // PHP; SEP #$20
+        "EE0A2C"     // INC $2C0A
+        "286CEAFF"   // PLP; JMP ($FFEA)
+        );
+    setAddress(0x2C00, nmiHook, Usb2Snes::CMD);
+}
+
+void Usb2Snes::setupNMIVectors(const QList<QPair<unsigned int, unsigned int>> addresses)
+{
+    //qDebug() << m_serverString;
     binaryDataSent = 0;
-    requestedBinaryReadSize = nmiDataSize;
-    changeState(GettingNMIData);
-    sendRequest(GetAddress, QStringList() << QString::number(0xFFFFFF, 16) << QString::number(nmiDataSize, 16));
-    // We can only send 8 addresses at a time
-    /*m_istate = IBusy;
-    changeState(GettingAddresses);
-    requestedBinaryReadSize = 0;
-    unsigned int total_size = 0;
-    QStringList operands;
-    unsigned int remaining = nmiDataSize;
-    unsigned int offset = 0;
-    while (remaining > 0)
+    QByteArray out;
+    int size = 3;
+    for(const auto &pair : addresses)
     {
-        unsigned int size = (remaining >= 255) ? 255 : remaining;
-        operands.append(QString::number(0xFFFFFF - offset, 16));
-        operands.append(QString::number(size, 16));
-        if (operands.size() == 16)
-        {
-            sendRequest(GetAddress, operands);
-            operands.clear();
-        }
-        remaining -= size;
-        ++offset;
+        quint32 addr24 = pair.first & 0xFFFFFFu;
+        quint8  len    = pair.second & 0xFF;
+
+        out.append(char((addr24 >> 16) & 0xFF));
+        out.append(char((addr24 >> 8)  & 0xFF));
+        out.append(char(addr24 & 0xFF));
+        out.append(char(len));
+
+        size += pair.second;
     }
-    if(operands.isEmpty() == false)
-        sendRequest(GetAddress, operands);
-    requestedBinaryReadSize = total_size;*/
+    m_nmiVectors.clear();
+    qDebug() << out.size() << size;
+    while(size > 0)
+    {
+        int s = 255;
+        if(size < s)
+            s = size;
+        m_nmiVectors.append(qMakePair(0xFFFFFF, s));
+        size -= 255;
+    }
+    qDebug() << m_nmiVectors;
+    setAddress(0xFFFFFE, out);
 }
 
-void Usb2Snes::setupNMIVectors()
+void Usb2Snes::setVectorsSize(const unsigned int size)
 {
-    m_istate = IBusy;
-    binaryDataSent = 0;
-    requestedBinaryReadSize = 1;
-    changeState(SettingUpVectors);
-    sendRequest(GetAddress, QStringList() << QString::number(0xFFFFFE, 16) << QString::number(1, 16));
-}
-
-void Usb2Snes::setNMIDataSize(unsigned int size)
-{
-    nmiDataSize = size;
+    changeState(SettingVectorSize);
+    getAddress(0xFFFFFD, size);
 }
 
 void Usb2Snes::setAddress(unsigned int addr, QByteArray data, Space space)
