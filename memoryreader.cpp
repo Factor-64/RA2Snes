@@ -132,6 +132,7 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
             mergeAddresses(amount);
             amount += 4;
         }
+        //mergeAddresses(64);
     }
     else
     {
@@ -142,8 +143,8 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
     for (int i = 0; i < uniqueMemoryAddresses.size(); ++i)
     {
         total += uniqueMemoryAddresses[i].second;
-    }*/
-    //qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size() << total;
+    }
+    qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size() << total;*/
     //qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size();
     //qDebug() << uniqueMemoryAddresses.size() << total;
     remapTriggerAddresses(false);

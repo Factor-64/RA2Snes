@@ -456,6 +456,7 @@ void ra2snes::onUsb2SnesStateChanged()
                     onUsb2SnesStateChanged();
                     return;
                 }
+                programTime = frameTimer->elapsed();
                 frameTimer->restart();
                 usb2snes->getNMIData();
                 //qDebug() << "PT" << programTime << "VT" << vgetTime;
