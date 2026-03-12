@@ -456,24 +456,9 @@ void ra2snes::onUsb2SnesStateChanged()
                     onUsb2SnesStateChanged();
                     return;
                 }
-                programTime = frameTimer->elapsed();
+                frameTimer->restart();
+                usb2snes->getNMIData();
                 //qDebug() << "PT" << programTime << "VT" << vgetTime;
-                if(programTime + vgetTime > 15)
-                {
-                    frameTimer->restart();
-                    usb2snes->getNMIData();
-                }
-                else
-                {
-                    int time = 16 - (programTime + vgetTime);
-                    if(time > 0)
-                        waitTimer->start(time);
-                    else
-                    {
-                        onUsb2SnesStateChanged();
-                        return;
-                    }
-                }
                 break;
             case CheckPatched:
                 //qDebug() << "check patch";
