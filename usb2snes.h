@@ -136,13 +136,13 @@ public:
     QVersionNumber          serverVersion();
     bool                    patchROM(QString patch);
     QByteArray              getBinaryData();
+    QByteArray              getFrameData();
     void                    getConfig();
     void                    isPatchedROM();
     void                    getRomType();
     void                    getRamSize();
     unsigned int            getRomTypeData();
     unsigned int            getRamSizeData();
-    void                    clearBinaryData();
     void                    setReciever();
     void                    unsetReciever();
     void                    getNMIData();
@@ -200,6 +200,7 @@ private:
     unsigned int    binaryDataSent;
     Usb2SnesCommand m_currentCommand;
     QByteArray      lastBinaryMessage;
+    QByteArray      frameData;
     QString         lastTextMessage;
     unsigned int    requestedBinaryReadSize;
     QMetaEnum       metaCommands;

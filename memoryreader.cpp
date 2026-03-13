@@ -127,7 +127,7 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
     if(customFirmware)
     {
         unsigned int amount = 4;
-        while(uniqueMemoryAddresses.size() > 255)
+        while(uniqueMemoryAddresses.size() > 320)
         {
             mergeAddresses(amount);
             amount += 4;

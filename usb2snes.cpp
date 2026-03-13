@@ -265,6 +265,7 @@ void Usb2Snes::onWebSocketBinaryReceived(QByteArray message)
         switch(m_state)
         {
             case GettingAddresses: {
+                frameData = buffer;
                 emit getAddressesDataReceived();
                 break;
             }
@@ -483,9 +484,24 @@ void Usb2Snes::setupNMIVectors(const QList<QPair<unsigned int, unsigned int>> ad
         out.append(char(len));
 
         size += pair.second;
+
+        if(out.size() >= 64)
+        {
+            setAddress(0xFFFFFE, out);
+            out.clear();
+        }
     }
     m_nmiVectors.clear();
     //sDebug() << out.size() << size;
+    if(!out.isEmpty())
+    {
+        setAddress(0xFFFFFE, out);
+        out.clear();
+    }
+    quint16 l = addresses.size();
+    out.append(char((l >> 8)  & 0xFF));
+    out.append(char(l & 0xFF));
+    setAddress(0xFFFFFD, out);
     while(size > 0)
     {
         int s = 255;
@@ -495,7 +511,6 @@ void Usb2Snes::setupNMIVectors(const QList<QPair<unsigned int, unsigned int>> ad
         size -= 255;
     }
     //sDebug() << m_nmiVectors;
-    setAddress(0xFFFFFE, out);
 }
 
 void Usb2Snes::setVectorsSize(const unsigned int size)
@@ -656,9 +671,9 @@ QByteArray Usb2Snes::getBinaryData()
     return lastBinaryMessage;
 }
 
-void Usb2Snes::clearBinaryData()
+QByteArray Usb2Snes::getFrameData()
 {
-    lastBinaryMessage.clear();
+    return frameData;
 }
 
 unsigned int Usb2Snes::getRomTypeData()

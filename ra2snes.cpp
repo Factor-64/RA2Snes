@@ -28,16 +28,25 @@ ra2snes::ra2snes(QObject *parent)
     richTimer = new QTimer(this);
     waitTimer = new QTimer(this);
     frameTimer = new QElapsedTimer();
+    waitTimer->setTimerType(Qt::PreciseTimer);
+    waitTimer->setSingleShot(true);
     crashTimer->setSingleShot(true);
     richTimer->setSingleShot(true);
 
     connect(crashTimer, &QTimer::timeout, this, [=]() {
+        bool t = false;
         if(doThisTaskNext == GetNMIData)
-            emit displayMessage("Currently waiting on data from SD2Snes! Please wait.", false);
+        {
+            emit displayMessage("Currently waiting on data from SD2Snes!", false);
+            t = raclient->sendQueuedRequest();
+        }
         else
-            emit displayMessage("SD2Snes Firmware is unresponsive. Please power cycle the console.", true);
-        if(raclient->sendQueuedRequest())
-            crashTimer->start(3000);
+        {
+            emit displayMessage("SD2Snes Firmware is unresponsive (It may be busy).", true);
+            t = raclient->sendQueuedRequest();
+        }
+        if(t)
+            crashTimer->start(5000);
         else
             crashTimer->start(10000);
     });
@@ -50,6 +59,10 @@ ra2snes::ra2snes(QObject *parent)
 
     connect(waitTimer, &QTimer::timeout, this, [=]() {
         //qDebug() << "ELAPSED" << frameTimer->elapsed();
+        //qDebug() << "WAIT TIMER EXPIRED";
+        //if(m_customFirmware)
+            //onUsb2SnesGetAddressesDataReceived();
+        //else
         onUsb2SnesStateChanged();
     });
 
@@ -282,7 +295,7 @@ void ra2snes::onUsb2SnesGetConfigDataReceived()
 void ra2snes::onUsb2SnesGetAddressesDataReceived()
 {
     vgetTime = frameTimer->restart();
-    QByteArray data = usb2snes->getBinaryData();
+    QByteArray data = usb2snes->getFrameData();
     if(m_customFirmware)
     {
         // Extra data that tell me the state of sd2snes
@@ -324,6 +337,7 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
             });
             return;
         }
+        //waitTimer->start(1000 / 60);
     }
     unsigned int framesPassed = std::round(std::abs((vgetTime + programTime) * 0.0600988138974405));
     if(framesPassed < 1)
@@ -509,7 +523,6 @@ void ra2snes::onUsb2SnesStateChanged()
                 break;
             case Reset:
                 reset = false;
-                usb2snes->clearBinaryData();
                 usb2snes->infos();
                 break;
             case NoChecksNeeded:
