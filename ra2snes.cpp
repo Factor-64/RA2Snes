@@ -162,7 +162,7 @@ ra2snes::ra2snes(QObject *parent)
         //qDebug() << "FINISHING UP";
         uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
         //qDebug() << "Unique Addresses:" << uniqueMemoryAddresses;
-        if(uniqueMemoryAddresses.empty())
+        if(uniqueMemoryAddresses.isEmpty())
             doThisTaskNext = NoChecksNeeded;
         else
         {
@@ -462,7 +462,10 @@ void ra2snes::onUsb2SnesStateChanged()
                 {
                     updateAddresses = false;
                     uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
-                    doThisTaskNext = SetupNMIData;
+                    if(!uniqueMemoryAddresses.isEmpty())
+                        doThisTaskNext = SetupNMIData;
+                    else
+                        doThisTaskNext = NoChecksNeeded;
                     onUsb2SnesStateChanged();
                     return;
                 }
@@ -488,6 +491,12 @@ void ra2snes::onUsb2SnesStateChanged()
                 {
                     uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
                     updateAddresses = false;
+                    if(uniqueMemoryAddresses.isEmpty())
+                    {
+                        doThisTaskNext = NoChecksNeeded;
+                        onUsb2SnesStateChanged();
+                        return;
+                    }
                 }
                 programTime = frameTimer->elapsed();
                 //qDebug() << "PT" << programTime << "VT" << vgetTime;
