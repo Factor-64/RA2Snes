@@ -451,17 +451,10 @@ void ra2snes::onUsb2SnesStateChanged()
         {
             case SetupNMIData: {
                 emit displayMessage("Setting up SD2SNES for NMI Data. This may take a while.", false);
-                doThisTaskNext = SetupNMIData2;
-                usb2snes->setNMIHook();
-                usb2snes->setVectorsSize(uniqueMemoryAddresses.size());
-                break;
-            }
-            case SetupNMIData2: {
                 doThisTaskNext = GetNMIData;
                 usb2snes->setupNMIVectors(uniqueMemoryAddresses);
+                usb2snes->setNMIHook();
                 usb2snes->getNMIData();
-                //doThisTaskNext = None;
-                //return;
                 break;
             }
             case GetNMIData:

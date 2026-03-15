@@ -34,7 +34,6 @@ public:
         GetRomType,
         GetFirmware,
         SetupNMIData,
-        SetupNMIData2,
         GetNMIData
     };
     Q_ENUM(Task)

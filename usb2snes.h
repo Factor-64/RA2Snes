@@ -149,7 +149,6 @@ public:
     void                    getNMIData();
     void                    setupNMIVectors(const QList<QPair<unsigned int, unsigned int>> addresses);
     void                    setNMIHook();
-    void                    setVectorsSize(const unsigned int size);
 
 signals:
     void    stateChanged();
