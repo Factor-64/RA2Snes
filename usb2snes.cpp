@@ -419,6 +419,35 @@ void Usb2Snes::getAddresses(QList<QPair<unsigned int, unsigned int>> addresses)
     requestedBinaryReadSize = total_size;
 }
 
+void Usb2Snes::setAddresses(QList<QPair<unsigned int, unsigned int>> addresses, QByteArray data)
+{
+    // We can only send 8 addresses at a time
+    m_istate = IBusy;
+    int total_size = 0;
+    QStringList operands;
+    for(auto &pair : addresses)
+    {
+        unsigned int size = pair.second;
+        total_size += size;
+        operands.append(QString::number(pair.first, 16));
+        operands.append(QString::number(size, 16));
+        if (operands.size() == 16)
+        {
+            sendRequest(PutAddress, operands);
+            operands.clear();
+            m_webSocket.sendBinaryMessage(data.left(total_size));
+            data.remove(0, total_size);
+            total_size = 0;
+        }
+    }
+    if(operands.isEmpty() == false)
+    {
+        sendRequest(PutAddress, operands);
+        m_webSocket.sendBinaryMessage(data);
+    }
+    m_istate = IReady;
+}
+
 void Usb2Snes::getRomType()
 {
     m_istate = IBusy;
@@ -483,13 +512,12 @@ void Usb2Snes::setupNMIVectors(const QList<QPair<unsigned int, unsigned int>> ad
         out.append(char(addr24 & 0xFF));
         out.append(char(len));
 
-        size += pair.second;
-
-        if(out.size() >= 64)
+        if(out.size() >= 1024)
         {
             setAddress(0xFFFFFE, out);
             out.clear();
         }
+        size += pair.second;
     }
     m_nmiVectors.clear();
     //sDebug() << out.size() << size;
@@ -498,12 +526,26 @@ void Usb2Snes::setupNMIVectors(const QList<QPair<unsigned int, unsigned int>> ad
         setAddress(0xFFFFFE, out);
         out.clear();
     }
+    /*QList<QPair<unsigned int, unsigned int>> addrs;
+    int data_size = out.size();
+    while(data_size > 0)
+    {
+        int s = 64;
+        if(data_size < s)
+            s = data_size;
+        addrs.append(qMakePair(0xFFFFFE, s));
+        data_size -= 64;
+
+    }
+    setAddresses(addrs, out);*/
     quint16 l = addresses.size();
     out.append(char((l >> 8)  & 0xFF));
     out.append(char(l & 0xFF));
+    out.append(char((size >> 16) & 0xFF));
     out.append(char((size >> 8)  & 0xFF));
     out.append(char(size & 0xFF));
     setAddress(0xFFFFFD, out);
+    qDebug() << "Setting 0xFFFFFD" << out.toHex(' ');
     while(size > 0)
     {
         int s = 255;

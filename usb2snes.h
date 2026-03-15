@@ -117,6 +117,7 @@ public:
     void                    getAddress(unsigned int addr, unsigned int size, Space space = SNES);
     void                    getAddresses(QList<QPair<unsigned int, unsigned int>> addresses);
     void                    setAddress(unsigned int addr, QByteArray data, Space space = SNES);
+    void                    setAddresses(QList<QPair<unsigned int, unsigned int>> addresses, QByteArray data);
     void                    checkReset();
     void                    sendFile(QString path, QByteArray data);
     void                    getFile(QString path);
