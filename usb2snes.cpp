@@ -472,7 +472,7 @@ void Usb2Snes::setupNMIVectors(const QList<QPair<unsigned int, unsigned int>> ad
     //sDebug() << m_serverString;
     binaryDataSent = 0;
     QByteArray out;
-    int size = 3;
+    int size = 1;
     for(const auto &pair : addresses)
     {
         quint32 addr24 = pair.first & 0xFFFFFFu;
@@ -501,6 +501,8 @@ void Usb2Snes::setupNMIVectors(const QList<QPair<unsigned int, unsigned int>> ad
     quint16 l = addresses.size();
     out.append(char((l >> 8)  & 0xFF));
     out.append(char(l & 0xFF));
+    out.append(char((size >> 8)  & 0xFF));
+    out.append(char(size & 0xFF));
     setAddress(0xFFFFFD, out);
     while(size > 0)
     {

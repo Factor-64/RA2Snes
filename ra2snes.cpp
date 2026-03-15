@@ -299,25 +299,28 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
     if(m_customFirmware)
     {
         // Extra data that tell me the state of sd2snes
-        // checks[0] is 1 if in game 0 if in menu
-        // checks[1] is 1 if resetting 0 if not
-        // checks[2] is 1 if patched 0 if not
-        const QByteArray checks = data.last(3);
-        data.chop(3);
+        // checks bit 0 is ingame status
+        // checks bit 1 is resetting status
+        // checks bit 2 is patched status
+        const char checks = data.back();
+        bool ingame    = (checks >> 0) & 1;
+        bool resetting = (checks >> 1) & 1;
+        bool patched   = (checks >> 2) & 1;
+
+        data.chop(1);
 
         qDebug() << data.size();
-        qDebug() << checks;
+        qDebug() << ingame << resetting << patched;
         //qDebug() << data.toHex(' ');
         //doThisTaskNext = None;
         //return;
-        if(checks[0] == 0)
+        if(!ingame)
         {
             reset = true;
-            reader->resetRuntimeData();
             return;
         }
         bool hc = raclient->getHardcore();
-        if(checks[2] && hc)
+        if(patched && hc)
         {
             raclient->setPatched(true);
             changeMode();
@@ -326,7 +329,7 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
         {
             changeMode();
         }
-        if(checks[1])
+        if(resetting)
         {
             //qDebug() << "RESET!";
             doThisTaskNext = None;
