@@ -194,10 +194,6 @@ ra2snes::ra2snes(QObject *parent)
         raclient->setAchievementInfo(id, infotype, value);
     });
 
-    connect(reader, &MemoryReader::modifiedAddresses, this, [=] {
-        updateAddresses = true;
-    });
-
     connect(reader, &MemoryReader::updateRichPresence, this, [=](const QString& status) {
         updateRichText(status);
     });
@@ -345,8 +341,15 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
     unsigned int framesPassed = std::round(std::abs((vgetTime + programTime) * 0.0600988138974405));
     if(framesPassed < 1)
         framesPassed = 1;
-    qDebug() << "Frames: " << framesPassed;
-    reader->processFrames(data, framesPassed);
+    //qDebug() << "Frames: " << framesPassed;
+    if(reader->processFrames(data, framesPassed))
+    {
+        uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
+        if(uniqueMemoryAddresses.isEmpty())
+            doThisTaskNext = NoChecksNeeded;
+        if(m_customFirmware)
+            doThisTaskNext = SetupNMIData;
+    }
     //qDebug() << usb2snes->getBinaryData();
 }
 
@@ -458,17 +461,6 @@ void ra2snes::onUsb2SnesStateChanged()
                 break;
             }
             case GetNMIData:
-                if(updateAddresses)
-                {
-                    updateAddresses = false;
-                    uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
-                    if(!uniqueMemoryAddresses.isEmpty())
-                        doThisTaskNext = SetupNMIData;
-                    else
-                        doThisTaskNext = NoChecksNeeded;
-                    onUsb2SnesStateChanged();
-                    return;
-                }
                 programTime = frameTimer->elapsed();
                 frameTimer->restart();
                 usb2snes->getNMIData();
@@ -487,17 +479,6 @@ void ra2snes::onUsb2SnesStateChanged()
             case GetConsoleAddresses:
                 //qDebug() << "get addresses";
                 doThisTaskNext = GetConsoleInfo;
-                if(updateAddresses)
-                {
-                    uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
-                    updateAddresses = false;
-                    if(uniqueMemoryAddresses.isEmpty())
-                    {
-                        doThisTaskNext = NoChecksNeeded;
-                        onUsb2SnesStateChanged();
-                        return;
-                    }
-                }
                 programTime = frameTimer->elapsed();
                 //qDebug() << "PT" << programTime << "VT" << vgetTime;
                 if(programTime + vgetTime > 15)
@@ -755,7 +736,6 @@ void ra2snes::initVars()
     doThisTaskNext = None;
     remember_me = false;
     m_ignore = false;
-    updateAddresses = false;
     raclient->clearAchievements();
     raclient->clearUser();
     raclient->clearGame();

@@ -500,8 +500,8 @@ void Usb2Snes::setNMIHook()
 
 void Usb2Snes::setupNMIVectors(const QList<QPair<unsigned int, unsigned int>> addresses)
 {
-    sDebug() << m_serverString;
-    sDebug() << m_firmwareString;
+    //sDebug() << m_serverString;
+    //sDebug() << m_firmwareString;
     binaryDataSent = 0;
     QByteArray out;
     int size = 1;
@@ -518,6 +518,7 @@ void Usb2Snes::setupNMIVectors(const QList<QPair<unsigned int, unsigned int>> ad
     }
     m_nmiVectors.clear();
     //sDebug() << out.size() << size;
+    //qDebug() << "Setting 0xFFFFFE" << out.toHex(' ');
     setAddress(0xFFFFFE, out);
     out.clear();
     quint16 l = addresses.size();

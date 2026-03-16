@@ -99,7 +99,6 @@ private:
     bool m_ignore;
     bool isGB;
     bool reset;
-    bool updateAddresses;
     QString m_console;
     Task doThisTaskNext;
     QList<QPair<unsigned int, unsigned int>> uniqueMemoryAddresses;

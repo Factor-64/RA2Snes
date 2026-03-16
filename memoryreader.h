@@ -16,7 +16,7 @@ public:
 
     void initTriggers(const QList<AchievementInfo>& achievements, const QList<LeaderboardInfo>& leaderboards, const QString& richPresence, const unsigned int& ramSize, const bool& customFirmware);
     QList<QPair<unsigned int, unsigned int>> getUniqueMemoryAddresses();
-    void processFrames(QByteArray& data, unsigned int& frames);
+    bool processFrames(QByteArray& data, unsigned int& frames);
     void resetRuntimeData();
 
 signals:
@@ -24,11 +24,10 @@ signals:
     void achievementUnlocked(const unsigned int& id, const QDateTime& time);
     void leaderboardCompleted(const unsigned int& id, const QDateTime& time);
     void updateAchievementInfo(const unsigned int& id, const AchievementInfoType& infotype, const int& value);
-    void modifiedAddresses();
     void updateRichPresence(const QString& status);
 
 private:
-    void decrementAddressCounts(rc_memrefs_t& memrefs);
+    bool decrementAddressCounts(rc_memrefs_t& memrefs);
     //void checkMemoryConsistency(QByteArray& data, unsigned int& frames);
     void remapTriggerAddresses(bool modified);
     void mergeAddresses(const unsigned int blockSize);

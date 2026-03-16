@@ -288,7 +288,7 @@ static uint32_t peek(uint32_t address, uint32_t num_bytes, void* ud) {
     return 0;
 }
 
-void MemoryReader::decrementAddressCounts(rc_memrefs_t& memrefs)
+bool MemoryReader::decrementAddressCounts(rc_memrefs_t& memrefs)
 {
     int type = 0;
     rc_memref_list_t* memref_list = &memrefs.memrefs;
@@ -326,19 +326,21 @@ void MemoryReader::decrementAddressCounts(rc_memrefs_t& memrefs)
             }
         }
     }
+    qDebug() << "TYPE:" << type;
     //oldMemory.clear();
     switch(type)
     {
     case 1:
         remapTriggerAddresses(true);
     case 2:
-        emit modifiedAddresses();
+        return true;
     default:
         break;
     }
+    return false;
 }
 
-void MemoryReader::processFrames(QByteArray& data, unsigned int& frames)
+bool MemoryReader::processFrames(QByteArray& data, unsigned int& frames)
 {
     memory_t mem;
     mem.ram = reinterpret_cast<uint8_t*>(const_cast<char*>(data.constData()));
@@ -354,7 +356,7 @@ void MemoryReader::processFrames(QByteArray& data, unsigned int& frames)
             emit updateRichPresence(QByteArray(output));
         }
     }
-
+    QList<unsigned int> ids;
     while (frames > 0)
     {
         for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); )
@@ -393,14 +395,12 @@ void MemoryReader::processFrames(QByteArray& data, unsigned int& frames)
             switch (new_state)
             {
             case RC_TRIGGER_STATE_TRIGGERED: {
+                emit achievementUnlocked(it.key(), QDateTime::currentDateTime());
                 emit updateAchievementInfo(it.key(), Value, trigger->measured_value);
                 emit updateAchievementInfo(it.key(), Percent, 100);
-                emit achievementUnlocked(it.key(), QDateTime::currentDateTime());
 
-                decrementAddressCounts(entry->memrefs);
-                free(entry);
-                it = achievementTriggers.erase(it);
-                continue;
+                ids.append(it.key());
+                break;
             }
             case RC_TRIGGER_STATE_PRIMED:
                 emit updateAchievementInfo(it.key(), Primed, true);
@@ -415,6 +415,17 @@ void MemoryReader::processFrames(QByteArray& data, unsigned int& frames)
 
         --frames;
     }
+
+    bool update = false;
+    for(auto id : ids)
+    {
+        auto* entry = achievementTriggers[id];
+        //if(decrementAddressCounts(entry->memrefs))
+            //update = true;
+        free(entry);
+        achievementTriggers.remove(id);
+    }
+    return update;
 }
 
 void MemoryReader::resetRuntimeData()

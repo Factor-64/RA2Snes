@@ -143,7 +143,6 @@ void AchievementModel::primeAchievement(const unsigned int& id, const bool& p) {
 void AchievementModel::updateAchievementValue(const unsigned int& id, const int& value) {
     for (int i = 0; i < m_achievements.size(); ++i) {
         if (m_achievements[i].id == id) {
-            if (m_achievements[i].unlocked) return;
             m_achievements[i].value = value;
             QModelIndex index = createIndex(i, 0);
             emit dataChanged(index, index, {ValueRole});

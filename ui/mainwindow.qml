@@ -331,19 +331,14 @@ ApplicationWindow {
         id: hud
         anchors.fill: parent
         visible: mainWindow.setupFinished
-        onVisibleChanged: {
-            challengeModel.clear()
-        }
 
-        ListModel {
-            id: challengeModel
+        onVisibleChanged: {
+            challenges.removeAllChallengeIcons();
         }
 
         Row {
             id: challenges
-            height: 84
             spacing: 8
-            width: 280
             anchors.rightMargin: 20
             anchors.right: parent.right
             anchors.bottom: parent.bottom
@@ -351,91 +346,110 @@ ApplicationWindow {
             z: 100
             layoutDirection: Qt.RightToLeft
 
-            Repeater {
-                id: challengeRepeater
-                model: challengeModel
-
-                Icon {
-                    mode: model.mode
-                    sourceUrl: model.sourceUrl
-                    value: model.value
-                    total: model.total
-
-                    onExpired: {
-                        challengeModel.remove(index);
-                    }
-                }
-            }
-        }
-
-        function findIndexBySource(sourceUrl)
-        {
-            for (let i = 0; i < challengeModel.count; ++i)
+            function findChild(sourceUrl)
             {
-                if (challengeModel.get(i).sourceUrl.toString() === String(sourceUrl))
-                    return i;
-            }
-            return -1;
-        }
-
-        function addChallengeIcons(sourceUrl, value, total)
-        {
-            const type = (total === 0) ? 0 : 1;
-            const complete = (total === value);
-            const idx = findIndexBySource(sourceUrl);
-
-            if (idx !== -1)
-            {
-                if (value === 0)
+                var child = null;
+                for (let i = 0; i < challenges.children.length; i++)
                 {
-                    challengeRepeater.itemAt(idx).fadeOutAndRemove();
-                    return
+                    child = challenges.children[i];
+                    if (!child) continue;
+                    if (String(child.sourceUrl) === String(sourceUrl))
+                        return child;
                 }
-                else
-                {
-                    challengeModel.set(idx, {
-                        mode: type,
-                        sourceUrl: sourceUrl,
-                        value: value,
-                        total: total
-                    })
-                    return;
-                }
+                return null;
             }
 
-            if (type === 1)
+            function findNotPrime()
             {
-                if (complete || value === 0)
-                    return;
+                var child = null;
+                for (let i = 0; i < challenges.children.length; i++)
+                {
+                    child = challenges.children[i];
+                    if (!child) continue;
+                    else if (child.type === 1)
+                        return child;
+                }
+                return null;
             }
 
-            if (challengeModel.count === 4)
+            function addChallengeIcons(sourceUrl, value, total)
             {
-                if (type == 1)
-                    return;
-                for (let i = 0; i < challengeModel.count; ++i)
+                const type = (total === 0) ? 0 : 1;
+                var currentCount = challenges.children.length;
+                const complete = (total === value);
+                const child = findChild(sourceUrl);
+
+                if (child)
                 {
-                    if (challengeModel.get(i).mode === 1)
+                    if (value === 0)
                     {
-                        challengeRepeater.itemAt(i).fadeOutAndRemove();
-                        break;
+                        child.fadeOutAndRemove();
+                        return;
                     }
+                    else
+                    {
+                        child.value = value;
+                        child.total = total;
+                        if (complete)
+                            child.restartTimer(10000);
+                        else
+                            child.restartTimer();
+                        return;
+                    }
+                }
+
+                if (type === 1)
+                {
+                    if (complete) return;
+                    else if(value === 0) return;
+                }
+
+                if (currentCount === 4)
+                {
+                    if(type === 1) return;
+                    const notprime = findNotPrime();
+                    if(!notprime) return;
+                    notprime.fadeOutAndRemove();
+                }
+
+                const icon = challengeIconComponent.createObject(challenges, {
+                    mode: type,
+                    sourceUrl: sourceUrl,
+                    value: value,
+                    total: total
+                });
+            }
+
+            function removeAllChallengeIcons()
+            {
+                for (let i = 0; i < challenges.children.length; i++)
+                {
+                    const child = challenges.children[i];
+                    if (!child) continue;
+                    child.fadeOutAndRemove();
                 }
             }
 
-            challengeModel.append({
-                mode: type,
-                sourceUrl: sourceUrl,
-                value: value,
-                total: total
-            })
-        }
-
-        function removeAllChallengeIcons() {
-            for (let i = challengeRepeater.count - 1; i >= 0; --i)
-            {
-                challengeRepeater.itemAt(i).fadeOutAndRemove();
+            Component {
+                id: challengeIconComponent
+                Icon { }
             }
+        }
+    }
+
+    Connections {
+        target: AchievementModel
+        function onPrimedChanged(badgeUrl, primed) {
+            if(mainWindow.allowIcons)
+                challenges.addChallengeIcons(badgeUrl, Number(primed), 0);
+        }
+    }
+
+    Connections {
+        target: AchievementModel
+        function onValueChanged(badgeUrl, value, total) {
+            if(mainWindow.allowIcons)
+                challenges.addChallengeIcons(badgeUrl, value, total);
         }
     }
 
@@ -454,22 +468,6 @@ ApplicationWindow {
                 });
             else
                 createPopup();
-        }
-    }
-
-    Connections {
-        target: AchievementModel
-        function onPrimedChanged(badgeUrl, primed) {
-            if(mainWindow.allowIcons)
-                hud.addChallengeIcons(badgeUrl, Number(primed), 0);
-        }
-    }
-
-    Connections {
-        target: AchievementModel
-        function onValueChanged(badgeUrl, value, total) {
-            if(mainWindow.allowIcons)
-                hud.addChallengeIcons(badgeUrl, value, total);
         }
     }
 

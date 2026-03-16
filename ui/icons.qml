@@ -80,16 +80,6 @@ ApplicationWindow {
             z: 100
             layoutDirection: Qt.RightToLeft
 
-            SequentialAnimation {
-                id: seq
-                property var targetItem: null
-                PropertyAnimation { target: seq.targetItem; property: "opacity"; to: 0; duration: 200 }
-                ScriptAction { script: seq.targetItem.destroy() }
-                onFinished: challenges.runNextRemoval()
-            }
-
-            property var removalQueue: []
-
             function findChild(sourceUrl)
             {
                 var child = null;
@@ -103,26 +93,13 @@ ApplicationWindow {
                 return null;
             }
 
-            function runNextRemoval()
-            {
-                if (removalQueue.length === 0) return;
-                seq.targetItem = removalQueue.shift();
-                seq.start();
-            }
-
-            function removeChallengeIcon(child)
-            {
-                removalQueue.push(child);
-                if (!seq.running) runNextRemoval();
-            }
-
             function findNotPrime()
             {
                 var child = null;
                 for (let i = 0; i < challenges.children.length; i++)
                 {
                     child = challenges.children[i];
-                    if (!child) return;
+                    if (!child) continue;
                     else if (child.type === 1)
                         return child;
                 }
@@ -140,7 +117,7 @@ ApplicationWindow {
                 {
                     if (value === 0)
                     {
-                        removeChallengeIcon(child);
+                        child.fadeOutAndRemove();
                         return;
                     }
                     else
@@ -154,7 +131,6 @@ ApplicationWindow {
                         return;
                     }
                 }
-                //console.log(sourceUrl, value, total, complete, child);
 
                 if (type === 1)
                 {
@@ -167,7 +143,7 @@ ApplicationWindow {
                     if(type === 1) return;
                     const notprime = findNotPrime();
                     if(!notprime) return;
-                    removeChallengeIcon(notprime);
+                    notprime.fadeOutAndRemove();
                 }
 
                 const icon = challengeIconComponent.createObject(challenges, {
@@ -176,10 +152,6 @@ ApplicationWindow {
                     value: value,
                     total: total
                 });
-
-                icon.expired.connect(function(child) {
-                    challenges.removeChallengeIcon(child);
-                });
             }
 
             function removeAllChallengeIcons()
@@ -187,9 +159,8 @@ ApplicationWindow {
                 for (let i = 0; i < challenges.children.length; i++)
                 {
                     const child = challenges.children[i];
-                    if (!child) return;
-                    seq.targetItem = child;
-                    seq.start();
+                    if (!child) continue;
+                    child.fadeOutAndRemove();
                 }
             }
 
