@@ -643,7 +643,7 @@ void RAClient::initWebSocket()
 
     connect(webSocket, &QWebSocket::textMessageReceived, this, &RAClient::onWebSocketMessage);
 
-    connect(webSocket, &QWebSocket::errorOccurred, this, &RAClient::onWebSocketError);
+    connect(webSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onWebSocketError(QAbstractSocket::SocketError)));
 
     QUrl url = "ws://" + wsIP + ":" + QString::number(wsPort);
     qDebug() << "Attempting WebSocket connection to:" << url;
