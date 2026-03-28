@@ -5,13 +5,15 @@
 #include <QJsonObject>
 #include "rc_version.h"
 #include "version.h"
+#include <QWebSocket>
+#include <QDebug>
 
 const QString RAClient::baseUrl = "https://retroachievements.org/";
 const QString RAClient::mediaUrl = "https://media.retroachievements.org/";
 const QString RAClient::userAgent = QString("ra2snes/%1 rcheevos/%2").arg(RA2SNES_VERSION_STRING,RCHEEVOS_VERSION_STRING);
 
 RAClient::RAClient(QObject *parent)
-    : QObject(parent)
+    : QObject(parent), obsWebSocket(nullptr), webSocketConnected(false), wsConnectionTimeout(nullptr)
 {
     networkManager = new QNetworkAccessManager(this);
     userinfo_model = UserInfoModel::instance();
@@ -411,6 +413,29 @@ void RAClient::handleAwardAchievementResponse(const QJsonObject& jsonObject)
                 gameinfo_model->updateCompletionCount();
                 userinfo_model->hardcore_score(jsonObject["Score"].toInt());
                 userinfo_model->softcore_score(jsonObject["SoftcoreScore"].toInt());
+
+                QJsonObject achData;
+                achData["id"] = (int)achievement.id;
+                achData["title"] = achievement.title;
+                achData["description"] = achievement.description;
+                achData["points"] = (int)achievement.points;
+                achData["type"] = achievement.type;
+                achData["badge_url"] = achievement.badge_url.toString();
+                achData["badge_locked_url"] = achievement.badge_locked_url.toString();
+                achData["badge_name"] = achievement.badge_name;
+                achData["achievement_link"] = achievement.achievement_link.toString();
+                achData["game_title"] = gameinfo_model->title();
+                achData["game_id"] = (int)gameinfo_model->id();
+                achData["game_icon"] = gameinfo_model->image_icon_url.toString();
+                achData["username"] = userinfo_model->username();
+                achData["new_total_points"] = userinfo_model->hardcore_score();
+                achData["is_hardcore"] = userinfo_model->hardcore();
+                achData["unlocked_at"] = achievement.time_unlocked.toString(Qt::ISODate);
+                achData["unlocked_timestamp"] = achievement.time_unlocked.toString("yyyy-MM-dd hh:mm:ss");
+
+                sendToWebSocket("achievement_unlocked", achData);
+                emit achievementUnlocked(achData);
+
                 if(progressionMap.contains(achievement.id))
                 {
                     progressionMap[achievement.id] = true;
@@ -577,8 +602,6 @@ void RAClient::handleStartSessionResponse(const QJsonObject& jsonObject)
 
 bool RAClient::isGameBeaten()
 {
-    //qDebug() << progressionMap;
-    //qDebug() << winMap;
     if(progressionMap.empty() || achievement_model->rowCount() < 1)
         return false;
     for(auto it = progressionMap.constBegin(); it != progressionMap.constEnd(); ++it) {
@@ -590,6 +613,15 @@ bool RAClient::isGameBeaten()
     for(auto it = winMap.constBegin(); it != winMap.constEnd(); ++it) {
         if(it.value()) {
             gameinfo_model->beaten(true);
+
+            QJsonObject gameData;
+            gameData["title"] = gameinfo_model->title();
+            gameData["id"] = (int)gameinfo_model->id();
+            gameData["timestamp"] = QDateTime::currentDateTime().toString(Qt::ISODate);
+
+            sendToWebSocket("game_beaten", gameData);
+            emit gameBeaten(gameData);
+
             return true;
         }
     }
@@ -604,10 +636,159 @@ bool RAClient::isGameMastered()
     if((gameinfo_model->completion_count() + warning) == achievement_model->rowCount())
     {
         gameinfo_model->mastered(true);
+
+        QJsonObject gameData;
+        gameData["title"] = gameinfo_model->title();
+        gameData["id"] = (int)gameinfo_model->id();
+        gameData["achievementCount"] = achievement_model->rowCount() - warning;
+        gameData["totalPoints"] = gameinfo_model->point_total();
+        gameData["timestamp"] = QDateTime::currentDateTime().toString(Qt::ISODate);
+
+        sendToWebSocket("game_mastered", gameData);
+        emit gameMastered(gameData);
+
         return true;
     }
     gameinfo_model->mastered(false);
     return false;
+}
+
+void RAClient::initWebSocket(const QString& obsWebSocketUrl)
+{
+    if (obsWebSocket != nullptr) {
+        delete obsWebSocket;
+        obsWebSocket = nullptr;
+    }
+
+    try {
+        obsWebSocket = new QWebSocket();
+        
+        connect(obsWebSocket, &QWebSocket::connected, this, &RAClient::onWebSocketConnected);
+        connect(obsWebSocket, &QWebSocket::disconnected, this, &RAClient::onWebSocketDisconnected);
+        connect(obsWebSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),
+                this, &RAClient::onWebSocketError);
+
+        if (wsConnectionTimeout == nullptr) {
+            wsConnectionTimeout = new QTimer(this);
+            wsConnectionTimeout->setSingleShot(true);
+            connect(wsConnectionTimeout, &QTimer::timeout, this, &RAClient::onWebSocketTimeout);
+        }
+        wsConnectionTimeout->start(5000);
+
+        qDebug() << "Attempting WebSocket connection to:" << obsWebSocketUrl;
+        obsWebSocket->open(QUrl(obsWebSocketUrl));
+    }
+    catch (const std::exception& e) {
+        qDebug() << "WebSocket initialization error:" << e.what();
+        webSocketConnected = false;
+        if (obsWebSocket != nullptr) {
+            delete obsWebSocket;
+            obsWebSocket = nullptr;
+        }
+    }
+}
+
+void RAClient::closeWebSocket()
+{
+    if (wsConnectionTimeout != nullptr) {
+        wsConnectionTimeout->stop();
+    }
+    
+    if (obsWebSocket != nullptr) {
+        try {
+            obsWebSocket->close();
+            delete obsWebSocket;
+            obsWebSocket = nullptr;
+        }
+        catch (const std::exception& e) {
+            qDebug() << "Error closing WebSocket:" << e.what();
+        }
+    }
+    
+    webSocketConnected = false;
+}
+
+void RAClient::onWebSocketConnected()
+{
+    webSocketConnected = true;
+    if (wsConnectionTimeout != nullptr) {
+        wsConnectionTimeout->stop();
+    }
+    qDebug() << "✓ OBS WebSocket connected successfully!";
+}
+
+void RAClient::onWebSocketDisconnected()
+{
+    webSocketConnected = false;
+    qDebug() << "⚠ OBS WebSocket disconnected";
+    
+    QTimer::singleShot(5000, this, [this]() {
+        if (!webSocketConnected) {
+            qDebug() << "Attempting to reconnect to OBS...";
+            initWebSocket("ws://localhost:8080");
+        }
+    });
+}
+
+void RAClient::onWebSocketError(QAbstractSocket::SocketError error)
+{
+    webSocketConnected = false;
+    if (wsConnectionTimeout != nullptr) {
+        wsConnectionTimeout->stop();
+    }
+    
+    QString errorString;
+    switch (error) {
+        case QAbstractSocket::ConnectionRefusedError:
+            errorString = "Connection refused - OBS WebSocket server not running";
+            break;
+        case QAbstractSocket::RemoteHostClosedError:
+            errorString = "Remote host closed connection";
+            break;
+        case QAbstractSocket::HostNotFoundError:
+            errorString = "Host not found - check OBS WebSocket URL";
+            break;
+        case QAbstractSocket::SocketTimeoutError:
+            errorString = "Connection timeout";
+            break;
+        default:
+            errorString = QString::number(error);
+            break;
+    }
+    
+    qDebug() << "⚠ OBS WebSocket error:" << errorString;
+}
+
+void RAClient::onWebSocketTimeout()
+{
+    if (!webSocketConnected && obsWebSocket != nullptr) {
+        qDebug() << "⚠ WebSocket connection timeout - OBS may not be running or unreachable";
+        obsWebSocket->close();
+        webSocketConnected = false;
+    }
+}
+
+void RAClient::sendToWebSocket(const QString& eventType, const QJsonObject& data)
+{
+    if (!webSocketConnected || obsWebSocket == nullptr) {
+        qDebug() << "ℹ WebSocket not connected, skipping event:" << eventType;
+        return;
+    }
+
+    try {
+        QJsonObject message;
+        message["action"] = "trigger_obs_event";
+        message["eventType"] = eventType;
+        message["data"] = data;
+
+        QJsonDocument doc(message);
+        obsWebSocket->sendTextMessage(doc.toJson(QJsonDocument::Compact));
+        qDebug() << "✓ Sent event to OBS:" << eventType;
+    }
+    catch (const std::exception& e) {
+        qDebug() << "Error sending WebSocket message:" << e.what();
+        
+    }
 }
 
 RAClient::~RAClient()

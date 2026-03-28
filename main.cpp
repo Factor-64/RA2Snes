@@ -3,6 +3,7 @@
 #include <QQmlContext>
 
 #include "ra2snes.h"
+#include "raclient.h"
 #include "achievementmodel.h"
 #include "gameinfomodel.h"
 #include "userinfomodel.h"
@@ -33,6 +34,8 @@ int main(int argc, char *argv[]) {
     qmlRegisterSingletonInstance("CustomModels", 1, 0, "AchievementModel", AchievementModel::instance());
     qmlRegisterSingletonInstance("CustomModels", 1, 0, "GameInfoModel", GameInfoModel::instance());
     qmlRegisterSingletonInstance("CustomModels", 1, 0, "UserInfoModel", UserInfoModel::instance());
+
+    RAClient::instance()->initWebSocket("ws://localhost:8080");
 
     QObject::connect(ra2snes::instance(), &ra2snes::loginSuccess, &engine, [&engine]() {
         //qDebug() << "Loggedin";

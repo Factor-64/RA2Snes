@@ -2,6 +2,7 @@
 #define ACHIEVEMENTMODEL_H
 
 #include <QAbstractListModel>
+#include <QJsonObject>
 #include "rastructs.h"
 
 class AchievementModel : public QAbstractListModel {
@@ -53,6 +54,7 @@ public:
     void appendAchievement(AchievementInfo a);
 
 signals:
+    void achievementUnlockedWithData(const QJsonObject& achData);
     void unlockedChanged(const unsigned int& index);
     void primedChanged(const QUrl& badgeUrl, const bool& p);
     void valueChanged(const QUrl& badgeUrl, const unsigned int& value, const unsigned int& total);

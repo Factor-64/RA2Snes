@@ -4,6 +4,7 @@
 #include <QNetworkReply>
 #include <QJsonObject>
 #include <QQueue>
+#include <QWebSocket>
 #include "userinfomodel.h"
 #include "gameinfomodel.h"
 #include "achievementmodel.h"
@@ -51,6 +52,8 @@ public:
     QString getRichPresence();
     void ping(const QString& rp);
     bool sendQueuedRequest();
+    void initWebSocket(const QString& obsWebSocketUrl = "ws://localhost:8080");
+    void closeWebSocket();
 
 signals:
     void loginSuccess(bool r);
@@ -62,6 +65,10 @@ signals:
     void awardedAchievement(const unsigned int& id, const QString& time, const unsigned int& points);
     void sessionStarted();
     void requestFinished();
+    void achievementUnlocked(const QJsonObject& achData);  
+    void gameBeaten(const QJsonObject& gameData);  
+    void gameMastered(const QJsonObject& gameData); 
+
 
 private:
     RAClient(QObject *parent = nullptr);
@@ -80,6 +87,11 @@ private:
     void handlePatchResponse(const QJsonObject& jsonObject);
     void handleUnlocksResponse(const QJsonObject& jsonObject);
     void handleStartSessionResponse(const QJsonObject& jsonObject);
+    void sendToWebSocket(const QString& eventType, const QJsonObject& data);  
+    void onWebSocketConnected();  
+    void onWebSocketDisconnected();  
+    void onWebSocketError(QAbstractSocket::SocketError error); 
+    void onWebSocketTimeout(); 
     //void handlePingResponse(const QJsonObject& jsonObject);
     QString latestRequest;
     bool warning;
@@ -88,6 +100,9 @@ private:
     UserInfoModel* userinfo_model;
     GameInfoModel* gameinfo_model;
     AchievementModel* achievement_model;
+    QWebSocket *obsWebSocket; 
+    bool webSocketConnected;
+    QTimer *wsConnectionTimeout; 
     QMap<unsigned int, bool> progressionMap;
     QMap<unsigned int, bool> winMap;
     QMap<unsigned int, QDateTime> achievedTimes;
