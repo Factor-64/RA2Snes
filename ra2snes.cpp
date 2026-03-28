@@ -156,10 +156,6 @@ ra2snes::ra2snes(QObject *parent)
         emit enableModeSwitching();
         //qDebug() << "INIT TRIGGERS";
         reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getLeaderboards(), raclient->getRichPresence(), usb2snes->getRamSizeData(), m_customFirmware);
-    });
-
-    connect(reader, &MemoryReader::finishedMemorySetup, this, [=] {
-        //qDebug() << "FINISHING UP";
         uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
         //qDebug() << "Unique Addresses:" << uniqueMemoryAddresses;
         if(uniqueMemoryAddresses.isEmpty())
@@ -305,8 +301,8 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
 
         data.chop(1);
 
-        qDebug() << data.size();
-        qDebug() << ingame << resetting << patched;
+        //qDebug() << data.size();
+        //qDebug() << ingame << resetting << patched;
         //qDebug() << data.toHex(' ');
         //doThisTaskNext = None;
         //return;
@@ -341,16 +337,21 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
     unsigned int framesPassed = std::round(std::abs((vgetTime + programTime) * 0.0600988138974405));
     if(framesPassed < 1)
         framesPassed = 1;
-    //qDebug() << "Frames: " << framesPassed;
-    if(reader->processFrames(data, framesPassed))
+    //qDebug() << "Frames:" << framesPassed;
+    if(reader->processFrames(data, framesPassed, m_customFirmware))
     {
-        uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
-        if(uniqueMemoryAddresses.isEmpty())
-            doThisTaskNext = NoChecksNeeded;
-        if(m_customFirmware)
-            doThisTaskNext = SetupNMIData;
+        if(!m_customFirmware)
+            reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getLeaderboards(), raclient->getRichPresence(), usb2snes->getRamSizeData(), m_customFirmware);
+        if(uniqueMemoryAddresses != reader->getUniqueMemoryAddresses())
+        {
+            qDebug() << "Changed";
+            uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
+            if(uniqueMemoryAddresses.isEmpty())
+                doThisTaskNext = NoChecksNeeded;
+            else if(m_customFirmware)
+                doThisTaskNext = SetupNMIData;
+        }
     }
-    //qDebug() << usb2snes->getBinaryData();
 }
 
 void ra2snes::onUsb2SnesGetAddressDataReceived()
@@ -642,6 +643,10 @@ void ra2snes::createSettingsFile()
         settings.setValue("Theme", user->theme());
         settings.setValue("IgnoreUpdates", m_ignore);
 
+        settings.setValue("WebSocketIP", raclient->getWebSocketIP());
+        settings.setValue("WebSocketPort", raclient->getWebSocketPort());
+        settings.setValue("WebSocketEnabled", m_websocket);
+
         if(remember_me)
         {
             QString time = QString::number(QDateTime::currentSecsSinceEpoch());
@@ -684,6 +689,11 @@ void ra2snes::loadSettings() {
         bool ic = settings.value("Icons").toBool();
         bool ip = settings.value("PopoutIcons").toBool();
         QString theme = settings.value("Theme").toString();
+        QString wsip = settings.value("WebSocketIP").toString();
+        int port = settings.value("WebSocketPort").toInt();
+        bool ws = settings.value("WebsocketEnabled").toBool();
+
+        raclient->setWebSocketIPandPort(wsip, port);
 
         UserInfoModel* user = raclient->getUserInfoModel();
         user->hardcore(hardcore);
@@ -698,6 +708,7 @@ void ra2snes::loadSettings() {
         setConsole(console_v);
 
         m_ignore = igno;
+        enableWebSocket(ws);
 
         if(username != "" && token != "" && time != "")
         {
@@ -736,6 +747,7 @@ void ra2snes::initVars()
     doThisTaskNext = None;
     remember_me = false;
     m_ignore = false;
+    m_websocket = false;
     raclient->clearAchievements();
     raclient->clearUser();
     raclient->clearGame();
@@ -866,6 +878,11 @@ bool ra2snes::ignore() const
     return m_ignore;
 }
 
+bool ra2snes::websocket() const
+{
+    return m_websocket;
+}
+
 void ra2snes::refreshRAData()
 {
     doThisTaskNext = None;
@@ -878,6 +895,16 @@ void ra2snes::ignoreUpdates(bool i)
 {
     m_ignore = i;
     emit ignoreChanged();
+}
+
+void ra2snes::enableWebSocket(bool e)
+{
+    m_websocket = e;
+    if(e)
+        raclient->initWebSocket();
+    else
+        raclient->closeWebSocket();
+    emit websocketChanged();
 }
 
 void ra2snes::checkForUpdate() {
@@ -976,6 +1003,3 @@ void ra2snes::postTelemetryData()
     //sInfo() << toSend;
     tempNetworkManager->post(req, toSend);
 }
-
-ra2snes::~ra2snes()
-{}

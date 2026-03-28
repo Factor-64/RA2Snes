@@ -1091,6 +1091,80 @@ Item {
             }
 
             Rectangle {
+                id: wsRect
+                width: parent.width
+                height: 24
+                color: themeLoader.item.popupBackgroundColor
+                Row {
+                    spacing: 4
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    CheckBox {
+                        id: wsCheckBox
+                        width: 14
+                        height: 14
+                        enabled: dropdown.mainWindow.loadedThemes
+
+                        indicator: Rectangle {
+                            width: 14
+                            height: 14
+                            radius: 2
+                            color: wsCheckBox.checked ? themeLoader.item.checkBoxCheckedColor : themeLoader.item.checkBoxUnCheckedColor;
+                            border.color: wsCheckBox.checked ? themeLoader.item.checkBoxCheckedBorderColor : themeLoader.item.checkBoxCheckedBorderColor
+                            Text {
+                                anchors.centerIn: parent
+                                text: wsCheckBox.checked ? "\u2713" : ""
+                                color: themeLoader.item.checkBoxCheckColor
+                                font.pixelSize: 12
+                            }
+                        }
+
+                        onCheckedChanged: {
+                            Ra2snes.enableWebSocket(wsCheckBox.checked);
+                        }
+                        Component.onCompleted: {
+                            wsCheckBox.checked = Ra2snes.websocket;
+                        }
+                        Connections {
+                            target: Ra2snes
+                            function onWebsocketChanged() { wsCheckBox.checked = Ra2snes.websocket; }
+                        }
+                    }
+
+                    Text {
+                        id: ws
+                        text: qsTr("OBS WebSocket")
+                        font.family: "Verdana"
+                        font.pixelSize: 13
+                        color: themeLoader.item.selectedLink
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
+                MouseArea {
+                    id: wsMouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        wsCheckBox.checked = !wsCheckBox.checked
+                    }
+                    onEntered: {
+                        wsRect.color = themeLoader.item.popupHighlightColor;
+                        ws.color = themeLoader.item.linkColor;
+                        themePopup.closeThemes();
+                    }
+
+                    onExited: {
+                        wsRect.color = themeLoader.item.popupBackgroundColor;
+                        ws.color = themeLoader.item.selectedLink;
+
+                        wsMouseArea.enabled = true;
+                    }
+                }
+            }
+
+            Rectangle {
                 id: ignoreRect
                 width: parent.width
                 height: 24

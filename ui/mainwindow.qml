@@ -448,6 +448,7 @@ ApplicationWindow {
     Connections {
         target: AchievementModel
         function onValueChanged(badgeUrl, value, total) {
+            //print("VALUE", badgeUrl, value, total);
             if(mainWindow.allowIcons)
                 challenges.addChallengeIcons(badgeUrl, value, total);
         }

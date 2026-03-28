@@ -8,25 +8,25 @@ MemoryReader::MemoryReader(QObject *parent) : QObject(parent) {
     mem_richpresence = nullptr;
     rpState = 0;
     uniqueMemoryAddresses.clear();
-    uniqueMemoryAddressesCounts.clear();
-    addressMap.clear();
     achievementTriggers.clear();
 }
 
-void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, const QList<LeaderboardInfo>& leaderboards, const QString& richPresence, const unsigned int& ramSize, const bool& customFirmware)
+void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, const QList<LeaderboardInfo>& leaderboards,
+                                const QString& richPresence, const unsigned int& ramSize, const bool& customFirmware)
 {
     uniqueMemoryAddresses.clear();
-    for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it) {
+    for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it)
         free(it.value());
-    }
+
     if(mem_richpresence != nullptr)
+    {
         free(mem_richpresence);
+        mem_richpresence = nullptr;
+    }
 
     achievementTriggers.clear();
     //leaderboardTriggers.clear();
     rpState = 0;
-    //currentRead = 0;
-    mem_richpresence = nullptr;
 
     QMap<unsigned int, unsigned int> uniqueAddresses;
     for (const AchievementInfo& achievement : achievements)
@@ -41,10 +41,6 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
         rc_trigger_t* trigger = rc_parse_trigger(trigger_buffer, mem_addr, nullptr, 0);
         rc_memrefs_t* memrefs = rc_trigger_get_memrefs(trigger);
 
-        rc_trigger_with_memrefs_t* mem_trigger = (rc_trigger_with_memrefs_t*)malloc(sizeof(rc_trigger_with_memrefs_t));
-        mem_trigger->trigger = *trigger;
-        mem_trigger->memrefs = *memrefs;
-
         if (trigger->measured_target != 0)
         {
             emit updateAchievementInfo(achievement.id, Target, trigger->measured_target);
@@ -54,10 +50,15 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
                 emit updateAchievementInfo(achievement.id, Percent, 100);
                 emit updateAchievementInfo(achievement.id, Value, trigger->measured_target);
                 free(trigger_buffer);
-                free(mem_trigger);
                 continue;
             }
         }
+
+        trigger->measured_value = achievement.value;
+
+        rc_trigger_with_memrefs_t* mem_trigger = (rc_trigger_with_memrefs_t*)malloc(sizeof(rc_trigger_with_memrefs_t));
+        mem_trigger->trigger = *trigger;
+        mem_trigger->memrefs = *memrefs;
 
         achievementTriggers[achievement.id] = mem_trigger;
 
@@ -70,8 +71,8 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
             for (; memref < memref_end; ++memref)
             {
                 memref->address = (memref->address > 0x1FFFF)
-                                       ? (memref->address % ramSize) + 0xE00000
-                                       : memref->address + 0xF50000;
+                                ? (memref->address % ramSize) + 0xE00000
+                                : memref->address + 0xF50000;
                 unsigned int requiredSize = memref->value.size + 1;
                 unsigned int &entry = uniqueAddresses[memref->address];
                 if (entry < requiredSize)
@@ -103,8 +104,8 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
                 for (; memref < memref_end; ++memref)
                 {
                     memref->address = (memref->address > 0x1FFFF)
-                    ? (memref->address % ramSize) + 0xE00000
-                    : memref->address + 0xF50000;
+                                    ? (memref->address % ramSize) + 0xE00000
+                                    : memref->address + 0xF50000;
                     unsigned int requiredSize = memref->value.size + 1;
                     unsigned int &entry = uniqueAddresses[memref->address];
                     if (entry < requiredSize)
@@ -147,6 +148,7 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
     qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size() << total;*/
     //qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size();
     //qDebug() << uniqueMemoryAddresses.size() << total;
+
     remapTriggerAddresses(false);
 }
 
@@ -177,7 +179,7 @@ void MemoryReader::mergeAddresses(unsigned int blockSize)
 void MemoryReader::remapTriggerAddresses(bool modified)
 {
     //qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size();
-    uniqueMemoryAddressesCounts.clear();
+    addressCounts.clear();
     QMap<unsigned int, unsigned int> temp;
     for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it)
     {
@@ -204,8 +206,8 @@ void MemoryReader::remapTriggerAddresses(bool modified)
                         unsigned int offsetInBlock = addr - blockStart;
                         unsigned int finalOffset = memoryOffset + offsetInBlock;
 
-                        temp[finalOffset] = blockStart;
-                        uniqueMemoryAddressesCounts[blockStart]++;
+                        temp[finalOffset] = addr;
+                        addressCounts[addr]++;
                         memref->address = finalOffset;
 
                         break;
@@ -240,10 +242,8 @@ void MemoryReader::remapTriggerAddresses(bool modified)
                         unsigned int offsetInBlock = addr - blockStart;
                         unsigned int finalOffset = memoryOffset + offsetInBlock;
 
-                        if(!temp.contains(finalOffset))
-                            temp[finalOffset] = blockStart;
-                        if(uniqueMemoryAddressesCounts.contains(blockStart))
-                            uniqueMemoryAddressesCounts[blockStart]++;
+                        temp[finalOffset] = addr;
+                        addressCounts[addr]++;
                         memref->address = finalOffset;
 
                         break;
@@ -254,10 +254,10 @@ void MemoryReader::remapTriggerAddresses(bool modified)
         }
     }
 
-    //qDebug() << "Setup Finished";
     addressMap = temp;
-    if(!modified)
-        emit finishedMemorySetup();
+    //qDebug() << "ADDR MAP:" << addressMap << addressMap.size();
+    //qDebug() << "ADDR COUNTS:" << addressCounts << addressCounts.size();
+    //qDebug() << "UMA:" << uniqueMemoryAddresses << uniqueMemoryAddresses.size();
 }
 
 QList<QPair<unsigned int, unsigned int>> MemoryReader::getUniqueMemoryAddresses()
@@ -288,63 +288,69 @@ static uint32_t peek(uint32_t address, uint32_t num_bytes, void* ud) {
     return 0;
 }
 
-bool MemoryReader::decrementAddressCounts(rc_memrefs_t& memrefs)
+bool MemoryReader::decrementAddressCounts(rc_memrefs_t &memrefs)
 {
-    int type = 0;
+    bool update = false;
     rc_memref_list_t* memref_list = &memrefs.memrefs;
     for (; memref_list; memref_list = memref_list->next)
     {
         rc_memref_t* memref = memref_list->items;
         const rc_memref_t* memref_end = memref + memref_list->count;
-
         for (; memref < memref_end; ++memref)
         {
-            const unsigned int& mappedAddress = addressMap[memref->address];
-            unsigned int& count = uniqueMemoryAddressesCounts[mappedAddress];
+            unsigned int addr = addressMap[memref->address];
 
-            auto it = std::find_if(uniqueMemoryAddresses.begin(), uniqueMemoryAddresses.end(),
-                                   [mappedAddress](const QPair<unsigned int, unsigned int>& pair) {
-                                       return pair.first == mappedAddress;
-                                   });
+            for (unsigned int i = 0; i < uniqueMemoryAddresses.size(); )
+            {
+                unsigned int blockStart = uniqueMemoryAddresses[i].first;
+                unsigned int blockSize = uniqueMemoryAddresses[i].second;
+                unsigned int blockEnd = (blockStart + blockSize) - 1;
 
-            if(it == uniqueMemoryAddresses.end())
-                continue;
-            if(--count < 1)
-            {
-                auto last = uniqueMemoryAddresses.end();
-                --last;
-                if(it != last)
-                    type = 1;
-                else
-                    type = 2;
-                uniqueMemoryAddresses.erase(it);
-            }
-            else if(mappedAddress + memref->address == it->first + it->second)
-            {
-                it->second -= memref->address;
-                type = 2;
+                if (addr >= blockStart && addr <= blockEnd)
+                {
+                    if (--addressCounts[addr] < 1)
+                    {
+                        if (blockSize > 1)
+                        {
+                            if (addr == blockStart)
+                            {
+                                update = true;
+                                uniqueMemoryAddresses[i].first++;
+                            }
+                            else if (addr == blockEnd)
+                            {
+                                update = true;
+                                uniqueMemoryAddresses[i].second--;
+                            }
+                        }
+                        else
+                        {
+                            update = true;
+                            uniqueMemoryAddresses.remove(i);
+                        }
+                        addressCounts.remove(addr);
+                    }
+
+                    //qDebug() << "ADDR:" << addr << "COUNT:" << addressCounts[addr];
+                    break;
+                }
+
+                ++i;
             }
         }
     }
-    qDebug() << "TYPE:" << type;
-    //oldMemory.clear();
-    switch(type)
-    {
-    case 1:
+    if (update)
         remapTriggerAddresses(true);
-    case 2:
-        return true;
-    default:
-        break;
-    }
-    return false;
+    return update;
 }
 
-bool MemoryReader::processFrames(QByteArray& data, unsigned int& frames)
+bool MemoryReader::processFrames(QByteArray& data, unsigned int& frames, bool& customFirmware)
 {
     memory_t mem;
     mem.ram = reinterpret_cast<uint8_t*>(const_cast<char*>(data.constData()));
     mem.size = data.size();
+
+    //qDebug() << "DATA SIZE:" << data.size();
 
     if(mem_richpresence != nullptr)
     {
@@ -356,6 +362,8 @@ bool MemoryReader::processFrames(QByteArray& data, unsigned int& frames)
             emit updateRichPresence(QByteArray(output));
         }
     }
+
+    bool update = false;
     QList<unsigned int> ids;
     while (frames > 0)
     {
@@ -398,7 +406,6 @@ bool MemoryReader::processFrames(QByteArray& data, unsigned int& frames)
                 emit achievementUnlocked(it.key(), QDateTime::currentDateTime());
                 emit updateAchievementInfo(it.key(), Value, trigger->measured_value);
                 emit updateAchievementInfo(it.key(), Percent, 100);
-
                 ids.append(it.key());
                 break;
             }
@@ -416,15 +423,16 @@ bool MemoryReader::processFrames(QByteArray& data, unsigned int& frames)
         --frames;
     }
 
-    bool update = false;
-    for(auto id : ids)
+    for (auto id : ids)
     {
-        auto* entry = achievementTriggers[id];
-        //if(decrementAddressCounts(entry->memrefs))
-            //update = true;
-        free(entry);
+        if(customFirmware)
+            update = decrementAddressCounts(achievementTriggers[id]->memrefs);
+        else
+            update = true;
+        free(achievementTriggers[id]);
         achievementTriggers.remove(id);
     }
+
     return update;
 }
 

@@ -43,7 +43,8 @@ public:
 
     Q_INVOKABLE QVariantMap get(int row) const;
 
-    void setUnlockedState(const unsigned int& i, const bool& unlocked, const QDateTime& time, const bool& e);
+    void setUnlockedState(const unsigned int& id, const bool& unlocked, const QDateTime& time);
+    AchievementInfo* unlockAchievement(const unsigned int& id, const QDateTime& time);
     void primeAchievement(const unsigned int& id, const bool& p);
     void updateAchievementValue(const unsigned int& id, const int& value);
     void updateAchievementPercent(const unsigned int& id, const int& percent);

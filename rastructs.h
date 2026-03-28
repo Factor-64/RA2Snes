@@ -39,9 +39,9 @@ struct AchievementInfo {
     bool unlocked;
     QUrl achievement_link;
     bool primed;
-    int value;
-    int percent;
-    int target;
+    int value = 0;
+    int percent = 0;
+    int target = 0;
 };
 
 struct LeaderboardInfo {

@@ -14,6 +14,9 @@ RAClient::RAClient(QObject *parent)
     : QObject(parent)
 {
     networkManager = new QNetworkAccessManager(this);
+    webSocket = nullptr;
+    wsPort = 4455;
+    wsIP = "localhost";
     userinfo_model = UserInfoModel::instance();
     gameinfo_model = GameInfoModel::instance();
     achievement_model = AchievementModel::instance();
@@ -112,7 +115,41 @@ void RAClient::ping(const QString& rp)
 
 void RAClient::awardAchievement(const unsigned int& id, const QDateTime& achieved)
 {
-    achievedTimes[id] = achieved;
+    AchievementInfo* ach = achievement_model->unlockAchievement(id, achieved);
+    if (ach == nullptr)
+        return;
+    gameinfo_model->updatePointCount(ach->points);
+    //qDebug() << "AWARDED" << achievement.id;
+    gameinfo_model->updateCompletionCount();
+    if(progressionMap.contains(id))
+    {
+        progressionMap[id] = true;
+        if(!gameinfo_model->beaten())
+            isGameBeaten();
+    }
+    isGameMastered();
+
+    QJsonObject achData;
+    achData["id"] = (int)id;
+    achData["title"] = ach->title;
+    achData["description"] = ach->description;
+    achData["points"] = (int)ach->points;
+    achData["type"] = ach->type;
+    achData["badge_url"] = ach->badge_url.toString();
+    achData["badge_locked_url"] = ach->badge_locked_url.toString();
+    achData["badge_name"] = ach->badge_name;
+    achData["achievement_link"] = ach->achievement_link.toString();
+    achData["game_title"] = gameinfo_model->title();
+    achData["game_id"] = (int)gameinfo_model->id();
+    achData["game_icon"] = gameinfo_model->image_icon_url().toString();
+    achData["username"] = userinfo_model->username();
+    achData["new_total_points"] = userinfo_model->hardcore_score();
+    achData["is_hardcore"] = userinfo_model->hardcore();
+    achData["unlocked_at"] = ach->time_unlocked.toString(Qt::ISODate);
+    achData["unlocked_timestamp"] = ach->time_unlocked_string;
+
+    sendToWebSocket("achievement_unlocked", achData);
+
     QByteArray md5hash;
     md5hash.append(QString::number(id).toLocal8Bit());
     md5hash.append(userinfo_model->username().toLocal8Bit());
@@ -131,28 +168,6 @@ void RAClient::awardAchievement(const unsigned int& id, const QDateTime& achieve
 
     sendRequest("awardachievement", post_content);
 }
-
-/*void RAClient::getLBPlacements()
-{
-    if(!gameinfo_model->leaderboards.empty() && index < gameinfo_model->leaderboards.size())
-    {
-        //qDebug() << "Getting Placements";
-        QList<QPair<QString, QString>> post_content;
-        post_content.append(qMakePair("i", QString::number(gameinfo_model->leaderboards.at(index).id)));
-        post_content.append(qMakePair("u", userinfo_model->username));
-        post_content.append(qMakePair("c", "1"));
-
-        request("lbinfo", post_content);
-    }
-    else index = 0;
-}*/
-
-/*void RAClient::queueLeaderboardRequest(unsigned int id, QDateTime achieved, unsigned int score) {
-    RequestData data = {LeaderboardRequest, id, true, achieved, score};
-    queue.enqueue(data);
-    if(!running)
-        startQueue();
-}*/
 
 void RAClient::setPatched(const bool& p)
 {
@@ -404,23 +419,11 @@ void RAClient::handleAwardAchievementResponse(const QJsonObject& jsonObject)
             auto& achievement = ach_list[i];
             if(achievement.id == jsonObject["AchievementID"].toInt())
             {
-                achievement_model->setUnlockedState(i, true, achievedTimes[achievement.id], true);
-                achievedTimes.remove(achievement.id);
-                gameinfo_model->updatePointCount(achievement.points);
-                //qDebug() << "AWARDED" << achievement.id;
-                gameinfo_model->updateCompletionCount();
                 userinfo_model->hardcore_score(jsonObject["Score"].toInt());
                 userinfo_model->softcore_score(jsonObject["SoftcoreScore"].toInt());
-                if(progressionMap.contains(achievement.id))
-                {
-                    progressionMap[achievement.id] = true;
-                    if(!gameinfo_model->beaten())
-                        isGameBeaten();
-                }
                 break;
             }
         }
-        isGameMastered();
     }
 }
 
@@ -562,7 +565,7 @@ void RAClient::handleStartSessionResponse(const QJsonObject& jsonObject)
                     winMap[achievement.id] = achievement.unlocked;
                 if(unlock["ID"].toInt() == achievement.id)
                 {
-                    achievement_model->setUnlockedState(i, true, QDateTime::fromSecsSinceEpoch(unlock["When"].toInt()), false);
+                    achievement_model->setUnlockedState(i, true, QDateTime::fromSecsSinceEpoch(unlock["When"].toInt()));
                     gameinfo_model->updatePointCount(achievement.points);
                 }
             }
@@ -590,6 +593,12 @@ bool RAClient::isGameBeaten()
     for(auto it = winMap.constBegin(); it != winMap.constEnd(); ++it) {
         if(it.value()) {
             gameinfo_model->beaten(true);
+            QJsonObject gameData;
+            gameData["title"] = gameinfo_model->title();
+            gameData["id"] = (int)gameinfo_model->id();
+            gameData["timestamp"] = QDateTime::currentDateTime().toString(Qt::ISODate);
+
+            sendToWebSocket("game_beaten", gameData);
             return true;
         }
     }
@@ -604,12 +613,134 @@ bool RAClient::isGameMastered()
     if((gameinfo_model->completion_count() + warning) == achievement_model->rowCount())
     {
         gameinfo_model->mastered(true);
+        QJsonObject gameData;
+        gameData["title"] = gameinfo_model->title();
+        gameData["id"] = (int)gameinfo_model->id();
+        gameData["achievementCount"] = achievement_model->rowCount() - warning;
+        gameData["totalPoints"] = gameinfo_model->point_total();
+        gameData["timestamp"] = QDateTime::currentDateTime().toString(Qt::ISODate);
+
+        sendToWebSocket("game_mastered", gameData);
         return true;
     }
     gameinfo_model->mastered(false);
     return false;
 }
 
-RAClient::~RAClient()
+void RAClient::initWebSocket()
 {
+    if(webSocket)
+    {
+        webSocket->deleteLater();
+        webSocket = nullptr;
+    }
+
+    webSocket = new QWebSocket(QString(), QWebSocketProtocol::VersionLatest, this);
+
+    connect(webSocket, &QWebSocket::connected, this, &RAClient::onWebSocketConnected);
+
+    connect(webSocket, &QWebSocket::disconnected, this, &RAClient::onWebSocketDisconnected);
+
+    connect(webSocket, &QWebSocket::textMessageReceived, this, &RAClient::onWebSocketMessage);
+
+    connect(webSocket, &QWebSocket::errorOccurred, this, &RAClient::onWebSocketError);
+
+    QUrl url = "ws://" + wsIP + ":" + QString::number(wsPort);
+    qDebug() << "Attempting WebSocket connection to:" << url;
+    webSocket->open(QUrl(url));
+}
+
+void RAClient::closeWebSocket()
+{
+    if(webSocket)
+    {
+        webSocket->close();
+        delete webSocket;
+        webSocket = nullptr;
+    }
+}
+
+void RAClient::onWebSocketConnected()
+{
+    qDebug() << "OBS WebSocket connected";
+}
+
+void RAClient::onWebSocketDisconnected()
+{
+    qDebug() << "OBS WebSocket disconnected";
+
+    QTimer::singleShot(3000, this, [this]() {
+        if(!webSocket || webSocket->state() == QAbstractSocket::UnconnectedState)
+            initWebSocket();
+    });
+}
+
+
+void RAClient::onWebSocketError(QAbstractSocket::SocketError error)
+{
+    qDebug() << "OBS WebSocket error:" << webSocket->errorString();
+}
+
+void RAClient::sendToWebSocket(const QString& eventType, const QJsonObject& data)
+{
+    if(webSocket->state() != QAbstractSocket::ConnectedState)
+    {
+        qDebug() << "OBS not connected, skipping event:" << eventType;
+        return;
+    }
+
+    QJsonObject vendorData;
+    vendorData["vendorName"] = RA2SNES_REPO_NAME;
+    vendorData["requestType"] = eventType;
+    vendorData["requestData"] = data;
+
+    QJsonObject d;
+    d["requestType"] = "CallVendorRequest";
+    d["requestId"] = QString::number(QDateTime::currentMSecsSinceEpoch());
+    d["requestData"] = vendorData;
+
+    QJsonObject message;
+    message["op"] = 6;
+    message["d"] = d;
+
+    webSocket->sendTextMessage(QJsonDocument(message).toJson(QJsonDocument::Compact));
+}
+
+void RAClient::onWebSocketMessage(const QString& msg)
+{
+    QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8());
+    QJsonObject obj = doc.object();
+
+    int op = obj["op"].toInt();
+
+    if(op == 0)
+    {
+        QJsonObject identify;
+        identify["op"] = 1;
+
+        QJsonObject d;
+        d["rpcVersion"] = 1;
+        identify["d"] = d;
+
+        webSocket->sendTextMessage(QJsonDocument(identify).toJson(QJsonDocument::Compact));
+        return;
+    }
+}
+
+void RAClient::setWebSocketIPandPort(QString& ip, int& port)
+{
+    if(!ip.isEmpty())
+        wsIP = ip;
+    if(port > 0)
+        wsPort = port;
+}
+
+QString RAClient::getWebSocketIP() const
+{
+    return wsIP;
+}
+
+int RAClient::getWebSocketPort() const
+{
+    return wsPort;
 }
