@@ -58,6 +58,8 @@ public:
     QString getWebSocketIP() const;
     int getWebSocketPort() const;
     void closeWebSocket();
+    void sendGameData();
+    void sendUserData();
 
 signals:
     void loginSuccess(bool r);
@@ -69,6 +71,9 @@ signals:
     void awardedAchievement(const unsigned int& id, const QString& time, const unsigned int& points);
     void sessionStarted();
     void requestFinished();
+
+private slots:
+    void onWebSocketError(QAbstractSocket::SocketError error);
 
 private:
     RAClient(QObject *parent = nullptr);
@@ -89,25 +94,30 @@ private:
     void sendToWebSocket(const QString& eventType, const QJsonObject& data);
     void onWebSocketConnected();
     void onWebSocketDisconnected();
-    void onWebSocketError(QAbstractSocket::SocketError error);
     void onWebSocketTimeout();
     void onWebSocketMessage(const QString& msg);
+    void processWebSocketQueue();
     //void handlePingResponse(const QJsonObject& jsonObject);
     QString latestRequest;
     bool warning;
     bool m_refresh;
-    QNetworkAccessManager* networkManager;
+    bool m_identified;
+    bool m_closing;
+    QNetworkAccessManager networkManager;
     UserInfoModel* userinfo_model;
     GameInfoModel* gameinfo_model;
     AchievementModel* achievement_model;
-    QWebSocket *webSocket;
+    QWebSocket webSocket;
     int wsPort;
     QString wsIP;
+    QTimer m_wsTimer;
+    QTimer m_reconnectTimer;
     QMap<unsigned int, bool> progressionMap;
     QMap<unsigned int, bool> winMap;
     QMap<unsigned int, QDateTime> achievedTimes;
     QList<LeaderboardInfo> leaderboards;
     QQueue<QPair<QString, QJsonObject>> queue;
+    QQueue<QString> m_wsQueue;
     QJsonObject latestPost;
     bool running;
 };

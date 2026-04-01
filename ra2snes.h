@@ -110,8 +110,8 @@ private:
     QString m_latestVersion;
     QString downloadUrl;
     QString richText;
-    QTimer* crashTimer;
-    QTimer* richTimer;
+    QTimer crashTimer;
+    QTimer richTimer;
     void createSettingsFile();
     void loadSettings();
     void onLoginSuccess(bool r);
@@ -129,8 +129,8 @@ private:
     void initVars();
     void postTelemetryData();
     void updateRichText(const QString& rt);
-    QTimer* waitTimer;
-    QElapsedTimer* frameTimer;
+    QTimer waitTimer;
+    QElapsedTimer frameTimer;
     unsigned int programTime;
     unsigned int vgetTime;
     unsigned int nmiWarmingSize;
