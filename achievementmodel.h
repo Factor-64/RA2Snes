@@ -54,7 +54,7 @@ public:
     void appendAchievement(AchievementInfo a);
 
 signals:
-    void unlockedChanged(const unsigned int& index);
+    void unlockedChanged();
     void primedChanged(const QUrl& badgeUrl, const bool& p);
     void valueChanged(const QUrl& badgeUrl, const unsigned int& value, const unsigned int& total);
 

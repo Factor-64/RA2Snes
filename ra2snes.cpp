@@ -179,15 +179,6 @@ ra2snes::ra2snes(QObject *parent)
         usb2snes->infos();
     });
 
-    connect(reader, &MemoryReader::achievementUnlocked, this, [=](const unsigned int& id, const QDateTime& time) {
-        //qDebug() << id << time;
-        raclient->awardAchievement(id, time);
-    });
-
-    connect(reader, &MemoryReader::updateAchievementInfo, this, [=](const unsigned int& id, const AchievementInfoType& infotype, const int& value) {
-        raclient->setAchievementInfo(id, infotype, value);
-    });
-
     connect(reader, &MemoryReader::updateRichPresence, this, [=](const QString& status) {
         updateRichText(status);
     });

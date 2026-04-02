@@ -128,12 +128,16 @@ void AchievementModel::setUnlockedState(const unsigned int& i, const bool& unloc
 AchievementInfo* AchievementModel::unlockAchievement(const unsigned int& id, const QDateTime& time) {
     for (int i = 0; i < m_achievements.size(); ++i) {
         if (m_achievements[i].id == id) {
+            if(m_achievements[i].unlocked)
+                return nullptr;
             m_achievements[i].unlocked = true;
             m_achievements[i].time_unlocked = time;
             m_achievements[i].time_unlocked_string = time.toString("MMMM d yyyy, h:mmap");
+            m_achievements[i].value = m_achievements[i].target;
+            m_achievements[i].percent = 100;
             QModelIndex index = createIndex(i, 0);
-            emit dataChanged(index, index, {UnlockedRole, TimeUnlockedRole, TimeUnlockedStringRole});
-            emit unlockedChanged(i);
+            emit dataChanged(index, index, {UnlockedRole, TimeUnlockedRole, TimeUnlockedStringRole, ValueRole, PercentRole});
+            emit unlockedChanged();
             return &m_achievements[i];
         }
     }

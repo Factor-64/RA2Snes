@@ -9,6 +9,7 @@ MemoryReader::MemoryReader(QObject *parent) : QObject(parent) {
     rpState = 0;
     uniqueMemoryAddresses.clear();
     achievementTriggers.clear();
+    raclient = RAClient::instance();
 }
 
 void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, const QList<LeaderboardInfo>& leaderboards,
@@ -367,10 +368,15 @@ bool MemoryReader::processFrames(QByteArray& data, unsigned int& frames, bool& c
     QList<unsigned int> ids;
     while (frames > 0)
     {
-        for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); )
+        for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it)
         {
             auto* entry = it.value();
-            if (!entry) { it = achievementTriggers.erase(it); continue; }
+            if (!entry)
+            {
+                it = achievementTriggers.erase(it);
+                --it;
+                continue;
+            }
 
             rc_trigger_t* trigger = &entry->trigger;
 
@@ -388,36 +394,30 @@ bool MemoryReader::processFrames(QByteArray& data, unsigned int& frames, bool& c
             {
                 const int32_t new_percent =
                     (int32_t)(((quint64)trigger->measured_value * 100) / trigger->measured_target);
-                emit updateAchievementInfo(it.key(), Percent, new_percent);
-                emit updateAchievementInfo(it.key(), Value, trigger->measured_value);
+                raclient->setAchievementInfo(it.key(), Percent, new_percent);
+                raclient->setAchievementInfo(it.key(), Value, trigger->measured_value);
             }
 
-            if (new_state == old_state) {
-                ++it;
+            if (new_state == old_state)
                 continue;
-            }
 
             if (old_state == RC_TRIGGER_STATE_PRIMED)
-                emit updateAchievementInfo(it.key(), Primed, false);
+                raclient->setAchievementInfo(it.key(), Primed, false);
 
             switch (new_state)
             {
             case RC_TRIGGER_STATE_TRIGGERED: {
-                emit achievementUnlocked(it.key(), QDateTime::currentDateTime());
-                emit updateAchievementInfo(it.key(), Value, trigger->measured_value);
-                emit updateAchievementInfo(it.key(), Percent, 100);
+                raclient->awardAchievement(it.key(), QDateTime::currentDateTime());
                 ids.append(it.key());
                 break;
             }
             case RC_TRIGGER_STATE_PRIMED:
-                emit updateAchievementInfo(it.key(), Primed, true);
+                raclient->setAchievementInfo(it.key(), Primed, true);
                 break;
 
             default:
                 break;
             }
-
-            ++it;
         }
 
         --frames;

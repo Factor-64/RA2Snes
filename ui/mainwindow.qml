@@ -234,7 +234,7 @@ ApplicationWindow {
 
         Connections {
             target: AchievementModel
-            function onUnlockedChanged(index)
+            function onUnlockedChanged()
             {
                 unlockSounds.playRandomSound(folderModelUnlocked);
             }

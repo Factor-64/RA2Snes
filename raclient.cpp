@@ -125,7 +125,7 @@ void RAClient::ping(const QString& rp)
 void RAClient::awardAchievement(const unsigned int& id, const QDateTime& achieved)
 {
     AchievementInfo* ach = achievement_model->unlockAchievement(id, achieved);
-    if (ach == nullptr)
+    if (!ach)
         return;
     gameinfo_model->updatePointCount(ach->points);
     //qDebug() << "AWARDED" << achievement.id;
