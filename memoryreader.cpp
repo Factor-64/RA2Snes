@@ -44,12 +44,12 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
 
         if (trigger->measured_target != 0)
         {
-            emit updateAchievementInfo(achievement.id, Target, trigger->measured_target);
+            raclient->setAchievementInfo(achievement.id, Target, trigger->measured_target);
 
             if (achievement.unlocked)
             {
-                emit updateAchievementInfo(achievement.id, Percent, 100);
-                emit updateAchievementInfo(achievement.id, Value, trigger->measured_target);
+                raclient->setAchievementInfo(achievement.id, Percent, 100);
+                raclient->setAchievementInfo(achievement.id, Value, trigger->measured_target);
                 free(trigger_buffer);
                 continue;
             }
