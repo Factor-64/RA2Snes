@@ -565,8 +565,17 @@ void ra2snes::setCurrentConsole()
         }
         if(m_console == "SNES")
         {
-            raclient->setTitle("SD2SNES Menu", "https://avatars.githubusercontent.com/u/238664?v=4", "https://sd2snes.de/blog/");
-            raclient->setHash("https://github.com/mrehkopf/sd2snes");
+            QString title = "SD2SNES " + usb2snes->firmwareString();
+            if(m_customFirmware)
+            {
+                raclient->setTitle(title, "https://avatars.githubusercontent.com/u/238664?v=4", "https://sd2snes.de/blog/");
+                raclient->setHash("https://github.com/mrehkopf/sd2snes");
+            }
+            else
+            {
+                raclient->setTitle(title, "https://avatars.githubusercontent.com/u/101234202?v=4", "https://github.com/Factor-64/sd2snes-RA2SNES");
+                raclient->setHash("https://github.com/Factor-64/sd2snes-RA2SNES");
+            }
             if(isGB)
             {
                 icon += "gb.png";

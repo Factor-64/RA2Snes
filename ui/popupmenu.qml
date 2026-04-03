@@ -1135,7 +1135,7 @@ Item {
 
                     Text {
                         id: ws
-                        text: qsTr("OBS WebSocket")
+                        text: qsTr("WebSocket")
                         font.family: "Verdana"
                         font.pixelSize: 13
                         color: themeLoader.item.selectedLink
