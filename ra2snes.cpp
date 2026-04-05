@@ -97,6 +97,7 @@ ra2snes::ra2snes(QObject *parent)
             doThisTaskNext = None;
             usb2snes->attach(devices.at(0));
             reset = true;
+            m_gameLoaded = true;
             usb2snes->infos(true);
             emit displayMessage("Console Connected", false);
         }
@@ -110,6 +111,7 @@ ra2snes::ra2snes(QObject *parent)
             setCurrentConsole();
             emit clearedAchievements();
             updateRichText("");
+            m_gameLoaded = false;
             emit displayMessage("Console Not Connected", true);
             QTimer::singleShot(1000, this, [=] {
                 raclient->sendQueuedRequest();
@@ -216,14 +218,15 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
                 doThisTaskNext = GetConsoleConfig;
             setCurrentConsole();
             updateRichText("");
-            m_gameLoaded = false;
             raclient->setPatched(false);
             raclient->clearAchievements();
             emit clearedAchievements();
             raclient->clearGame();
-            raclient->sendGameData();
             if(richTimer.isActive())
                 richTimer.stop();
+            if(m_gameLoaded)
+                raclient->sendGameData();
+            m_gameLoaded = false;
         }
         else if (!m_gameLoaded && loggedin && !m_loadingGame)
         {
@@ -566,16 +569,8 @@ void ra2snes::setCurrentConsole()
         if(m_console == "SNES")
         {
             QString title = "SD2SNES " + usb2snes->firmwareString();
-            if(m_customFirmware)
-            {
-                raclient->setTitle(title, "https://avatars.githubusercontent.com/u/238664?v=4", "https://sd2snes.de/blog/");
-                raclient->setHash("https://github.com/mrehkopf/sd2snes");
-            }
-            else
-            {
-                raclient->setTitle(title, "https://avatars.githubusercontent.com/u/101234202?v=4", "https://github.com/Factor-64/sd2snes-RA2SNES");
-                raclient->setHash("https://github.com/Factor-64/sd2snes-RA2SNES");
-            }
+            raclient->setTitle(title, "https://avatars.githubusercontent.com/u/238664?v=4", "https://sd2snes.de/blog/");
+            raclient->setHash("https://github.com/mrehkopf/sd2snes");
             if(isGB)
             {
                 icon += "gb.png";
@@ -731,7 +726,6 @@ void ra2snes::signOut()
     initVars();
     reset = true;
     loadSettings();
-    raclient->sendUserData();
     onUsb2SnesStateChanged();
 }
 
@@ -751,7 +745,6 @@ void ra2snes::initVars()
     raclient->clearAchievements();
     raclient->clearUser();
     raclient->clearGame();
-    raclient->sendGameData();
     raclient->setHardcore(true);
     raclient->setAutoHardcore(false);
     saveUISettings(600, 600, false, false, true, false, "Dark");
@@ -1004,4 +997,14 @@ void ra2snes::postTelemetryData()
     //sDebug() << req.rawHeaderList();
     //sInfo() << toSend;
     tempNetworkManager->post(req, toSend);
+}
+
+ra2snes::~ra2snes()
+{
+    if(waitTimer.isActive())
+        waitTimer.stop();
+    if(crashTimer.isActive())
+        crashTimer.stop();
+    if(richTimer.isActive())
+        richTimer.stop();
 }

@@ -75,10 +75,10 @@ jobs:
         with:
           submodules: true
 
-      - name: Install Qt 6.9.1 (MSVC 2022)
+      - name: Install Qt 6.9.3 (MSVC 2022)
         uses: jurplel/install-qt-action@v3
         with:
-          version: '6.9.1'
+          version: '6.9.3'
           host: 'windows'
           target: 'desktop'
           arch: 'win64_msvc2022_64'

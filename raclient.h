@@ -79,6 +79,7 @@ private:
     RAClient(QObject *parent = nullptr);
     RAClient(const RAClient&) = delete;
     RAClient& operator=(const RAClient&) = delete;
+    ~RAClient();
 
     static const QString baseUrl;
     static const QString userAgent;
@@ -95,13 +96,11 @@ private:
     void onWebSocketConnected();
     void onWebSocketDisconnected();
     void onWebSocketTimeout();
-    void onWebSocketMessage(const QString& msg);
     void processWebSocketQueue();
     //void handlePingResponse(const QJsonObject& jsonObject);
     QString latestRequest;
     bool warning;
     bool m_refresh;
-    bool m_identified;
     bool m_closing;
     QNetworkAccessManager networkManager;
     UserInfoModel* userinfo_model;

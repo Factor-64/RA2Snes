@@ -88,6 +88,7 @@ private:
     explicit ra2snes(QObject *parent = nullptr);
     ra2snes(const ra2snes&) = delete;
     ra2snes& operator=(const ra2snes&) = delete;
+    ~ra2snes();
 
     Usb2Snes *usb2snes;
     RAClient *raclient;

@@ -13,8 +13,8 @@ const QString RAClient::userAgent = QString("ra2snes/%1 rcheevos/%2").arg(RA2SNE
 RAClient::RAClient(QObject *parent)
     : QObject(parent)
 {
-    wsPort = 4455;
-    wsIP = "localhost";
+    wsPort = 21477;
+    wsIP = "127.0.0.1";
     userinfo_model = UserInfoModel::instance();
     gameinfo_model = GameInfoModel::instance();
     achievement_model = AchievementModel::instance();
@@ -22,7 +22,6 @@ RAClient::RAClient(QObject *parent)
     warning = false;
     m_refresh = false;
     running = false;
-    m_identified = false;
     m_closing = false;
     m_reconnectTimer.setSingleShot(true);
     m_wsTimer.setInterval(500);
@@ -31,7 +30,6 @@ RAClient::RAClient(QObject *parent)
 
     connect(&webSocket, &QWebSocket::connected, this, &RAClient::onWebSocketConnected);
     connect(&webSocket, &QWebSocket::disconnected, this, &RAClient::onWebSocketDisconnected);
-    connect(&webSocket, &QWebSocket::textMessageReceived, this, &RAClient::onWebSocketMessage);
     connect(&webSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onWebSocketError(QAbstractSocket::SocketError)));
 }
 
@@ -502,6 +500,7 @@ void RAClient::handlePatchResponse(const QJsonObject& jsonObject)
             if(info.type == "missable")
                 ++missables;
             total += info.points;
+            qDebug() << info.points;
             achievement_model->appendAchievement(info);
         }
     }
@@ -607,14 +606,15 @@ bool RAClient::isGameMastered()
 void RAClient::initWebSocket()
 {
     QUrl url = "ws://" + wsIP + ":" + QString::number(wsPort);
-    //qDebug() << "Attempting WebSocket connection to:" << url;
+    qDebug() << "Attempting WebSocket connection to:" << url;
     webSocket.open(url);
+    if(!m_wsQueue.isEmpty())
+        m_wsTimer.start();
 }
 
 void RAClient::closeWebSocket()
 {
-    //qDebug() << "OBS WebSocket Closed";
-    m_identified = false;
+    qDebug() << "OBS WebSocket Closed";
     m_wsQueue.clear();
     if(m_wsTimer.isActive())
         m_wsTimer.stop();
@@ -626,15 +626,19 @@ void RAClient::closeWebSocket()
 
 void RAClient::onWebSocketConnected()
 {
-    //qDebug() << "OBS WebSocket connected";
+    qDebug() << "OBS WebSocket connected";
+    sendUserData();
+    sendGameData();
 }
 
 void RAClient::onWebSocketDisconnected()
 {
-    //qDebug() << "OBS WebSocket disconnected";
+    qDebug() << "OBS WebSocket disconnected";
 
-    if (m_closing)
+    if(m_closing)
     {
+        if(m_reconnectTimer.isActive())
+            m_reconnectTimer.stop();
         m_closing = false;
         return;
     }
@@ -650,78 +654,29 @@ void RAClient::onWebSocketError(QAbstractSocket::SocketError error)
 
 void RAClient::sendToWebSocket(const QString& eventType, const QJsonObject& data)
 {
-    if(webSocket.state() != QAbstractSocket::ConnectedState || !m_identified)
-    {
-        //qDebug() << "OBS not connected, skipping event:" << eventType;
+    if (webSocket.state() != QAbstractSocket::ConnectedState)
         return;
-    }
-
-    QJsonObject vendorData;
-    vendorData["vendorName"] = RA2SNES_REPO_NAME;
-    vendorData["requestType"] = eventType;
-    vendorData["requestData"] = data;
-
-    QJsonObject d;
-    d["requestType"] = "CallVendorRequest";
-    d["requestId"] = QString::number(QDateTime::currentMSecsSinceEpoch());
-    d["requestData"] = vendorData;
 
     QJsonObject message;
-    message["op"] = 6;
-    message["d"] = d;
+    message["eventtype"] = eventType;
+    message["data"] = data;
 
     QString json = QJsonDocument(message).toJson(QJsonDocument::Compact);
     m_wsQueue.enqueue(json);
-    if(!m_wsTimer.isActive())
+
+    if (!m_wsTimer.isActive())
         m_wsTimer.start();
 }
 
+
 void RAClient::processWebSocketQueue()
 {
-    if(!m_identified || webSocket.state() != QAbstractSocket::ConnectedState)
-        return;
-
-    if(m_wsQueue.isEmpty())
+    if(webSocket.state() != QAbstractSocket::ConnectedState || m_wsQueue.isEmpty())
     {
         m_wsTimer.stop();
         return;
     }
     webSocket.sendTextMessage(m_wsQueue.dequeue());
-}
-
-
-void RAClient::onWebSocketMessage(const QString& msg)
-{
-    QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8());
-    QJsonObject obj = doc.object();
-
-    int op = obj["op"].toInt();
-
-    switch(op)
-    {
-        case 0: {
-            QJsonObject identify;
-            identify["op"] = 1;
-
-            QJsonObject d;
-            d["rpcVersion"] = 1;
-            identify["d"] = d;
-
-            webSocket.sendTextMessage(QJsonDocument(identify).toJson(QJsonDocument::Compact));
-            return;
-        }
-        case 2: {
-            m_identified = true;
-            if(!m_wsQueue.isEmpty())
-                m_wsTimer.start();
-            sendUserData();
-            sendGameData();
-            qDebug() << "OBS WebSocket: Identified successfully";
-            return;
-        }
-        default:
-            break;
-    }
 }
 
 void RAClient::sendUserData()
@@ -741,7 +696,6 @@ void RAClient::sendGameData()
     QJsonObject gameData;
     gameData["title"] = gameinfo_model->title();
     gameData["id"] = (int)gameinfo_model->id();
-    gameData["image_icon"] = gameinfo_model->image_icon();
     gameData["image_icon_url"] = gameinfo_model->image_icon_url().toString();
     gameData["game_link"] = gameinfo_model->game_link().toString();
     gameData["console"] = gameinfo_model->console();
@@ -752,6 +706,7 @@ void RAClient::sendGameData()
     gameData["missable_count"] = (int)gameinfo_model->missable_count();
     gameData["point_count"] = gameinfo_model->point_count();
     gameData["achievement_count"] = achievement_model->rowCount() - warning;
+    gameData["completion_count"] = (int)gameinfo_model->completion_count();
     gameData["timestamp"] = QDateTime::currentDateTime().toString(Qt::ISODate);
 
     sendToWebSocket("game_data", gameData);
@@ -773,4 +728,12 @@ QString RAClient::getWebSocketIP() const
 int RAClient::getWebSocketPort() const
 {
     return wsPort;
+}
+
+RAClient::~RAClient()
+{
+    if(m_wsTimer.isActive())
+        m_wsTimer.stop();
+    m_closing = true;
+    webSocket.close();
 }
