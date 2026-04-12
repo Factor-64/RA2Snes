@@ -15,8 +15,7 @@ public:
 
     explicit MemoryReader(QObject *parent = nullptr);
 
-    void initTriggers(const QList<AchievementInfo>& achievements, const QList<LeaderboardInfo>& leaderboards, const QString& richPresence,
-                      const unsigned int& ramSize, const bool& customFirmware);
+    void initTriggers(const QList<AchievementInfo>& achievements, const QString& richPresence, const unsigned int& ramSize);
     QList<QPair<unsigned int, unsigned int>> getUniqueMemoryAddresses();
     bool processFrames(QByteArray& data, unsigned int& frames, bool& customFirmware);
     void resetRuntimeData();

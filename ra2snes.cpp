@@ -155,7 +155,7 @@ ra2snes::ra2snes(QObject *parent)
         emit achievementModelReady();
         emit enableModeSwitching();
         //qDebug() << "INIT TRIGGERS";
-        reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getLeaderboards(), raclient->getRichPresence(), usb2snes->getRamSizeData(), m_customFirmware);
+        reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getRichPresence(), usb2snes->getRamSizeData());
         uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
         //qDebug() << "Unique Addresses:" << uniqueMemoryAddresses;
         if(uniqueMemoryAddresses.isEmpty())
@@ -334,7 +334,7 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
     if(reader->processFrames(data, framesPassed, m_customFirmware))
     {
         if(!m_customFirmware)
-            reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getLeaderboards(), raclient->getRichPresence(), usb2snes->getRamSizeData(), m_customFirmware);
+            reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getRichPresence(), usb2snes->getRamSizeData());
         if(uniqueMemoryAddresses != reader->getUniqueMemoryAddresses())
         {
             qDebug() << "Changed";
@@ -821,6 +821,7 @@ void ra2snes::updateRichText(const QString& rt)
     if(richText != rt)
     {
         richText = rt;
+        raclient->sendRichPresence(rt);
         emit updatedRichText();
     }
 }

@@ -522,10 +522,9 @@ void Usb2Snes::setupNMIVectors(const QList<QPair<unsigned int, unsigned int>> ad
     setAddress(0xFFFFFE, out);
     out.clear();
     quint16 l = addresses.size();
-    out.append(char((l >> 8)  & 0xFF));
+    out.append(char((l >> 8) & 0xFF));
     out.append(char(l & 0xFF));
-    out.append(char((size >> 16) & 0xFF));
-    out.append(char((size >> 8)  & 0xFF));
+    out.append(char((size >> 8) & 0xFF));
     out.append(char(size & 0xFF));
     setAddress(0xFFFFFD, out);
     //qDebug() << "Setting 0xFFFFFD" << out.toHex(' ');

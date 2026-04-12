@@ -60,6 +60,7 @@ public:
     void closeWebSocket();
     void sendGameData();
     void sendUserData();
+    void sendRichPresence(QString rich);
 
 signals:
     void loginSuccess(bool r);

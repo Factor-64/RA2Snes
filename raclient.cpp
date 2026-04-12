@@ -712,6 +712,14 @@ void RAClient::sendGameData()
     sendToWebSocket("game_data", gameData);
 }
 
+void RAClient::sendRichPresence(QString rich)
+{
+    QJsonObject richPresence;
+    richPresence["text"] = rich;
+
+    sendToWebSocket("rich_presence", richPresence);
+}
+
 void RAClient::setWebSocketIPandPort(QString& ip, int& port)
 {
     if(!ip.isEmpty())

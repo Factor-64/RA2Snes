@@ -12,8 +12,7 @@ MemoryReader::MemoryReader(QObject *parent) : QObject(parent) {
     raclient = RAClient::instance();
 }
 
-void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, const QList<LeaderboardInfo>& leaderboards,
-                                const QString& richPresence, const unsigned int& ramSize, const bool& customFirmware)
+void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, const QString& richPresence, const unsigned int& ramSize)
 {
     uniqueMemoryAddresses.clear();
     for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it)
@@ -126,19 +125,11 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
     //qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size() << total;
     //qDebug() << uniqueMemoryAddresses.size() << total;
 
-    if(customFirmware)
+    unsigned int amount = 4;
+    while(uniqueMemoryAddresses.size() > 256)
     {
-        unsigned int amount = 4;
-        while(uniqueMemoryAddresses.size() > 320)
-        {
-            mergeAddresses(amount);
-            amount += 4;
-        }
-        //mergeAddresses(64);
-    }
-    else
-    {
-        mergeAddresses(255);
+        mergeAddresses(amount);
+        amount += 4;
     }
 
     /*total = 0;
