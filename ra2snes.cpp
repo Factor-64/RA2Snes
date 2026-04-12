@@ -111,6 +111,7 @@ ra2snes::ra2snes(QObject *parent)
             setCurrentConsole();
             emit clearedAchievements();
             updateRichText("");
+            updateFirmware(false);
             m_gameLoaded = false;
             emit displayMessage("Console Not Connected", true);
             QTimer::singleShot(1000, this, [=] {
@@ -202,12 +203,15 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
         if(infos.firmwareVersion.contains("RA2SNES"))
         {
             if(!m_customFirmware)
+            {
                 emit displayMessage("Custom firmware detected", false);
-            m_customFirmware = true;
+
+            }
+            updateFirmware(true);
         }
         else
         {
-            m_customFirmware = false;
+            updateFirmware(false);
         }
         //qDebug() << m_currentGame << infos.firmwareVersion;
         if (m_currentGame.contains("m3nu.bin") || m_currentGame.contains("menu.bin") || doThisTaskNext == Reset || m_currentGame.isEmpty())
@@ -337,7 +341,7 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
             reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getRichPresence(), usb2snes->getRamSizeData());
         if(uniqueMemoryAddresses != reader->getUniqueMemoryAddresses())
         {
-            qDebug() << "Changed";
+            //qDebug() << "Changed";
             uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
             if(uniqueMemoryAddresses.isEmpty())
                 doThisTaskNext = NoChecksNeeded;
@@ -826,6 +830,15 @@ void ra2snes::updateRichText(const QString& rt)
     }
 }
 
+void ra2snes::updateFirmware(const bool cfw)
+{
+    if(m_customFirmware != cfw)
+    {
+        m_customFirmware = cfw;
+        emit firmwareChanged();
+    }
+}
+
 QString ra2snes::console() const
 {
     return m_console;
@@ -856,6 +869,11 @@ QString ra2snes::appDirPath() const
 QString ra2snes::richPresence() const
 {
     return richText;
+}
+
+bool ra2snes::customFirmware() const
+{
+    return m_customFirmware;
 }
 
 QString ra2snes::version() const

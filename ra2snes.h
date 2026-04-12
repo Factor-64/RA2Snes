@@ -18,6 +18,7 @@ class ra2snes : public QObject
     Q_PROPERTY(QString latestVersion READ latestVersion NOTIFY newUpdate)
     Q_PROPERTY(bool ignore READ ignore WRITE ignoreUpdates NOTIFY ignoreChanged)
     Q_PROPERTY(bool websocket READ websocket WRITE enableWebSocket NOTIFY websocketChanged)
+    Q_PROPERTY(bool customFirmware READ customFirmware NOTIFY firmwareChanged)
     Q_PROPERTY(QString richPresence READ richPresence NOTIFY updatedRichText)
 
 public:
@@ -55,6 +56,7 @@ public:
     QString richPresence() const;
     bool ignore() const;
     bool websocket() const;
+    bool customFirmware() const;
 
 public slots:
     void signIn(const QString &username, const QString &password, const bool& remember);
@@ -83,6 +85,7 @@ signals:
     void ignoreChanged();
     void updatedRichText();
     void websocketChanged();
+    void firmwareChanged();
 
 private:
     explicit ra2snes(QObject *parent = nullptr);
@@ -130,6 +133,7 @@ private:
     void initVars();
     void postTelemetryData();
     void updateRichText(const QString& rt);
+    void updateFirmware(const bool cfw);
     QTimer waitTimer;
     QElapsedTimer frameTimer;
     unsigned int programTime;

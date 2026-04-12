@@ -136,6 +136,26 @@ Rectangle {
                             }
                         }
                     }
+                    Row {
+                        Text {
+                            text: qsTr("Firmware: ")
+                            color: themeLoader.item.basicTextColor
+                            font.bold: true
+                            font.family: "Verdana"
+                            font.pixelSize: 13
+                        }
+                        Text {
+                            text: {
+                                if(Ra2snes.customFirmware)
+                                    qsTr("Custom");
+                                else
+                                    qsTr("Standard");
+                            }
+                            font.family: "Verdana"
+                            font.pixelSize: 13
+                            color: themeLoader.item.basicTextColor
+                        }
+                    }
                 }
             }
         }

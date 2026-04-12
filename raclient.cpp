@@ -500,7 +500,7 @@ void RAClient::handlePatchResponse(const QJsonObject& jsonObject)
             if(info.type == "missable")
                 ++missables;
             total += info.points;
-            qDebug() << info.points;
+            //qDebug() << info.points;
             achievement_model->appendAchievement(info);
         }
     }
@@ -606,7 +606,7 @@ bool RAClient::isGameMastered()
 void RAClient::initWebSocket()
 {
     QUrl url = "ws://" + wsIP + ":" + QString::number(wsPort);
-    qDebug() << "Attempting WebSocket connection to:" << url;
+    //qDebug() << "Attempting WebSocket connection to:" << url;
     webSocket.open(url);
     if(!m_wsQueue.isEmpty())
         m_wsTimer.start();
@@ -614,7 +614,7 @@ void RAClient::initWebSocket()
 
 void RAClient::closeWebSocket()
 {
-    qDebug() << "OBS WebSocket Closed";
+    //qDebug() << "OBS WebSocket Closed";
     m_wsQueue.clear();
     if(m_wsTimer.isActive())
         m_wsTimer.stop();
@@ -626,14 +626,14 @@ void RAClient::closeWebSocket()
 
 void RAClient::onWebSocketConnected()
 {
-    qDebug() << "OBS WebSocket connected";
+    //qDebug() << "OBS WebSocket connected";
     sendUserData();
     sendGameData();
 }
 
 void RAClient::onWebSocketDisconnected()
 {
-    qDebug() << "OBS WebSocket disconnected";
+    //qDebug() << "OBS WebSocket disconnected";
 
     if(m_closing)
     {
@@ -649,7 +649,7 @@ void RAClient::onWebSocketDisconnected()
 
 void RAClient::onWebSocketError(QAbstractSocket::SocketError error)
 {
-    qDebug() << "OBS WebSocket error:" << webSocket.errorString();
+    //qDebug() << "OBS WebSocket error:" << webSocket.errorString();
 }
 
 void RAClient::sendToWebSocket(const QString& eventType, const QJsonObject& data)
