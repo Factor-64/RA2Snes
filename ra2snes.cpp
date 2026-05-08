@@ -291,6 +291,8 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
         // checks bit 0 is ingame status
         // checks bit 1 is resetting status
         // checks bit 2 is patched status
+        //qDebug() << data.size();
+        //qDebug() << data.toHex(' ');
         const char checks = data.back();
         bool ingame    = (checks >> 0) & 1;
         bool resetting = (checks >> 1) & 1;
@@ -298,9 +300,7 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
 
         data.chop(1);
 
-        //qDebug() << data.size();
         //qDebug() << ingame << resetting << patched;
-        //qDebug() << data.toHex(' ');
         //doThisTaskNext = None;
         //return;
         if(!ingame)

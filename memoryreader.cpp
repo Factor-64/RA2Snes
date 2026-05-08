@@ -373,7 +373,10 @@ bool MemoryReader::processFrames(QByteArray& data, unsigned int& frames, bool& c
 
             int old_state = trigger->state;
             uint32_t old_measured_value = trigger->measured_value;
-            int new_state = rc_evaluate_trigger(trigger, peek, &mem, nullptr);
+            //trigger->state = RC_TRIGGER_STATE_ACTIVE;
+            //int new_state = rc_evaluate_trigger(trigger, peek, &mem, nullptr);
+            rc_test_trigger(trigger, peek, &mem, nullptr);
+            int new_state = trigger->state;
 
             if (trigger->measured_value != old_measured_value &&
                 old_measured_value != RC_MEASURED_UNKNOWN &&
