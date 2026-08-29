@@ -86,6 +86,8 @@ jobs:
 
       - name: Setup MSVC Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
           
       - name: Configure CMake
         run: cmake -S . -B build -G Ninja -A x64 -DCMAKE_BUILD_TYPE=Release
