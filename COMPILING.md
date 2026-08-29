@@ -15,13 +15,26 @@
     git clone https://github.com/Factor-64/RA2Snes.git --recursive
     ```
 2) Install Dependencies
-    ```
+
+   For systems with `apt`:
+
+   ```
    sudo apt-get install -y build-essential cmake git qt6-tools-dev qt6-websockets-dev \
         qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts \
         qml6-module-qtquick-templates qml6-module-qtquick-window qt6-declarative-dev \
         qml6-module-qtqml-workerscript qml6-module-qtmultimedia qml6-module-qt-labs-folderlistmodel \
         qml6-module-qt5compat-graphicaleffects libqt6svg6 libqt6websockets6 libqt6qml6 libqt6gui6
-    ```
+   ```
+
+   For systems with `dnf`:
+
+   ```sh
+   sudo dnf group install -y c-development development-tools \
+     && sudo dnf install -y cmake git qt5-qtgraphicaleffects \
+     qt6-qt5compat-devel qt6-qtdeclarative-devel qt6-qtmultimedia-devel \
+     qt6-qttools-devel qt6-qtwebsockets-devel
+   ```
+
 3) Setup with CMake
     ```
     cd RA2Snes
