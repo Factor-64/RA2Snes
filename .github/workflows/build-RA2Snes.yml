@@ -77,7 +77,7 @@ jobs:
           submodules: true
 
       - name: Install Qt 6.9.3 (MSVC 2022)
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4.3.1
         with:
           version: '6.9.3'
           host: 'windows'
@@ -86,9 +86,10 @@ jobs:
           modules: 'qtwebsockets'
 
       - name: Setup MSVC Developer Command Prompt
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: TheMrMilchmann/setup-msvc-dev@v4.1.0
         with:
-          arch: x64
+          arch: amd64
+          vs-path: 'C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools'
           
       - name: Configure CMake
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
