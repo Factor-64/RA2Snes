@@ -90,7 +90,7 @@ jobs:
           arch: x64
           
       - name: Configure CMake
-        run: cmake -S . -B build -G Ninja -A x64 -DCMAKE_BUILD_TYPE=Release
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
       - name: Build project
         run: cmake --build build --config Release
