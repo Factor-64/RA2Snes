@@ -95,10 +95,14 @@ jobs:
       - name: Build project
         run: cmake --build build --config Release
 
+      - name: Deploy Qt DLLs
+        run: |
+          $qtbin = "${{ env.Qt6_DIR }}\bin"
+          & "$qtbin\windeployqt.exe" --qmldir .\qml .\build\ra2snes.exe --release
+          & "$qtbin\windeployqt.exe" --qmldir .\qml .\build\updater.exe --release
+      
       - name: Upload Windows Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: |
-            build/Release/ra2snes.exe
-            build/Release/updater.exe
+          path: build/
