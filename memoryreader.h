@@ -12,12 +12,10 @@ class MemoryReader : public QObject {
     Q_OBJECT
 
 public:
-
     explicit MemoryReader(QObject *parent = nullptr);
-
-    void initTriggers(const QList<AchievementInfo>& achievements, const QString& richPresence, const unsigned int& ramSize);
+    void initTriggers(const QList<AchievementInfo>& achievements, const QString& richPresence, const unsigned int& ramSize, const bool customFirmware);
     QList<QPair<unsigned int, unsigned int>> getUniqueMemoryAddresses();
-    bool processFrames(QByteArray& data, unsigned int& frames, bool& customFirmware);
+    bool processFrame(QByteArray& data, bool& customFirmware);
     void resetRuntimeData();
 
 signals:
@@ -32,7 +30,6 @@ private:
     QMap<unsigned int, unsigned int> addressMap;
     QMap<unsigned int, int> addressCounts;
     RAClient* raclient;
-    //QMap<unsigned int, rc_lboard_t*> leaderboardTriggers;
     rc_richpresence_with_memrefs_t* mem_richpresence;
     int rpState;
 };

@@ -23,10 +23,12 @@ RAClient::RAClient(QObject *parent)
     m_refresh = false;
     running = false;
     m_closing = false;
-    m_reconnectTimer.setSingleShot(true);
-    m_wsTimer.setInterval(500);
-    connect(&m_wsTimer, &QTimer::timeout, this, &RAClient::processWebSocketQueue);
-    connect(&m_reconnectTimer, &QTimer::timeout, this, &RAClient::initWebSocket);
+    m_wsTimer = new QTimer(this);
+    m_reconnectTimer = new QTimer(this);
+    m_reconnectTimer->setSingleShot(true);
+    m_wsTimer->setInterval(500);
+    connect(m_wsTimer, &QTimer::timeout, this, &RAClient::processWebSocketQueue);
+    connect(m_reconnectTimer, &QTimer::timeout, this, &RAClient::initWebSocket);
 
     connect(&webSocket, &QWebSocket::connected, this, &RAClient::onWebSocketConnected);
     connect(&webSocket, &QWebSocket::disconnected, this, &RAClient::onWebSocketDisconnected);
@@ -609,17 +611,17 @@ void RAClient::initWebSocket()
     //qDebug() << "Attempting WebSocket connection to:" << url;
     webSocket.open(url);
     if(!m_wsQueue.isEmpty())
-        m_wsTimer.start();
+        m_wsTimer->start();
 }
 
 void RAClient::closeWebSocket()
 {
     //qDebug() << "OBS WebSocket Closed";
     m_wsQueue.clear();
-    if(m_wsTimer.isActive())
-        m_wsTimer.stop();
-    if(m_reconnectTimer.isActive())
-        m_reconnectTimer.stop();
+    if(m_wsTimer->isActive())
+        m_wsTimer->stop();
+    if(m_reconnectTimer->isActive())
+        m_reconnectTimer->stop();
     m_closing = true;
     webSocket.close();
 }
@@ -637,13 +639,13 @@ void RAClient::onWebSocketDisconnected()
 
     if(m_closing)
     {
-        if(m_reconnectTimer.isActive())
-            m_reconnectTimer.stop();
+        if(m_reconnectTimer->isActive())
+            m_reconnectTimer->stop();
         m_closing = false;
         return;
     }
 
-    m_reconnectTimer.start(1000);
+    m_reconnectTimer->start(1000);
 }
 
 
@@ -664,8 +666,8 @@ void RAClient::sendToWebSocket(const QString& eventType, const QJsonObject& data
     QString json = QJsonDocument(message).toJson(QJsonDocument::Compact);
     m_wsQueue.enqueue(json);
 
-    if (!m_wsTimer.isActive())
-        m_wsTimer.start();
+    if (!m_wsTimer->isActive())
+        m_wsTimer->start();
 }
 
 
@@ -673,7 +675,7 @@ void RAClient::processWebSocketQueue()
 {
     if(webSocket.state() != QAbstractSocket::ConnectedState || m_wsQueue.isEmpty())
     {
-        m_wsTimer.stop();
+        m_wsTimer->stop();
         return;
     }
     webSocket.sendTextMessage(m_wsQueue.dequeue());
@@ -740,8 +742,15 @@ int RAClient::getWebSocketPort() const
 
 RAClient::~RAClient()
 {
-    if(m_wsTimer.isActive())
-        m_wsTimer.stop();
     m_closing = true;
+    if (m_wsTimer->isActive())
+        m_wsTimer->stop();
+    if (m_reconnectTimer->isActive())
+        m_reconnectTimer->stop();
+
     webSocket.close();
+
+    webSocket.disconnect(this);
+
+    webSocket.deleteLater();
 }

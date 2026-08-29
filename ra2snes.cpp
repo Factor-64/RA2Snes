@@ -24,12 +24,28 @@ ra2snes::ra2snes(QObject *parent)
     m_appDirPath = "";
     richText = "";
     initVars();
-    waitTimer.setTimerType(Qt::PreciseTimer);
-    waitTimer.setSingleShot(true);
-    crashTimer.setSingleShot(true);
-    richTimer.setSingleShot(true);
+    waitTimer = new QTimer(this);
+    crashTimer = new QTimer(this);
+    richTimer = new QTimer(this);
+    evalTimer = new QTimer(this);
+    frameTimer = new QElapsedTimer();
+    waitTimer->setTimerType(Qt::PreciseTimer);
+    waitTimer->setSingleShot(true);
+    crashTimer->setSingleShot(true);
+    richTimer->setSingleShot(true);
+    evalTimer->setInterval(1000 / 60.0988138974405);
 
-    connect(&crashTimer, &QTimer::timeout, this, [=]() {
+    connect(evalTimer, &QTimer::timeout, this, [this] {
+        evaluateFrameData();
+    });
+
+    connect(waitTimer, &QTimer::timeout, this, [=]() {
+        onUsb2SnesStateChanged();
+    });
+
+    connect(crashTimer, &QTimer::timeout, this, [=]() {
+        if(evalTimer->isActive())
+            evalTimer->stop();
         bool t = false;
         if(doThisTaskNext == GetNMIData)
         {
@@ -42,24 +58,15 @@ ra2snes::ra2snes(QObject *parent)
             t = raclient->sendQueuedRequest();
         }
         if(t)
-            crashTimer.start(5000);
+            crashTimer->start(5000);
         else
-            crashTimer.start(10000);
+            crashTimer->start(10000);
     });
 
-    connect(&richTimer, &QTimer::timeout, this, [=]() {
+    connect(richTimer, &QTimer::timeout, this, [=]() {
         if(!richText.isEmpty())
             raclient->ping(richText);
-        richTimer.start(120000);
-    });
-
-    connect(&waitTimer, &QTimer::timeout, this, [=]() {
-        //qDebug() << "ELAPSED" << frameTimer->elapsed();
-        //qDebug() << "WAIT TIMER EXPIRED";
-        //if(m_customFirmware)
-            //onUsb2SnesGetAddressesDataReceived();
-        //else
-        onUsb2SnesStateChanged();
+        richTimer->start(120000);
     });
 
     connect(usb2snes, &Usb2Snes::connected, this, [=]() {
@@ -71,10 +78,12 @@ ra2snes::ra2snes(QObject *parent)
     });
 
     connect(usb2snes, &Usb2Snes::disconnected, this, [=]() {
-        if(crashTimer.isActive())
-            crashTimer.stop();
-        if(richTimer.isActive())
-            richTimer.stop();
+        if(evalTimer->isActive())
+            evalTimer->stop();
+        if(crashTimer->isActive())
+            crashTimer->stop();
+        if(richTimer->isActive())
+            richTimer->stop();
         raclient->clearAchievements();
         raclient->clearGame();
         raclient->sendGameData();
@@ -103,8 +112,8 @@ ra2snes::ra2snes(QObject *parent)
         }
         else
         {
-            if(crashTimer.isActive())
-                crashTimer.stop();
+            if(crashTimer->isActive())
+                crashTimer->stop();
             raclient->clearAchievements();
             raclient->clearGame();
             raclient->sendGameData();
@@ -156,7 +165,7 @@ ra2snes::ra2snes(QObject *parent)
         emit achievementModelReady();
         emit enableModeSwitching();
         //qDebug() << "INIT TRIGGERS";
-        reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getRichPresence(), usb2snes->getRamSizeData());
+        reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getRichPresence(), usb2snes->getRamSizeData(), m_customFirmware);
         uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
         //qDebug() << "Unique Addresses:" << uniqueMemoryAddresses;
         if(uniqueMemoryAddresses.isEmpty())
@@ -175,11 +184,11 @@ ra2snes::ra2snes(QObject *parent)
                     doThisTaskNext = GetConsoleAddresses;
             }
         }
-        if(!richTimer.isActive())
-            richTimer.start(30000);
+        if(!richTimer->isActive())
+            richTimer->start(30000);
         //qDebug() << doThisTaskNext;
-        frameTimer.restart();
         usb2snes->infos();
+        millisecPassed = QDateTime::currentDateTime();
     });
 
     connect(reader, &MemoryReader::updateRichPresence, this, [=](const QString& status) {
@@ -200,13 +209,10 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
     if (!infos.flags.contains("NO_FILE_CMD"))
     {
         m_currentGame = infos.romPlaying.remove(QChar('\u0000')).replace("?", " ");
-        if(infos.firmwareVersion.contains("RA2SNES"))
+        if(QVersionNumber(QVersionNumber::fromString(infos.firmwareVersion)).microVersion() > 1000)
         {
             if(!m_customFirmware)
-            {
                 emit displayMessage("Custom firmware detected", false);
-
-            }
             updateFirmware(true);
         }
         else
@@ -226,8 +232,8 @@ void ra2snes::onUsb2SnesInfoDone(Usb2Snes::DeviceInfo infos)
             raclient->clearAchievements();
             emit clearedAchievements();
             raclient->clearGame();
-            if(richTimer.isActive())
-                richTimer.stop();
+            if(richTimer->isActive())
+                richTimer->stop();
             if(m_gameLoaded)
                 raclient->sendGameData();
             m_gameLoaded = false;
@@ -283,7 +289,8 @@ void ra2snes::onUsb2SnesGetConfigDataReceived()
 
 void ra2snes::onUsb2SnesGetAddressesDataReceived()
 {
-    vgetTime = frameTimer.restart();
+    vgetTime = frameTimer->restart();
+    static Task oldTask = None;
     QByteArray data = usb2snes->getFrameData();
     if(m_customFirmware)
     {
@@ -329,16 +336,24 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
             });
             return;
         }
-        //waitTimer->start(1000 / 60);
     }
-    unsigned int framesPassed = std::round(std::abs((vgetTime + programTime) * 0.0600988138974405));
+    unsigned int framesPassed = qRound(qAbs((millisecPassed.msecsTo(QDateTime::currentDateTime())) * 0.0600988138974405));
+    millisecPassed = QDateTime::currentDateTime();
     if(framesPassed < 1)
         framesPassed = 1;
-    //qDebug() << "Frames:" << framesPassed;
-    if(reader->processFrames(data, framesPassed, m_customFirmware))
+    frameQueue.enqueue(qMakePair(data, framesPassed));
+    qDebug() << "Frames:" << framesPassed;
+}
+
+void ra2snes::evaluateFrameData()
+{
+    if(frameQueue.empty()) return;
+    auto frameData = frameQueue.head();
+    auto& data = frameData.first;
+    if(reader->processFrame(data, m_customFirmware))
     {
         if(!m_customFirmware)
-            reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getRichPresence(), usb2snes->getRamSizeData());
+            reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getRichPresence(), usb2snes->getRamSizeData(), m_customFirmware);
         if(uniqueMemoryAddresses != reader->getUniqueMemoryAddresses())
         {
             //qDebug() << "Changed";
@@ -348,6 +363,14 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
             else if(m_customFirmware)
                 doThisTaskNext = SetupNMIData;
         }
+    }
+    if(--frameData.second <= 0)
+    {
+        frameQueue.dequeue();
+    }
+    else
+    {
+        frameQueue.head().second = frameData.second;
     }
 }
 
@@ -424,10 +447,10 @@ void ra2snes::onRequestError(const bool& net, const QString& request, const QStr
     }
     else
     {
-        if(crashTimer.isActive())
-            crashTimer.stop();
-        if(richTimer.isActive())
-            richTimer.stop();
+        if(crashTimer->isActive())
+            crashTimer->stop();
+        if(richTimer->isActive())
+            richTimer->stop();
         doThisTaskNext = NoChecksNeeded;
         emit displayMessage("Game Hash does not exist!", true);
         raclient->setTitleToHash(m_currentGame);
@@ -441,9 +464,9 @@ void ra2snes::onUsb2SnesStateChanged()
     //qDebug() << "Task Finished: " << doThisTaskNext;
     //qDebug() << "State: " << usb2snes->state();
     //qDebug() << "Reset? " << reset;
-    if(crashTimer.isActive())
-        crashTimer.stop();
-    crashTimer.start(20000);
+    if(crashTimer->isActive())
+        crashTimer->stop();
+    crashTimer->start(20000);
     if(usb2snes->state() == Usb2Snes::Ready)
     {
         if(reset)
@@ -459,8 +482,6 @@ void ra2snes::onUsb2SnesStateChanged()
                 break;
             }
             case GetNMIData:
-                programTime = frameTimer.elapsed();
-                frameTimer.restart();
                 usb2snes->getNMIData();
                 //qDebug() << "PT" << programTime << "VT" << vgetTime;
                 break;
@@ -477,11 +498,11 @@ void ra2snes::onUsb2SnesStateChanged()
             case GetConsoleAddresses:
                 //qDebug() << "get addresses";
                 doThisTaskNext = GetConsoleInfo;
-                programTime = frameTimer.elapsed();
                 //qDebug() << "PT" << programTime << "VT" << vgetTime;
+                programTime = frameTimer->elapsed();
                 if(programTime + vgetTime > 15)
                 {
-                    frameTimer.restart();
+                    frameTimer->restart();
                     usb2snes->getAddresses(uniqueMemoryAddresses);
                 }
                 else
@@ -489,7 +510,7 @@ void ra2snes::onUsb2SnesStateChanged()
                     doThisTaskNext = GetConsoleAddresses;
                     int time = 16 - (programTime + vgetTime);
                     if(time > 0)
-                        waitTimer.start(time);
+                        waitTimer->start(time);
                     else
                         onUsb2SnesStateChanged();
                 }
@@ -1020,10 +1041,14 @@ void ra2snes::postTelemetryData()
 
 ra2snes::~ra2snes()
 {
-    if(waitTimer.isActive())
-        waitTimer.stop();
-    if(crashTimer.isActive())
-        crashTimer.stop();
-    if(richTimer.isActive())
-        richTimer.stop();
+    if(waitTimer->isActive())
+        waitTimer->stop();
+    if(evalTimer->isActive())
+        evalTimer->stop();
+    if(crashTimer->isActive())
+        crashTimer->stop();
+    if(richTimer->isActive())
+        richTimer->stop();
+    delete reader;
+    delete usb2snes;
 }

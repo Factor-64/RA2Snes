@@ -114,8 +114,8 @@ private:
     QString m_latestVersion;
     QString downloadUrl;
     QString richText;
-    QTimer crashTimer;
-    QTimer richTimer;
+    QTimer* crashTimer;
+    QTimer* richTimer;
     void createSettingsFile();
     void loadSettings();
     void onLoginSuccess(bool r);
@@ -134,11 +134,14 @@ private:
     void postTelemetryData();
     void updateRichText(const QString& rt);
     void updateFirmware(const bool cfw);
-    QTimer waitTimer;
-    QElapsedTimer frameTimer;
+    void evaluateFrameData();
+    QTimer* evalTimer;
+    QElapsedTimer* frameTimer;
+    QQueue<QPair<QByteArray, int>> frameQueue;
+    QDateTime millisecPassed;
+    QTimer* waitTimer;
     unsigned int programTime;
     unsigned int vgetTime;
-    unsigned int nmiWarmingSize;
 };
 
 #endif // RA2SNES_H

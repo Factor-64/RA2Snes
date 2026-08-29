@@ -472,7 +472,7 @@ void Usb2Snes::getRamSize()
 void Usb2Snes::isPatchedROM()
 {
     //sDebug() << "Checking for patched rom";
-    if (m_firmwareVersion > QVersionNumber(7) || m_firmwareString.contains("2025"))
+    if (m_firmwareVersion > QVersionNumber(7))
         getAddress(0x2A00, 4, CMD);
     else
         getAddress(0x2A90, 1, CMD);
@@ -491,9 +491,9 @@ void Usb2Snes::getNMIData()
 void Usb2Snes::setNMIHook()
 {
     const QByteArray nmiHook = QByteArray::fromHex(
-        "08E220"     // PHP; SEP #$20
-        "EE0A2C"     // INC $2C0A
-        "286CEAFF"   // PLP; JMP ($FFEA)
+        //"08E220"     // PHP; SEP #$20
+        //"EE0A2C28"     // INC $2C0A; PLP
+        "6CEAFF"   // JMP ($FFEA)
         );
     setAddress(0x2C00, nmiHook, Usb2Snes::CMD);
 }

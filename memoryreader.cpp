@@ -12,7 +12,7 @@ MemoryReader::MemoryReader(QObject *parent) : QObject(parent) {
     raclient = RAClient::instance();
 }
 
-void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, const QString& richPresence, const unsigned int& ramSize)
+void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, const QString& richPresence, const unsigned int& ramSize, const bool customFirmware)
 {
     uniqueMemoryAddresses.clear();
     for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it)
@@ -25,7 +25,6 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
     }
 
     achievementTriggers.clear();
-    //leaderboardTriggers.clear();
     rpState = 0;
 
     QMap<unsigned int, unsigned int> uniqueAddresses;
@@ -125,12 +124,17 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
     //qDebug() << uniqueMemoryAddresses << uniqueMemoryAddresses.size() << total;
     //qDebug() << uniqueMemoryAddresses.size() << total;
 
-    unsigned int amount = 4;
-    while(uniqueMemoryAddresses.size() > 256)
+    if(customFirmware)
     {
-        mergeAddresses(amount);
-        amount += 4;
+        unsigned int amount = 4;
+        while(uniqueMemoryAddresses.size() > 256)
+        {
+            mergeAddresses(amount);
+            amount += 4;
+        }
     }
+    else
+        mergeAddresses(255);
 
     /*total = 0;
     for (int i = 0; i < uniqueMemoryAddresses.size(); ++i)
@@ -336,7 +340,7 @@ bool MemoryReader::decrementAddressCounts(rc_memrefs_t &memrefs)
     return update;
 }
 
-bool MemoryReader::processFrames(QByteArray& data, unsigned int& frames, bool& customFirmware)
+bool MemoryReader::processFrame(QByteArray& data, bool& customFirmware)
 {
     memory_t mem;
     mem.ram = reinterpret_cast<uint8_t*>(const_cast<char*>(data.constData()));
@@ -357,64 +361,59 @@ bool MemoryReader::processFrames(QByteArray& data, unsigned int& frames, bool& c
 
     bool update = false;
     QList<unsigned int> ids;
-    while (frames > 0)
+    for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it)
     {
-        for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it)
+        auto* entry = it.value();
+        if (!entry)
         {
-            auto* entry = it.value();
-            if (!entry)
-            {
-                it = achievementTriggers.erase(it);
-                --it;
-                continue;
-            }
-
-            rc_trigger_t* trigger = &entry->trigger;
-
-            int old_state = trigger->state;
-            uint32_t old_measured_value = trigger->measured_value;
-            //trigger->state = RC_TRIGGER_STATE_ACTIVE;
-            //int new_state = rc_evaluate_trigger(trigger, peek, &mem, nullptr);
-            rc_test_trigger(trigger, peek, &mem, nullptr);
-            int new_state = trigger->state;
-
-            if (trigger->measured_value != old_measured_value &&
-                old_measured_value != RC_MEASURED_UNKNOWN &&
-                trigger->measured_target != 0 &&
-                trigger->measured_value <= trigger->measured_target &&
-                new_state != RC_TRIGGER_STATE_TRIGGERED &&
-                new_state != RC_TRIGGER_STATE_INACTIVE &&
-                new_state != RC_TRIGGER_STATE_WAITING)
-            {
-                const int32_t new_percent =
-                    (int32_t)(((quint64)trigger->measured_value * 100) / trigger->measured_target);
-                raclient->setAchievementInfo(it.key(), Percent, new_percent);
-                raclient->setAchievementInfo(it.key(), Value, trigger->measured_value);
-            }
-
-            if (new_state == old_state)
-                continue;
-
-            if (old_state == RC_TRIGGER_STATE_PRIMED)
-                raclient->setAchievementInfo(it.key(), Primed, false);
-
-            switch (new_state)
-            {
-            case RC_TRIGGER_STATE_TRIGGERED: {
-                raclient->awardAchievement(it.key(), QDateTime::currentDateTime());
-                ids.append(it.key());
-                break;
-            }
-            case RC_TRIGGER_STATE_PRIMED:
-                raclient->setAchievementInfo(it.key(), Primed, true);
-                break;
-
-            default:
-                break;
-            }
+            it = achievementTriggers.erase(it);
+            --it;
+            continue;
         }
 
-        --frames;
+        rc_trigger_t* trigger = &entry->trigger;
+
+        int old_state = trigger->state;
+        uint32_t old_measured_value = trigger->measured_value;
+        //trigger->state = RC_TRIGGER_STATE_ACTIVE;
+        int new_state = rc_evaluate_trigger(trigger, peek, &mem, nullptr);
+        //rc_test_trigger(trigger, peek, &mem, nullptr);
+        //int new_state = trigger->state;
+
+        if (trigger->measured_value != old_measured_value &&
+            old_measured_value != RC_MEASURED_UNKNOWN &&
+            trigger->measured_target != 0 &&
+            trigger->measured_value <= trigger->measured_target &&
+            new_state != RC_TRIGGER_STATE_TRIGGERED &&
+            new_state != RC_TRIGGER_STATE_INACTIVE &&
+            new_state != RC_TRIGGER_STATE_WAITING)
+        {
+            const int32_t new_percent =
+                (int32_t)(((quint64)trigger->measured_value * 100) / trigger->measured_target);
+            raclient->setAchievementInfo(it.key(), Percent, new_percent);
+            raclient->setAchievementInfo(it.key(), Value, trigger->measured_value);
+        }
+
+        if (new_state == old_state)
+            continue;
+
+        if (old_state == RC_TRIGGER_STATE_PRIMED)
+            raclient->setAchievementInfo(it.key(), Primed, false);
+
+        switch (new_state)
+        {
+        case RC_TRIGGER_STATE_TRIGGERED: {
+            raclient->awardAchievement(it.key(), QDateTime::currentDateTime());
+            ids.append(it.key());
+            break;
+        }
+        case RC_TRIGGER_STATE_PRIMED:
+            raclient->setAchievementInfo(it.key(), Primed, true);
+            break;
+
+        default:
+            break;
+        }
     }
 
     for (auto id : ids)

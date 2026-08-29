@@ -110,8 +110,8 @@ private:
     QWebSocket webSocket;
     int wsPort;
     QString wsIP;
-    QTimer m_wsTimer;
-    QTimer m_reconnectTimer;
+    QTimer* m_wsTimer;
+    QTimer* m_reconnectTimer;
     QMap<unsigned int, bool> progressionMap;
     QMap<unsigned int, bool> winMap;
     QMap<unsigned int, QDateTime> achievedTimes;
