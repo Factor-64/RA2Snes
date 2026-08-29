@@ -100,18 +100,13 @@ jobs:
           mkdir deploy
           copy build\ra2snes.exe deploy\
           copy build\updater.exe deploy\
-          
-      - name: Debug QML import scanner
-        run: |
-          $qtbin = "${{ env.Qt6_DIR }}\bin"
-          & "$qtbin\qmlimportscanner.exe" --rootPath .\qml --output qmlimports.json
-          type qmlimports.json
       
       - name: Deploy Qt DLLs
         run: |
           $qtbin = "${{ env.Qt6_DIR }}\bin"
-          & "$qtbin\windeployqt.exe" --qmldir .\qml .\deploy\ra2snes.exe --release
-          & "$qtbin\windeployqt.exe" --qmldir .\qml .\deploy\updater.exe --release
+          $qtqml = "${{ env.Qt6_DIR }}\qml"
+          & "$qtbin\windeployqt6.exe" --qmldir "$qtqml" .\deploy\ra2snes.exe --release
+          & "$qtbin\windeployqt6.exe" --qmldir "$qtqml" .\deploy\updater.exe --release
       
       - name: Upload Windows Build Artifacts
         uses: actions/upload-artifact@v4
