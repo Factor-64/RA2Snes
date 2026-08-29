@@ -88,7 +88,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
           
       - name: Configure CMake
-        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+        run: cmake -S . -B build -G Ninja -A x64 -DCMAKE_BUILD_TYPE=Release
 
       - name: Build project
         run: cmake --build build --config Release
