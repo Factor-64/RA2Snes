@@ -86,10 +86,10 @@ jobs:
           modules: 'qtwebsockets'
 
       - name: Setup MSVC Developer Command Prompt
-        uses: TheMrMilchmann/setup-msvc-dev@v4.1.0
+        uses: ilammy/msvc-dev-cmd@v1
         with:
-          arch: amd64
-          vs-path: 'C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools'
+          arch: x64
+          toolset: '14.44'
           
       - name: Configure CMake
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
