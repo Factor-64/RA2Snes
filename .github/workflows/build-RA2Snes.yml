@@ -100,10 +100,11 @@ jobs:
           mkdir deploy
           copy build\ra2snes.exe deploy\
           copy build\updater.exe deploy\
+          
       - name: Debug QML import scanner
         run: |
           $qtbin = "${{ env.Qt6_DIR }}\bin"
-          & "$qtbin\qmlimportscanner.exe" --qmlDir .\qml --output qmlimports.json
+          & "$qtbin\qmlimportscanner.exe" --rootPath .\qml --output qmlimports.json
           type qmlimports.json
       
       - name: Deploy Qt DLLs
