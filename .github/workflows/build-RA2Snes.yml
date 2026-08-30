@@ -83,7 +83,7 @@ jobs:
           host: 'windows'
           target: 'desktop'
           arch: 'win64_msvc2022_64'
-          modules: 'qttools qtwebsockets qtdeclarative qtquickcontrols2 qtquicklayouts qtquickwidgets qt5compat qtmultimedia qtsvg'
+          modules: 'qttools qtwebsockets qtdeclarative qtquickcontrols2 qtquicklayouts qtquickwidgets qt5compat qtmultimedia qtimageformats qtsvg'
 
       - name: Setup MSVC Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1
