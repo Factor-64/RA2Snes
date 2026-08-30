@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         submodules: true
 
@@ -27,7 +27,7 @@ jobs:
       run: cmake --build build --config Release
 
     - name: Upload Linux Build Artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: linux-build
         path: |
@@ -38,7 +38,7 @@ jobs:
     runs-on: macos-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         submodules: true
 
@@ -62,41 +62,57 @@ jobs:
         macdeployqt6 ra2snes.app -dmg
   
     - name: Upload macOS Build Artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: macos-build
         path: |
           build/ra2snes.dmg
+          
   windows-x64:
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: true
 
-      - name: Install Qt 6.9.3 (MSVC 2022)
-        uses: jurplel/install-qt-action@v3
+      - name: Install Qt 6.10.3 (MSVC 2022)
+        uses: jurplel/install-qt-action@v4.3.1
         with:
-          version: '6.9.3'
+          version: '6.10.3'
           host: 'windows'
           target: 'desktop'
           arch: 'win64_msvc2022_64'
-          modules: 'qtwebsockets'
+          modules: 'qtwebsockets qt5compat qtmultimedia qtimageformats qtshadertools'
+          install-deps: true
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
-
+      - name: Setup MSVC Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+          
       - name: Configure CMake
-        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
       - name: Build project
         run: cmake --build build --config Release
+
+      - name: Prepare deployment folder
+        run: |
+          mkdir deploy
+          copy build\ra2snes.exe deploy\
+          copy build\updater.exe deploy\
+      
+      - name: Deploy Qt DLLs
+        run: |
+          $qtbin = "$env:QT_ROOT_DIR\bin"
+          $qtqml = "$env:QT_ROOT_DIR\qml"
+          & "$qtbin\windeployqt6.exe" --qmldir "$qtqml" .\deploy\updater.exe --release
+          & "$qtbin\windeployqt6.exe" --qmldir "$qtqml" .\deploy\ra2snes.exe --release
+          & Copy-Item "$env:QT_ROOT_DIR\qml\Qt5Compat" -Destination ".\deploy\qml\Qt5Compat" -Recurse
 
       - name: Upload Windows Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: |
-            build/Release/ra2snes.exe
-            build/Release/updater.exe
+          path: deploy/
