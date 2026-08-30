@@ -106,8 +106,8 @@ jobs:
         run: |
           $qtbin = "$env:QT_ROOT_DIR\bin"
           $qtqml = "$env:QT_ROOT_DIR\qml"
-          & "$qtbin\windeployqt6.exe" --qmldir "$qtqml" .\deploy\ra2snes.exe --release
           & "$qtbin\windeployqt6.exe" --qmldir "$qtqml" .\deploy\updater.exe --release
+          & "$qtbin\windeployqt6.exe" --qmldir "$qtqml" .\deploy\ra2snes.exe --release
 
       - name: Upload Windows Build Artifacts
         uses: actions/upload-artifact@v4
