@@ -343,7 +343,7 @@ bool MemoryReader::decrementAddressCounts(rc_memrefs_t &memrefs)
 bool MemoryReader::processFrame(QByteArray& data, bool& customFirmware)
 {
     memory_t mem;
-    mem.ram = reinterpret_cast<uint8_t*>(const_cast<char*>(data.constData()));
+    mem.ram = reinterpret_cast<uint8_t*>(data.data());
     mem.size = data.size();
 
     //qDebug() << "DATA SIZE:" << data.size();

@@ -289,7 +289,7 @@ void ra2snes::onUsb2SnesGetConfigDataReceived()
 
 void ra2snes::onUsb2SnesGetAddressesDataReceived()
 {
-    vgetTime = frameTimer->restart();
+    //vgetTime = frameTimer->restart();
     static Task oldTask = None;
     QByteArray data = usb2snes->getFrameData();
     if(m_customFirmware)
@@ -354,15 +354,11 @@ void ra2snes::evaluateFrameData()
     {
         if(!m_customFirmware)
             reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getRichPresence(), usb2snes->getRamSizeData(), m_customFirmware);
-        if(uniqueMemoryAddresses != reader->getUniqueMemoryAddresses())
-        {
-            //qDebug() << "Changed";
-            uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
-            if(uniqueMemoryAddresses.isEmpty())
-                doThisTaskNext = NoChecksNeeded;
-            else if(m_customFirmware)
-                doThisTaskNext = SetupNMIData;
-        }
+        uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
+        if(uniqueMemoryAddresses.isEmpty())
+            doThisTaskNext = NoChecksNeeded;
+        else if(m_customFirmware)
+            doThisTaskNext = SetupNMIData;
     }
     if(--frameData.second <= 0)
     {
@@ -499,7 +495,8 @@ void ra2snes::onUsb2SnesStateChanged()
                 //qDebug() << "get addresses";
                 doThisTaskNext = GetConsoleInfo;
                 //qDebug() << "PT" << programTime << "VT" << vgetTime;
-                programTime = frameTimer->elapsed();
+                usb2snes->getAddresses(uniqueMemoryAddresses);
+                /*programTime = frameTimer->elapsed();
                 if(programTime + vgetTime > 15)
                 {
                     frameTimer->restart();
@@ -513,7 +510,7 @@ void ra2snes::onUsb2SnesStateChanged()
                         waitTimer->start(time);
                     else
                         onUsb2SnesStateChanged();
-                }
+                }*/
                 break;
             case GetConsoleInfo:
                 //qDebug() << "infos";
