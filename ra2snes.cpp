@@ -27,25 +27,17 @@ ra2snes::ra2snes(QObject *parent)
     waitTimer = new QTimer(this);
     crashTimer = new QTimer(this);
     richTimer = new QTimer(this);
-    evalTimer = new QTimer(this);
     frameTimer = new QElapsedTimer();
     waitTimer->setTimerType(Qt::PreciseTimer);
     waitTimer->setSingleShot(true);
     crashTimer->setSingleShot(true);
     richTimer->setSingleShot(true);
-    evalTimer->setInterval(1000 / 60.0988138974405);
-
-    connect(evalTimer, &QTimer::timeout, this, [this] {
-        evaluateFrameData();
-    });
 
     connect(waitTimer, &QTimer::timeout, this, [=]() {
         onUsb2SnesStateChanged();
     });
 
     connect(crashTimer, &QTimer::timeout, this, [=]() {
-        if(evalTimer->isActive())
-            evalTimer->stop();
         bool t = false;
         if(doThisTaskNext == GetNMIData)
         {
@@ -78,8 +70,6 @@ ra2snes::ra2snes(QObject *parent)
     });
 
     connect(usb2snes, &Usb2Snes::disconnected, this, [=]() {
-        if(evalTimer->isActive())
-            evalTimer->stop();
         if(crashTimer->isActive())
             crashTimer->stop();
         if(richTimer->isActive())
@@ -289,9 +279,7 @@ void ra2snes::onUsb2SnesGetConfigDataReceived()
 
 void ra2snes::onUsb2SnesGetAddressesDataReceived()
 {
-    //vgetTime = frameTimer->restart();
-    static Task oldTask = None;
-    QByteArray data = usb2snes->getFrameData();
+    QByteArray data = usb2snes->getBinaryData();
     if(m_customFirmware)
     {
         // Extra data that tell me the state of sd2snes
@@ -337,6 +325,7 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
             return;
         }
     }
+    vgetTime = frameTimer->restart();
     unsigned int framesPassed = qRound(qAbs((millisecPassed.msecsTo(QDateTime::currentDateTime())) * 0.0600988138974405));
     millisecPassed = QDateTime::currentDateTime();
     if(framesPassed < 1)
@@ -347,27 +336,26 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
 
 void ra2snes::evaluateFrameData()
 {
+    qDebug() << frameQueue.size();
     if(frameQueue.empty()) return;
     auto frameData = frameQueue.head();
     auto& data = frameData.first;
+    auto& frames = frameData.second;
     if(reader->processFrame(data, m_customFirmware))
     {
-        if(!m_customFirmware)
-            reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getRichPresence(), usb2snes->getRamSizeData(), m_customFirmware);
-        uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
-        if(uniqueMemoryAddresses.isEmpty())
-            doThisTaskNext = NoChecksNeeded;
-        else if(m_customFirmware)
-            doThisTaskNext = SetupNMIData;
+        //if(!m_customFirmware)
+        //    reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getRichPresence(), usb2snes->getRamSizeData(), m_customFirmware);
+        //uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
+        //if(uniqueMemoryAddresses.isEmpty())
+            //doThisTaskNext = NoChecksNeeded;
+        //else if(m_customFirmware)
+            //doThisTaskNext = SetupNMIData;
+        doThisTaskNext = NoChecksNeeded;
     }
-    if(--frameData.second <= 0)
-    {
-        frameQueue.dequeue();
-    }
+    if(--frames != 0)
+        frameQueue.head().second = frames;
     else
-    {
-        frameQueue.head().second = frameData.second;
-    }
+        frameQueue.dequeue();
 }
 
 void ra2snes::onUsb2SnesGetAddressDataReceived()
@@ -496,7 +484,7 @@ void ra2snes::onUsb2SnesStateChanged()
                 doThisTaskNext = GetConsoleInfo;
                 //qDebug() << "PT" << programTime << "VT" << vgetTime;
                 usb2snes->getAddresses(uniqueMemoryAddresses);
-                /*programTime = frameTimer->elapsed();
+                programTime = frameTimer->elapsed();
                 if(programTime + vgetTime > 15)
                 {
                     frameTimer->restart();
@@ -510,7 +498,7 @@ void ra2snes::onUsb2SnesStateChanged()
                         waitTimer->start(time);
                     else
                         onUsb2SnesStateChanged();
-                }*/
+                }
                 break;
             case GetConsoleInfo:
                 //qDebug() << "infos";
@@ -569,6 +557,7 @@ void ra2snes::onUsb2SnesStateChanged()
     else if(usb2snes->state() == Usb2Snes::ReceivingFile)
         emit displayMessage("Loading... Do Not Turn Off Console!", false);
     raclient->sendQueuedRequest();
+    evaluateFrameData();
 }
 
 void ra2snes::setCurrentConsole()
@@ -1040,8 +1029,6 @@ ra2snes::~ra2snes()
 {
     if(waitTimer->isActive())
         waitTimer->stop();
-    if(evalTimer->isActive())
-        evalTimer->stop();
     if(crashTimer->isActive())
         crashTimer->stop();
     if(richTimer->isActive())

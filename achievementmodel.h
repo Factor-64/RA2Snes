@@ -52,6 +52,7 @@ public:
     void clearAchievements();
     QList<AchievementInfo> getAchievements();
     void appendAchievement(AchievementInfo a);
+    void setAchievements(const QList<AchievementInfo>& list);
 
 signals:
     void unlockedChanged();
@@ -64,6 +65,7 @@ private:
     AchievementModel& operator=(const AchievementModel&) = delete;
 
     QList<AchievementInfo> m_achievements;
+    QHash<unsigned int, int> m_indexById;
 };
 
 #endif // ACHIEVEMENTMODEL_H

@@ -359,7 +359,7 @@ bool MemoryReader::processFrame(QByteArray& data, bool& customFirmware)
         }
     }
 
-    bool update = false;
+    //bool update = false;
     QList<unsigned int> ids;
     for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it)
     {
@@ -404,6 +404,7 @@ bool MemoryReader::processFrame(QByteArray& data, bool& customFirmware)
         {
         case RC_TRIGGER_STATE_TRIGGERED: {
             raclient->awardAchievement(it.key(), QDateTime::currentDateTime());
+            //update = true;
             ids.append(it.key());
             break;
         }
@@ -418,15 +419,15 @@ bool MemoryReader::processFrame(QByteArray& data, bool& customFirmware)
 
     for (auto id : ids)
     {
-        if(customFirmware)
-            update = decrementAddressCounts(achievementTriggers[id]->memrefs);
+        /*if(customFirmware)
+            update |= decrementAddressCounts(achievementTriggers[id]->memrefs);
         else
-            update = true;
+            update = true;*/
         free(achievementTriggers[id]);
         achievementTriggers.remove(id);
     }
 
-    return update;
+    return achievementTriggers.empty();
 }
 
 void MemoryReader::resetRuntimeData()

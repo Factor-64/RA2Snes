@@ -135,9 +135,8 @@ private:
     void updateRichText(const QString& rt);
     void updateFirmware(const bool cfw);
     void evaluateFrameData();
-    QTimer* evalTimer;
     QElapsedTimer* frameTimer;
-    QQueue<QPair<QByteArray, int>> frameQueue;
+    QQueue<QPair<QByteArray, unsigned int>> frameQueue;
     QDateTime millisecPassed;
     QTimer* waitTimer;
     unsigned int programTime;
