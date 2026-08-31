@@ -222,9 +222,8 @@ ApplicationWindow {
         {
             if (model.count > 0 && mainWindow.setupFinished)
             {
-                var now = new Date().getTime();
-                var randomIndex = Math.floor(Math.random() * now % model.count);
-                var fileUrl = String(model.get(randomIndex, "fileURL"));
+                var randomIndex = Math.floor(Math.random() * model.count);
+                var fileUrl = String(model.get(randomIndex, "fileUrl"));
                 if (unlockSound.mediaStatus === MediaPlayer.NoMedia)
                     unlockSound.source = fileUrl;
                 else

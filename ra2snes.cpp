@@ -331,12 +331,12 @@ void ra2snes::onUsb2SnesGetAddressesDataReceived()
     if(framesPassed < 1)
         framesPassed = 1;
     frameQueue.enqueue(qMakePair(data, framesPassed));
-    qDebug() << "Frames:" << framesPassed;
+    //qDebug() << "Frames:" << framesPassed;
 }
 
 void ra2snes::evaluateFrameData()
 {
-    qDebug() << frameQueue.size();
+    //qDebug() << frameQueue.size();
     if(frameQueue.empty()) return;
     auto frameData = frameQueue.head();
     auto& data = frameData.first;
@@ -354,6 +354,8 @@ void ra2snes::evaluateFrameData()
     }
     if(--frames != 0)
         frameQueue.head().second = frames;
+    else if(frameQueue.size() > 20)
+        frameQueue.dequeue();
     else
         frameQueue.dequeue();
 }
