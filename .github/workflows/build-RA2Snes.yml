@@ -35,7 +35,7 @@ jobs:
           build/updater
 
   macos-x64:
-    runs-on: macos-latest
+    runs-on: macos-15-intel
     steps:
     - name: Checkout
       uses: actions/checkout@v7
@@ -56,7 +56,7 @@ jobs:
 
     - name: Create dmg
       run: |
-        export PATH="/opt/homebrew/Cellar/qt/6*/bin:$PATH"
+        export PATH="$(brew --prefix qt)/bin:$PATH"
         cd build
         cp updater ra2snes.app/Contents/MacOS
         macdeployqt6 ra2snes.app -dmg
@@ -67,7 +67,41 @@ jobs:
         name: macos-build
         path: |
           build/ra2snes.dmg
-          
+
+  macos-arm:
+    runs-on: macos-15
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+      with:
+        submodules: true
+
+    - name: Install dependencies
+      run: |
+        brew install qt
+        brew update
+
+    - name: Configure CMake
+      run: |
+        cmake -S . -B build -DCMAKE_PREFIX_PATH="$(brew --prefix qt)/lib/cmake/Qt6"
+
+    - name: Build project
+      run: cmake --build build --config Release
+
+    - name: Create dmg
+      run: |
+        export PATH="$(brew --prefix qt)/bin:$PATH"
+        cd build
+        cp updater ra2snes.app/Contents/MacOS
+        macdeployqt6 ra2snes.app -dmg
+
+    - name: Upload macOS ARM Build Artifacts
+      uses: actions/upload-artifact@v7
+      with:
+        name: macos-arm-build
+        path: |
+          build/ra2snes.dmg
+
   windows-x64:
     runs-on: windows-2022
     steps:
