@@ -8,6 +8,31 @@
 3) Open the CMakeFile as a project in Qt Creator (the builds and releases use MSVC).
 4) Build and Run
 
+## macOS
+
+1) Install the Xcode Command Line Tools, Homebrew (if needed), CMake, and Qt:
+    ```
+    xcode-select --install
+    brew install cmake qt
+    ```
+   Homebrew's `qt` formula provides Qt 6. This may be a newer Qt release than the version used for Windows.
+2) Clone the repo, including its submodules:
+    ```
+    git clone https://github.com/Factor-64/RA2Snes.git --recursive
+    cd RA2Snes
+    ```
+3) Configure and build, using Homebrew's Qt installation as the CMake package prefix:
+    ```
+    cmake -S . -B build \
+      -DCMAKE_PREFIX_PATH="$(brew --prefix qt)" \
+      -DCMAKE_BUILD_TYPE=Release
+    cmake --build build --parallel
+    ```
+4) Launch the app bundle:
+    ```
+    open build/ra2snes.app
+    ```
+
 ## Linux
 
 1) Clone the repo
