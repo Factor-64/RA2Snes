@@ -34,40 +34,6 @@ jobs:
           build/ra2snes
           build/updater
 
-  macos-x64:
-    runs-on: macos-15-intel
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v7
-      with:
-        submodules: true
-
-    - name: Install dependencies
-      run: |
-        brew install qt
-        brew update
-        
-    - name: Configure CMake
-      run: |
-        cmake -S . -B build -DCMAKE_PREFIX_PATH="$(brew --prefix qt)/lib/cmake/Qt6"
-
-    - name: Build project
-      run: cmake --build build --config Release
-
-    - name: Create dmg
-      run: |
-        export PATH="$(brew --prefix qt)/bin:$PATH"
-        cd build
-        cp updater ra2snes.app/Contents/MacOS
-        macdeployqt6 ra2snes.app -dmg
-  
-    - name: Upload macOS Build Artifacts
-      uses: actions/upload-artifact@v7
-      with:
-        name: macos-build
-        path: |
-          build/ra2snes.dmg
-
   macos-arm:
     runs-on: macos-15
     steps:
@@ -83,17 +49,21 @@ jobs:
 
     - name: Configure CMake
       run: |
-        cmake -S . -B build -DCMAKE_PREFIX_PATH="$(brew --prefix qt)/lib/cmake/Qt6"
+        cmake -S . -B build \
+          -DCMAKE_PREFIX_PATH="$(brew --prefix qt);$(brew --prefix qtmultimedia)" \
+          -DCMAKE_BUILD_TYPE=Release
 
     - name: Build project
-      run: cmake --build build --config Release
+      run: cmake --build build --parallel
 
     - name: Create dmg
       run: |
         export PATH="$(brew --prefix qt)/bin:$PATH"
         cd build
-        cp updater ra2snes.app/Contents/MacOS
-        macdeployqt6 ra2snes.app -dmg
+        macdeployqt6 ra2snes.app -qmldir=../ui \
+          -qmlimport="$(brew --prefix qtmultimedia)/share/qt/qml" \
+          -libpath="$(brew --prefix qtmultimedia)/lib" \
+          -dmg
 
     - name: Upload macOS ARM Build Artifacts
       uses: actions/upload-artifact@v7

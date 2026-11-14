@@ -93,6 +93,17 @@ set(PROJECT_SOURCES
     networkcachemanager.h
 )
 
+if(APPLE)
+    set(MACOS_BUNDLE_RESOURCES
+        ${CMAKE_SOURCE_DIR}/ui/images/ra2snes.icns
+        ${CMAKE_SOURCE_DIR}/qt.conf
+    )
+    set_source_files_properties(${MACOS_BUNDLE_RESOURCES} PROPERTIES
+        MACOSX_PACKAGE_LOCATION Resources
+    )
+    list(APPEND PROJECT_SOURCES ${MACOS_BUNDLE_RESOURCES})
+endif()
+
 if(WIN32)
     set(PROJECT_SOURCES ${PROJECT_SOURCES} ${CMAKE_SOURCE_DIR}/ra2snes.rc)
 endif()
@@ -139,6 +150,11 @@ target_link_libraries(ra2snes PRIVATE
     Qt${QT_VERSION_MAJOR}::QuickWidgets
 )
 
+if(APPLE AND QT_VERSION_MAJOR EQUAL 6)
+    find_package(Qt6 REQUIRED COMPONENTS MultimediaQuick)
+    target_link_libraries(ra2snes PRIVATE Qt6::MultimediaQuick)
+endif()
+
 target_include_directories(ra2snes PRIVATE
     ${CMAKE_SOURCE_DIR}/rcheevos/include
     ${CMAKE_SOURCE_DIR}/rcheevos/src
@@ -159,6 +175,12 @@ set_target_properties(ra2snes PROPERTIES
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
+
+if(APPLE)
+    set_target_properties(ra2snes PROPERTIES
+        MACOSX_BUNDLE_ICON_FILE ra2snes.icns
+    )
+endif()
 
 set_target_properties(updater PROPERTIES
     WIN32_EXECUTABLE TRUE
