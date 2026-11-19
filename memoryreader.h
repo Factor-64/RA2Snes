@@ -15,13 +15,14 @@ public:
     explicit MemoryReader(QObject *parent = nullptr);
     void initTriggers(const QList<AchievementInfo>& achievements, const QString& richPresence, const unsigned int& ramSize, const bool customFirmware);
     QList<QPair<unsigned int, unsigned int>> getUniqueMemoryAddresses();
-    bool processFrame(QByteArray& data, bool& customFirmware);
+    bool processFrames(QByteArray& data, uint& frames, bool& customFirmware);
     void resetRuntimeData();
 
 signals:
     void updateRichPresence(const QString& status);
 
 private:
+    void setAchievementInfo(const unsigned int& id, const AchievementInfoType& infotype, const int& value);
     bool decrementAddressCounts(rc_memrefs_t &memrefs);
     void remapTriggerAddresses(bool modified);
     void mergeAddresses(const unsigned int blockSize);
@@ -29,6 +30,7 @@ private:
     QMap<unsigned int, rc_trigger_with_memrefs_t*> achievementTriggers;
     QMap<unsigned int, unsigned int> addressMap;
     QMap<unsigned int, int> addressCounts;
+    AchievementModel* achievementModel;
     RAClient* raclient;
     rc_richpresence_with_memrefs_t* mem_richpresence;
     int rpState;

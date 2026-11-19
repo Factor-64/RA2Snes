@@ -9,6 +9,7 @@ MemoryReader::MemoryReader(QObject *parent) : QObject(parent) {
     rpState = 0;
     uniqueMemoryAddresses.clear();
     achievementTriggers.clear();
+    achievementModel = AchievementModel::instance();
     raclient = RAClient::instance();
 }
 
@@ -42,12 +43,12 @@ void MemoryReader::initTriggers(const QList<AchievementInfo>& achievements, cons
 
         if (trigger->measured_target != 0)
         {
-            raclient->setAchievementInfo(achievement.id, Target, trigger->measured_target);
+            setAchievementInfo(achievement.id, Target, trigger->measured_target);
 
             if (achievement.unlocked)
             {
-                raclient->setAchievementInfo(achievement.id, Percent, 100);
-                raclient->setAchievementInfo(achievement.id, Value, trigger->measured_target);
+                setAchievementInfo(achievement.id, Percent, 100);
+                setAchievementInfo(achievement.id, Value, trigger->measured_target);
                 free(trigger_buffer);
                 continue;
             }
@@ -340,13 +341,33 @@ bool MemoryReader::decrementAddressCounts(rc_memrefs_t &memrefs)
     return update;
 }
 
-bool MemoryReader::processFrame(QByteArray& data, bool& customFirmware)
+void MemoryReader::setAchievementInfo(const unsigned int& id, const AchievementInfoType& infotype, const int& value)
+{
+    switch(infotype)
+    {
+    case Value:
+        achievementModel->updateAchievementValue(id, value);
+        break;
+    case Percent:
+        achievementModel->updateAchievementPercent(id, value);
+        break;
+    case Primed:
+        achievementModel->primeAchievement(id, value);
+        break;
+    case Target:
+        achievementModel->updateAchievementTarget(id, value);
+        break;
+    }
+}
+
+bool MemoryReader::processFrames(QByteArray& data, uint& frames, bool& customFirmware)
 {
     memory_t mem;
     mem.ram = reinterpret_cast<uint8_t*>(data.data());
     mem.size = data.size();
 
     //qDebug() << "DATA SIZE:" << data.size();
+    //qDebug() << data.toHex(' ');
 
     if(mem_richpresence != nullptr)
     {
@@ -360,71 +381,125 @@ bool MemoryReader::processFrame(QByteArray& data, bool& customFirmware)
     }
 
     //bool update = false;
-    QList<unsigned int> ids;
-    for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it)
+    while(frames-- > 0)
     {
-        auto* entry = it.value();
-        if (!entry)
+        QList<unsigned int> ids;
+        for (auto it = achievementTriggers.begin(); it != achievementTriggers.end(); ++it)
         {
-            it = achievementTriggers.erase(it);
-            --it;
-            continue;
+            auto* entry = it.value();
+            if (!entry)
+            {
+                it = achievementTriggers.erase(it);
+                --it;
+                continue;
+            }
+
+            rc_trigger_t* trigger = &entry->trigger;
+
+            int old_state = trigger->state;
+            uint32_t old_measured_value = trigger->measured_value;
+            //trigger->state = RC_TRIGGER_STATE_ACTIVE;
+            int new_state = rc_evaluate_trigger(trigger, peek, &mem, nullptr);
+            //rc_test_trigger(trigger, peek, &mem, nullptr);
+            //int new_state = trigger->state;
+
+            if (trigger->measured_value != old_measured_value &&
+                old_measured_value != RC_MEASURED_UNKNOWN &&
+                trigger->measured_target != 0 &&
+                trigger->measured_value <= trigger->measured_target &&
+                new_state != RC_TRIGGER_STATE_TRIGGERED &&
+                new_state != RC_TRIGGER_STATE_INACTIVE &&
+                new_state != RC_TRIGGER_STATE_WAITING)
+            {
+                const int32_t new_percent =
+                    (int32_t)(((quint64)trigger->measured_value * 100) / trigger->measured_target);
+                setAchievementInfo(it.key(), Percent, new_percent);
+                setAchievementInfo(it.key(), Value, trigger->measured_value);
+            }
+
+            if (new_state == old_state)
+                continue;
+
+            if (old_state == RC_TRIGGER_STATE_PRIMED)
+            {
+                setAchievementInfo(it.key(), Primed, false);
+                auto* main = trigger->requirement;
+                int i = 1;
+                qDebug() << "Main";
+                for(; main != nullptr; main = main->next)
+                {
+                    auto* con = main->conditions;
+                    qDebug() << "ID:" << i;
+                    int c = 1;
+                    for (; con != nullptr; con = con->next)
+                    {
+                        bool cond_true = (con->is_true & 0x01) != 0;
+                        bool caused_reset = (con->is_true & 0x02) != 0;
+                        qDebug()
+                        << "C:" << c
+                        << "Type:" << con->type
+                        << "Hits:" << con->current_hits
+                        << "Req:" << con->required_hits
+                        << "is_true:" << con->is_true
+                        << "CondTrue:" << cond_true
+                        << "CausedReset:" << caused_reset;
+
+                        ++c;
+                    }
+                }
+                qDebug() << "Sub";
+                auto* sub = trigger->alternative;
+                i = 1;
+                for(; sub != nullptr; sub = sub->next)
+                {
+                    auto* con = sub->conditions;
+                    qDebug() << "ID:" << i;
+                    int c = 1;
+                    for (; con != nullptr; con = con->next)
+                    {
+                        bool cond_true = (con->is_true & 0x01) != 0;
+                        bool caused_reset = (con->is_true & 0x02) != 0;
+                        qDebug()
+                        << "C:" << c
+                        << "Type:" << con->type
+                        << "Hits:" << con->current_hits
+                        << "Req:" << con->required_hits
+                        << "is_true:" << con->is_true
+                        << "CondTrue:" << cond_true
+                        << "CausedReset:" << caused_reset;
+
+                        ++c;
+                    }
+                    ++i;
+                }
+            }
+
+            switch (new_state)
+            {
+            case RC_TRIGGER_STATE_TRIGGERED: {
+                raclient->awardAchievement(it.key(), QDateTime::currentDateTime());
+                //update = true;
+                ids.append(it.key());
+                break;
+            }
+            case RC_TRIGGER_STATE_PRIMED:
+                setAchievementInfo(it.key(), Primed, true);
+                break;
+
+            default:
+                break;
+            }
         }
 
-        rc_trigger_t* trigger = &entry->trigger;
-
-        int old_state = trigger->state;
-        uint32_t old_measured_value = trigger->measured_value;
-        //trigger->state = RC_TRIGGER_STATE_ACTIVE;
-        int new_state = rc_evaluate_trigger(trigger, peek, &mem, nullptr);
-        //rc_test_trigger(trigger, peek, &mem, nullptr);
-        //int new_state = trigger->state;
-
-        if (trigger->measured_value != old_measured_value &&
-            old_measured_value != RC_MEASURED_UNKNOWN &&
-            trigger->measured_target != 0 &&
-            trigger->measured_value <= trigger->measured_target &&
-            new_state != RC_TRIGGER_STATE_TRIGGERED &&
-            new_state != RC_TRIGGER_STATE_INACTIVE &&
-            new_state != RC_TRIGGER_STATE_WAITING)
+        for (auto id : ids)
         {
-            const int32_t new_percent =
-                (int32_t)(((quint64)trigger->measured_value * 100) / trigger->measured_target);
-            raclient->setAchievementInfo(it.key(), Percent, new_percent);
-            raclient->setAchievementInfo(it.key(), Value, trigger->measured_value);
+            /*if(customFirmware)
+                update |= decrementAddressCounts(achievementTriggers[id]->memrefs);
+            else
+                update = true;*/
+            free(achievementTriggers[id]);
+            achievementTriggers.remove(id);
         }
-
-        if (new_state == old_state)
-            continue;
-
-        if (old_state == RC_TRIGGER_STATE_PRIMED)
-            raclient->setAchievementInfo(it.key(), Primed, false);
-
-        switch (new_state)
-        {
-        case RC_TRIGGER_STATE_TRIGGERED: {
-            raclient->awardAchievement(it.key(), QDateTime::currentDateTime());
-            //update = true;
-            ids.append(it.key());
-            break;
-        }
-        case RC_TRIGGER_STATE_PRIMED:
-            raclient->setAchievementInfo(it.key(), Primed, true);
-            break;
-
-        default:
-            break;
-        }
-    }
-
-    for (auto id : ids)
-    {
-        /*if(customFirmware)
-            update |= decrementAddressCounts(achievementTriggers[id]->memrefs);
-        else
-            update = true;*/
-        free(achievementTriggers[id]);
-        achievementTriggers.remove(id);
     }
 
     return achievementTriggers.empty();

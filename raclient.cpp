@@ -276,25 +276,6 @@ AchievementModel* RAClient::getAchievementModel()
     return achievement_model;
 }
 
-void RAClient::setAchievementInfo(const unsigned int& id, const AchievementInfoType& infotype, const int& value)
-{
-    switch(infotype)
-    {
-        case Value:
-            achievement_model->updateAchievementValue(id, value);
-            break;
-        case Percent:
-            achievement_model->updateAchievementPercent(id, value);
-            break;
-        case Primed:
-            achievement_model->primeAchievement(id, value);
-            break;
-        case Target:
-            achievement_model->updateAchievementTarget(id, value);
-            break;
-    }
-}
-
 void RAClient::sendRequest(const QString& request_type, const QJsonObject& post_content)
 {
     QNetworkRequest request{QUrl(baseUrl + "dorequest.php")};

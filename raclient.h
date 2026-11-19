@@ -46,7 +46,6 @@ public:
     void clearUser();
     void setAutoHardcore(const bool& ac);
     bool getAutoHardcore();
-    void setAchievementInfo(const unsigned int& id, const AchievementInfoType& infotype, const int& value);
     void setTitleToHash(const QString& currentGame);
     void setHash(const QString& h);
     void refresh();

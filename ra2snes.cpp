@@ -154,6 +154,7 @@ ra2snes::ra2snes(QObject *parent)
     connect(raclient, &RAClient::sessionStarted, this, [=] {
         emit achievementModelReady();
         emit enableModeSwitching();
+        frameQueue.clear();
         //qDebug() << "INIT TRIGGERS";
         reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getRichPresence(), usb2snes->getRamSizeData(), m_customFirmware);
         uniqueMemoryAddresses = reader->getUniqueMemoryAddresses();
@@ -341,7 +342,16 @@ void ra2snes::evaluateFrameData()
     auto frameData = frameQueue.head();
     auto& data = frameData.first;
     auto& frames = frameData.second;
-    if(reader->processFrame(data, m_customFirmware))
+    if(frames > 3)
+    {
+        frames = 3;
+        frameQueue.head().second -= 3;
+    }
+    else
+    {
+        frameQueue.head().second -= frames;
+    }
+    if(reader->processFrames(data, frames, m_customFirmware))
     {
         //if(!m_customFirmware)
         //    reader->initTriggers(raclient->getAchievementModel()->getAchievements(), raclient->getRichPresence(), usb2snes->getRamSizeData(), m_customFirmware);
@@ -352,12 +362,11 @@ void ra2snes::evaluateFrameData()
             //doThisTaskNext = SetupNMIData;
         doThisTaskNext = NoChecksNeeded;
     }
-    if(--frames != 0)
-        frameQueue.head().second = frames;
+    if(frameQueue.head().second < 1)
+        frameQueue.dequeue();
     else if(frameQueue.size() > 20)
         frameQueue.dequeue();
-    else
-        frameQueue.dequeue();
+    //qDebug() << frameQueue.size();
 }
 
 void ra2snes::onUsb2SnesGetAddressDataReceived()
